@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>HYPERLOOP HELLFACTORY: Main Menu</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div id="app" style="grid-template-rows: 1fr;">
+  <section class="panel" style="margin: auto; width: min(720px, 92vw);">
+    <div id="title" style="font-size: 22px;">HYPERLOOP HELLFACTORY</div>
+    <div class="small" style="margin-top: 6px;">The Infinite Production Spiral</div>
+    <div style="margin-top: 16px;">
+      <div class="card">
+        <div>
+          <div><strong>Main Menu</strong></div>
+          <div class="meta">You are the foreman of a factory that eats reality. Choose your timeline.</div>
+        </div>
+      </div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
+        <button class="btn" id="startNew">Start New Run</button>
+        <button class="btn secondary" id="continueRun">Continue</button>
+      </div>
+      <div class="small" style="margin-top:10px;">Tip: Storage caps end runs. Upgrade silos early.</div>
+    </div>
+  </section>
+</div>
+<script>
+const saveKey = "hyperloop-hellfactory-save";
+const continueBtn = document.getElementById("continueRun");
+const startBtn = document.getElementById("startNew");
+const hasSave = !!localStorage.getItem(saveKey);
+continueBtn.disabled = !hasSave;
+startBtn.addEventListener("click", () => {
+  localStorage.removeItem(saveKey);
+  window.location.href = "index.html";
+});
+continueBtn.addEventListener("click", () => {
+  window.location.href = "index.html";
+});
+</script>
+</body>
+</html>

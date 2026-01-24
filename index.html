@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>HYPERLOOP HELLFACTORY: The Infinite Production Spiral</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div id="app">
+  <header>
+    <div id="title">HYPERLOOP HELLFACTORY</div>
+    <div id="status">Reality is 97% stable.</div>
+    <div id="header-actions">
+      <button class="btn secondary" id="saveBtn" title="Save to localStorage">Save</button>
+      <button class="btn secondary" id="prestigeBtn" title="Timeline Reboot">Timeline Reboot</button>
+      <label class="toggle" title="Reduce animations">
+        <input type="checkbox" id="reducedMotion" /> Reduced Motion
+      </label>
+      <label class="toggle" title="Colorblind-friendly palette">
+        <input type="checkbox" id="colorblind" /> Colorblind
+      </label>
+      <label class="toggle" title="Screen shake on major events">
+        <input type="checkbox" id="shakeToggle" checked /> Shake
+      </label>
+      <label class="toggle" title="Fireworks on milestones">
+        <input type="checkbox" id="fireworksToggle" checked /> Fireworks
+      </label>
+    </div>
+  </header>
+  <div id="resourceBar"></div>
+  <div id="statLine"></div>
+  <div id="main">
+    <section id="leftPanel" class="panel">
+      <div id="tabs"></div>
+      <div id="tab-contents">
+        <div id="tab-buildings" class="tab"></div>
+        <div id="tab-research" class="tab"></div>
+        <div id="tab-upgrades" class="tab"></div>
+        <div id="tab-achievements" class="tab"></div>
+        <div id="tab-stats" class="tab"></div>
+      </div>
+    </section>
+    <section id="gridPanel" class="panel">
+      <div class="card">
+        <div>
+          <div><strong>Factory Grid</strong> <span class="small" id="gridStats"></span></div>
+          <div class="small">The Conveyor Gods demand tribute.</div>
+        </div>
+        <div class="stack-right">
+          <div class="small" id="heatDisplay">Heat: 0%</div>
+          <button class="btn secondary" id="buySlotBtn" title="Buy a grid slot">Buy Slot</button>
+          <button class="btn secondary" id="blueprintBtn" title="Auto-place selected building" style="display:none;">Blueprint</button>
+        </div>
+      </div>
+      <div id="grid"></div>
+      <div id="supportBar" class="support-bar">
+        <div class="support-item" id="fanCounter" title="Fans reduce heat without using grid space.">
+          <span class="icon">🌀</span>
+          <span class="label">Fans</span>
+          <span class="value">0</span>
+        </div>
+      </div>
+    </section>
+    <section id="rightPanel" class="panel">
+      <div class="card"><strong>Storyline</strong><span class="small">Hyperloop narrative feed.</span></div>
+      <div id="storyArea" class="card"></div>
+      <div class="card"><strong>Contracts & Boss</strong><span class="small">Corporate eyes everywhere.</span></div>
+      <div id="contractArea"></div>
+      <div id="bossArea"></div>
+    </section>
+  </div>
+</div>
+<div id="floatingLayer"></div>
+<div id="fireworksLayer"></div>
+<div id="heatEdge"></div>
+<div id="contextMenu">
+  <button id="contextRemove" class="btn secondary" type="button">Demolish Building</button>
+</div>
+<div id="gameOverOverlay">
+  <div id="gameOverCard">
+    <div class="gameover-title">Storage Collapse</div>
+    <div class="small">Your vaults ruptured. The factory drowns in its own output.</div>
+    <div class="small">Expand storage next run. Hoard smarter.</div>
+    <div class="gameover-actions">
+      <button class="btn" id="gameOverMenu">Main Menu</button>
+      <button class="btn secondary" id="gameOverRestart">Restart Run</button>
+    </div>
+  </div>
+</div>
+<div id="prestigeOverlay">
+  <div id="prestigeCard">
+    <div><strong>Timeline Reboot</strong></div>
+    <div class="small">Pick a Timeline Perk. You cannot unpick destiny.</div>
+    <div class="perk-options" id="perkOptions"></div>
+  </div>
+</div>
+<script src="js/constants.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/state.js"></script>
+<script src="js/dom.js"></script>
+<script src="js/systems.js"></script>
+<script src="js/render.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
