@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Factory 84: Main Menu</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div id="app" style="grid-template-rows: 1fr;">
+  <section class="panel" style="margin: auto; width: min(720px, 92vw);">
+    <div id="title" style="font-size: 22px;">Factory 84</div>
+    <div class="small" style="margin-top: 6px;">The Infinite Production Spiral</div>
+    <div style="margin-top: 16px;">
+      <div class="card">
+        <div>
+          <div><strong>Main Menu</strong></div>
+          <div class="meta">You are the foreman of a factory that eats reality. Choose your timeline.</div>
+        </div>
+      </div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
+        <button class="btn" id="startNew">Start New Run</button>
+        <button class="btn secondary" id="continueRun">Continue</button>
+      </div>
+      <div class="small" style="margin-top:10px;">Tip: Storage caps end runs. Upgrade silos early.</div>
+      <div class="roadmap">
+        <div class="roadmap-header">
+          <div>
+            <div class="roadmap-title">Roadmap</div>
+            <div class="roadmap-subtitle">In the pipeline</div>
+          </div>
+          <div class="roadmap-badge">WIP</div>
+        </div>
+        <div class="roadmap-track">
+          <div class="roadmap-item">
+            <div class="roadmap-node"></div>
+            <div class="roadmap-card">
+              <div class="roadmap-name">Automation</div>
+              <div class="roadmap-note">Factory rules and grid babysitters.</div>
+            </div>
+          </div>
+          <div class="roadmap-item">
+            <div class="roadmap-node"></div>
+            <div class="roadmap-card">
+              <div class="roadmap-name">UI Polish</div>
+              <div class="roadmap-note">Sharper panels, clearer stats, less clutter.</div>
+            </div>
+          </div>
+          <div class="roadmap-item">
+            <div class="roadmap-node"></div>
+            <div class="roadmap-card">
+              <div class="roadmap-name">First Planet End Game</div>
+              <div class="roadmap-note">Portal scale milestones and final boss.</div>
+            </div>
+          </div>
+          <div class="roadmap-item">
+            <div class="roadmap-node"></div>
+            <div class="roadmap-card">
+              <div class="roadmap-name">Continents War</div>
+              <div class="roadmap-note">Faction influence across the surface.</div>
+            </div>
+          </div>
+          <div class="roadmap-item">
+            <div class="roadmap-node"></div>
+            <div class="roadmap-card">
+              <div class="roadmap-name">Multiple Planets</div>
+              <div class="roadmap-note">Chain worlds into a production empire.</div>
+            </div>
+          </div>
+          <div class="roadmap-item">
+            <div class="roadmap-node"></div>
+            <div class="roadmap-card">
+              <div class="roadmap-name">Interplanetary Transport</div>
+              <div class="roadmap-note">Railguns, gates, and logistics routes.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+<div id="audioConsentOverlay">
+  <div id="audioConsentCard">
+    <div><strong>Enable Main Menu Music?</strong></div>
+    <div class="small">Allow Factory 84 to play the main menu track.</div>
+    <div class="audio-consent-actions">
+      <button class="btn" id="audioConsentAllow">Allow Music</button>
+      <button class="btn secondary" id="audioConsentDecline">No Thanks</button>
+    </div>
+  </div>
+</div>
+<audio id="menuAudio" src="audio/mainmenu.mp3" loop></audio>
+<script>
+const saveKey = "hyperloop-hellfactory-save";
+const audioConsentKey = "hhf-audio-consent";
+const continueBtn = document.getElementById("continueRun");
+const startBtn = document.getElementById("startNew");
+const menuAudio = document.getElementById("menuAudio");
+const consentOverlay = document.getElementById("audioConsentOverlay");
+const consentAllow = document.getElementById("audioConsentAllow");
+const consentDecline = document.getElementById("audioConsentDecline");
+const hasSave = !!localStorage.getItem(saveKey);
+continueBtn.disabled = !hasSave;
+
+function tryPlayMenuAudio() {
+  if (!menuAudio) return;
+  const playPromise = menuAudio.play();
+  if (playPromise && playPromise.catch) {
+    playPromise.catch(() => {});
+  }
+}
+
+function applyMenuAudioConsent() {
+  const consent = localStorage.getItem(audioConsentKey);
+  if (!consent && consentOverlay) {
+    consentOverlay.classList.add("active");
+    return;
+  }
+  if (consent === "granted") {
+    tryPlayMenuAudio();
+  }
+}
+
+if (consentAllow) {
+  consentAllow.addEventListener("click", () => {
+    localStorage.setItem(audioConsentKey, "granted");
+    if (consentOverlay) consentOverlay.classList.remove("active");
+    tryPlayMenuAudio();
+  });
+}
+
+if (consentDecline) {
+  consentDecline.addEventListener("click", () => {
+    localStorage.setItem(audioConsentKey, "denied");
+    if (consentOverlay) consentOverlay.classList.remove("active");
+  });
+}
+
+startBtn.addEventListener("click", () => {
+  localStorage.removeItem(saveKey);
+  window.location.href = "index.html";
+});
+continueBtn.addEventListener("click", () => {
+  window.location.href = "index.html";
+});
+
+applyMenuAudioConsent();
+</script>
+</body>
+</html>
