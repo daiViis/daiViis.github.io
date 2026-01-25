@@ -559,6 +559,32 @@ header {
   z-index: 10;
 }
 #prestigeOverlay.active { display: flex; }
+#audioConsentOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.82);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 13;
+}
+#audioConsentOverlay.active { display: flex; }
+#audioConsentCard {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  width: min(420px, 92vw);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.55);
+}
+.audio-consent-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
 #prestigeCard {
   background: var(--panel);
   border: 1px solid var(--border);

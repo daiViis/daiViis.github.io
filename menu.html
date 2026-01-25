@@ -26,12 +26,63 @@
     </div>
   </section>
 </div>
+<div id="audioConsentOverlay">
+  <div id="audioConsentCard">
+    <div><strong>Enable Main Menu Music?</strong></div>
+    <div class="small">Allow HELLFACTORY to play the main menu track.</div>
+    <div class="audio-consent-actions">
+      <button class="btn" id="audioConsentAllow">Allow Music</button>
+      <button class="btn secondary" id="audioConsentDecline">No Thanks</button>
+    </div>
+  </div>
+</div>
+<audio id="menuAudio" src="audio/mainmenu.mp3" loop></audio>
 <script>
 const saveKey = "hyperloop-hellfactory-save";
+const audioConsentKey = "hhf-audio-consent";
 const continueBtn = document.getElementById("continueRun");
 const startBtn = document.getElementById("startNew");
+const menuAudio = document.getElementById("menuAudio");
+const consentOverlay = document.getElementById("audioConsentOverlay");
+const consentAllow = document.getElementById("audioConsentAllow");
+const consentDecline = document.getElementById("audioConsentDecline");
 const hasSave = !!localStorage.getItem(saveKey);
 continueBtn.disabled = !hasSave;
+
+function tryPlayMenuAudio() {
+  if (!menuAudio) return;
+  const playPromise = menuAudio.play();
+  if (playPromise && playPromise.catch) {
+    playPromise.catch(() => {});
+  }
+}
+
+function applyMenuAudioConsent() {
+  const consent = localStorage.getItem(audioConsentKey);
+  if (!consent && consentOverlay) {
+    consentOverlay.classList.add("active");
+    return;
+  }
+  if (consent === "granted") {
+    tryPlayMenuAudio();
+  }
+}
+
+if (consentAllow) {
+  consentAllow.addEventListener("click", () => {
+    localStorage.setItem(audioConsentKey, "granted");
+    if (consentOverlay) consentOverlay.classList.remove("active");
+    tryPlayMenuAudio();
+  });
+}
+
+if (consentDecline) {
+  consentDecline.addEventListener("click", () => {
+    localStorage.setItem(audioConsentKey, "denied");
+    if (consentOverlay) consentOverlay.classList.remove("active");
+  });
+}
+
 startBtn.addEventListener("click", () => {
   localStorage.removeItem(saveKey);
   window.location.href = "index.html";
@@ -39,6 +90,8 @@ startBtn.addEventListener("click", () => {
 continueBtn.addEventListener("click", () => {
   window.location.href = "index.html";
 });
+
+applyMenuAudioConsent();
 </script>
 </body>
 </html>
