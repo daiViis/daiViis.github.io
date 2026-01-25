@@ -18,10 +18,48 @@ function buildGrid() {
     const cell = document.createElement("div");
     cell.className = "tile";
     cell.dataset.index = index;
+    const label = document.createElement("div");
+    label.className = "label";
+    const heat = document.createElement("div");
+    heat.className = "heat";
+    const progress = document.createElement("div");
+    progress.className = "progress";
+    const bar = document.createElement("div");
+    bar.className = "bar";
+    progress.appendChild(bar);
+    const transfer = document.createElement("div");
+    transfer.className = "transfer";
+    cell.appendChild(label);
+    cell.appendChild(heat);
+    cell.appendChild(progress);
+    cell.appendChild(transfer);
+    cell._label = label;
+    cell._heat = heat;
+    cell._progress = progress;
+    cell._bar = bar;
+    cell._transfer = transfer;
     cell.addEventListener("click", () => handleTileClick(index));
     cell.addEventListener("contextmenu", (event) => handleTileContext(index, event));
     gridEl.appendChild(cell);
   });
+  buildNeighborCache();
+}
+
+function buildNeighborCache() {
+  const width = getGridWidth();
+  const rows = getGridRows();
+  const neighbors = [];
+  for (let index = 0; index < state.gridSlots; index++) {
+    const x = index % width;
+    const y = Math.floor(index / width);
+    const list = [];
+    if (x > 0) list.push({ index: index - 1, dir: "left" });
+    if (x < width - 1 && index + 1 < state.gridSlots) list.push({ index: index + 1, dir: "right" });
+    if (y > 0) list.push({ index: index - width, dir: "up" });
+    if (y < rows - 1 && index + width < state.gridSlots) list.push({ index: index + width, dir: "down" });
+    neighbors[index] = list;
+  }
+  state.neighbors = neighbors;
 }
 
 function handleTileContext(index, event) {
@@ -140,6 +178,7 @@ function consumeResource(res, amount) {
 }
 
 function getNeighbors(index) {
+  if (state.neighbors && state.neighbors[index]) return state.neighbors[index];
   const width = getGridWidth();
   const rows = getGridRows();
   const x = index % width;
@@ -218,12 +257,19 @@ function spawnFloatOnTile(tile, text) {
 }
 
 function transferResources() {
-  state.grid.forEach((tile, index) => {
-    if (!tile.building) return;
-    for (const [res, amt] of Object.entries(tile.localInv)) {
+  const frameStart = performance.now();
+  const budgetMs = 4;
+  for (let index = 0; index < state.grid.length; index++) {
+    const tile = state.grid[index];
+    if (!tile.building) continue;
+    const entries = Object.entries(tile.localInv);
+    for (let i = 0; i < entries.length; i++) {
+      const res = entries[i][0];
+      const amt = entries[i][1];
       if (bnCmp(amt, { m: 0, e: 0 }) <= 0) continue;
       const neighbors = getNeighbors(index);
-      for (const neighbor of neighbors) {
+      for (let n = 0; n < neighbors.length; n++) {
+        const neighbor = neighbors[n];
         const targetTile = state.grid[neighbor.index];
         if (!targetTile.building || !wantsResource(targetTile, res)) continue;
         const transferAmt = bnFromNumber(1 + state.modifiers.transferBoost);
@@ -236,8 +282,12 @@ function transferResources() {
         targetTile.transferDir = reverseDir(neighbor.dir);
         targetTile.transferTime = 0.2;
       }
+      if (performance.now() - frameStart > budgetMs) {
+        state.perfDrops = (state.perfDrops || 0) + 1;
+        return;
+      }
     }
-  });
+  }
 }
 
 function reverseDir(dir) {
@@ -252,6 +302,9 @@ function updateBurntScrap(dt) {
   const have = state.totals.BurntScrap || { m: 0, e: 0 };
   if (bnCmp(have, bnFromNumber(1)) < 0) return;
   if (!consumeResource("BurntScrap", bnFromNumber(1))) return;
+  if (state.totals && state.totals.BurntScrap) {
+    bnSubInPlace(state.totals.BurntScrap, bnFromNumber(1));
+  }
   const buildingCount = state.grid.reduce((acc, tile) => acc + (tile.building ? 1 : 0), 0);
   state.heat = Math.min(100, state.heat + buildingCount);
   addLog("[BURN]", `Purge consumes 1 Burnt Scrap. Heat +${buildingCount}.`);
@@ -383,7 +436,6 @@ function applyContracts(dt) {
   }
   if (state.contract.active) {
     const c = state.contract.active;
-    c.time -= dt;
     if (c.type === "deliver") {
       const have = state.totals[c.resource] || { m: 0, e: 0 };
       c.progress = Math.min(1, bnToNumber(have) / c.amount);
@@ -399,11 +451,6 @@ function applyContracts(dt) {
       if (state.heat >= c.min && state.heat <= c.max) c.progress += dt;
       c.progressRatio = Math.min(1, c.progress / c.duration);
       if (c.progress >= c.duration) completeContract();
-    }
-    if (c.time <= 0) {
-      addLog("[FAIL]", "Contract expired. The board snickers.");
-      state.stats.currentStreak = 0;
-      state.contract.active = null;
     }
   }
 }
@@ -590,8 +637,19 @@ function applyPerks() {
   if (perk) perk.apply(state);
 }
 
+function checkAICoreCue() {
+  if (!state.audio || state.audio.aiCoreCuePlayed) return;
+  if (bnCmp(state.stats.lifetime.AICores, bnFromNumber(1)) < 0) return;
+  state.audio.aiCoreCuePlayed = true;
+  if (typeof playAICoreCue === "function") playAICoreCue();
+}
+
 function tick(dt) {
   if (state.gameOver) return;
+  const frameStart = performance.now();
+  const budgetMs = 8;
+  const outOfTime = () => performance.now() - frameStart > budgetMs;
+  state.lastTickAt = performance.now();
   const effectiveDt = dt;
   state.throttleReactor = Math.max(0, state.throttleReactor - effectiveDt);
   state.labPriority = Math.max(0, state.labPriority - effectiveDt);
@@ -621,11 +679,27 @@ function tick(dt) {
   const heatMultiplier = 1 + Math.min(state.heat, 60) / 60 * 0.5;
   const bossDebuff = getBossDebuff();
 
-  state.grid.forEach(tile => {
-    if (!tile.building) return;
+  for (let i = 0; i < state.grid.length; i++) {
+    const tile = state.grid[i];
+    if (!tile.building) {
+      tile.visualSpeed = 0;
+      tile.visualProgress = 0;
+      if (outOfTime()) break;
+      continue;
+    }
     const def = BUILDINGS[tile.building];
-    if (auditDisable && auditDisable.disable === tile.building) return;
-    if (bossDebuff.disable && bossDebuff.disable === tile.building) return;
+    if (auditDisable && auditDisable.disable === tile.building) {
+      tile.visualSpeed = 0;
+      tile.visualProgress = tile.progress;
+      if (outOfTime()) break;
+      continue;
+    }
+    if (bossDebuff.disable && bossDebuff.disable === tile.building) {
+      tile.visualSpeed = 0;
+      tile.visualProgress = tile.progress;
+      if (outOfTime()) break;
+      continue;
+    }
     let speed = def.speed * state.modifiers.globalSpeed * heatMultiplier * sabotageSpeed * bossDebuff.speed;
     if (state.modifiers.hyperEfficiency) {
       speed *= state.stats.lifetime.Godcoins.m > 0 ? 1.4 : 0.8;
@@ -636,12 +710,45 @@ function tick(dt) {
     if (tile.building === "Reactor" && state.throttleReactor > 0) speed *= 0.6;
     if (tile.building === "Lab" && state.labPriority > 0) speed *= 1.2;
 
-    if (def.support) return;
-    if (def.inputs.length > 0 && !hasInputs(tile, def.inputs, tile.building === "Assembler" ? state.modifiers.assemblerEfficiency : 1)) return;
+    if (!Number.isFinite(speed) || speed <= 0) {
+      tile.visualSpeed = 0;
+      tile.visualProgress = tile.progress;
+      if (outOfTime()) break;
+      continue;
+    }
+    if (def.support) {
+      tile.visualSpeed = 0;
+      tile.visualProgress = tile.progress;
+      if (outOfTime()) break;
+      continue;
+    }
+    if (def.inputs.length > 0 && !hasInputs(tile, def.inputs, tile.building === "Assembler" ? state.modifiers.assemblerEfficiency : 1)) {
+      tile.visualSpeed = 0;
+      tile.visualProgress = tile.progress;
+      if (outOfTime()) break;
+      continue;
+    }
 
+    tile.visualSpeed = speed;
     tile.progress += speed * effectiveDt;
-    while (tile.progress >= 1) {
-      const efficiency = def.efficiency * state.modifiers.efficiency;
+    if (!Number.isFinite(tile.progress) || tile.progress <= 0) {
+      tile.progress = 0;
+      tile.visualProgress = 0;
+      if (outOfTime()) break;
+      continue;
+    }
+    const efficiency = def.efficiency * state.modifiers.efficiency;
+    const cycles = Math.floor(tile.progress);
+    if (cycles > 0 && def.inputs.length === 0) {
+      produceOutputs(tile, def.outputs, efficiency * cycles);
+      tile.progress -= cycles;
+      tile.visualProgress = tile.progress;
+      if (outOfTime()) break;
+      continue;
+    }
+    const maxCycles = 500;
+    let cycleCount = 0;
+    while (tile.progress >= 1 && cycleCount < maxCycles) {
       if (def.inputs.length > 0) {
         const inputMod = tile.building === "Assembler" ? state.modifiers.assemblerEfficiency : 1;
         if (!hasInputs(tile, def.inputs, inputMod)) break;
@@ -651,13 +758,27 @@ function tick(dt) {
       if (tile.building === "Assembler" && state.modifiers.assemblerChaos && Math.random() < 0.2) outputEfficiency *= 2;
       produceOutputs(tile, def.outputs, outputEfficiency);
       tile.progress -= 1;
+      cycleCount += 1;
     }
-  });
+    if (cycleCount === maxCycles && tile.progress >= 1) {
+      tile.progress = tile.progress % 1;
+    }
+    tile.visualProgress = tile.progress;
+    if (outOfTime()) break;
+  }
+
+  if (outOfTime()) {
+    state.perfDrops = (state.perfDrops || 0) + 1;
+    return;
+  }
 
   transferResources();
+  if (outOfTime()) {
+    state.perfDrops = (state.perfDrops || 0) + 1;
+    return;
+  }
   computeTotals();
   updateBurntScrap(effectiveDt);
-  computeTotals();
   if (checkStorageCap()) return;
   updateHeatAndGlitch(effectiveDt, bossDebuff);
   maybeMeltdown();
@@ -665,6 +786,7 @@ function tick(dt) {
   applyContracts(effectiveDt);
   updateBoss(effectiveDt);
   applyAchievements();
+  checkAICoreCue();
   handleAutoBlueprint();
   updateProductionRates(effectiveDt);
   checkMilestones();
@@ -694,7 +816,7 @@ function checkMilestones() {
     if (!state.milestoneNext[r.key]) return;
     const total = state.totals[r.key];
     const thresholdExp = state.milestoneNext[r.key];
-    const threshold = bnFromNumber(Math.pow(10, thresholdExp));
+    const threshold = bnPow10(thresholdExp);
     if (bnCmp(total, threshold) >= 0) {
       spawnFirework();
       state.milestoneNext[r.key] += 3;

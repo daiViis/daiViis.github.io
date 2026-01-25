@@ -1,3 +1,76 @@
+const AUDIO_CONSENT_KEY = "hhf-audio-consent";
+const CRASH_LOG_LIMIT = 50;
+let savePending = false;
+const bgmEl = document.getElementById("bgm");
+const aicoreCueEl = document.getElementById("aicoreCue");
+
+function isAudioAllowed() {
+  return localStorage.getItem(AUDIO_CONSENT_KEY) === "granted";
+}
+
+function playWithGestureFallback(audioEl) {
+  if (!audioEl) return;
+  const playPromise = audioEl.play();
+  if (playPromise && playPromise.catch) {
+    playPromise.catch(() => {
+      const resume = () => {
+        audioEl.play().catch(() => {});
+      };
+      document.addEventListener("click", resume, { once: true });
+      document.addEventListener("keydown", resume, { once: true });
+    });
+  }
+}
+
+function initAudio() {
+  if (!isAudioAllowed()) return;
+  if (bgmEl) bgmEl.volume = 0.6;
+  playWithGestureFallback(bgmEl);
+}
+
+function playAICoreCue() {
+  if (!isAudioAllowed() || !aicoreCueEl) return;
+  if (bgmEl && !bgmEl.paused) {
+    bgmEl.pause();
+  }
+  aicoreCueEl.currentTime = 0;
+  playWithGestureFallback(aicoreCueEl);
+}
+
+function logCrash(context, error) {
+  const errMsg = error && error.message ? error.message : String(error || "Unknown error");
+  const entry = { icon: "[ERR]", text: `${context}: ${errMsg}` };
+  if (state) {
+    state.log = state.log || [];
+    state.log.unshift(entry);
+    state.log = state.log.slice(0, CRASH_LOG_LIMIT);
+  }
+  if (console && console.error) console.error(context, error);
+}
+
+function safeRun(context, fn) {
+  try {
+    return fn();
+  } catch (err) {
+    logCrash(context, err);
+    return null;
+  }
+}
+
+function scheduleSave(reason) {
+  if (savePending) return;
+  savePending = true;
+  const run = () => {
+    savePending = false;
+    safeRun(`saveGame:${reason}`, saveGame);
+  };
+  if (window.requestIdleCallback) {
+    window.requestIdleCallback(run, { timeout: 2000 });
+  } else {
+    setTimeout(run, 0);
+  }
+}
+
 function calculatePrestigeGain() {
   const total = state.stats.lifetime.Godcoins.m > 0 ? state.stats.lifetime.Godcoins : state.stats.lifetime.Scrap;
   const log10 = total.m === 0 ? 0 : total.e + Math.log10(total.m);
@@ -22,7 +95,7 @@ function performPrestige(perkId) {
   addLog("[REBOOT]", "Timeline rebooted. Reality rewritten.");
 }
 
-saveBtn.addEventListener("click", saveGame);
+saveBtn.addEventListener("click", () => scheduleSave("manual"));
 prestigeBtn.addEventListener("click", () => showPrestigeOverlay());
 reducedMotionToggle.addEventListener("change", e => { state.settings.reducedMotion = e.target.checked; applySettings(); });
 colorblindToggle.addEventListener("change", e => { state.settings.colorblind = e.target.checked; applySettings(); });
@@ -56,7 +129,7 @@ gameOverRestartBtn.addEventListener("click", () => {
 tabContents.stats.addEventListener("click", (event) => {
   const btn = event.target.closest("button[data-prestige]");
   if (!btn) return;
-  if (purchasePrestigeUpgrade(btn.dataset.prestige)) {
+  if (safeRun("purchasePrestigeUpgrade", () => purchasePrestigeUpgrade(btn.dataset.prestige))) {
     triggerRewardEffect(btn);
     pulseLatestLog();
   }
@@ -69,7 +142,7 @@ tabContents.buildings.addEventListener("pointerdown", (event) => {
   if (!state.unlocks[key]) return;
   const def = BUILDINGS[key];
   if (def.global) {
-    if (buyGlobalSupport(key)) {
+    if (safeRun("buyGlobalSupport", () => buyGlobalSupport(key))) {
       triggerRewardEffect(btn);
     }
     return;
@@ -78,6 +151,12 @@ tabContents.buildings.addEventListener("pointerdown", (event) => {
 });
 
 function init() {
+  window.addEventListener("error", (event) => {
+    logCrash("window.onerror", event.error || event.message || "Unknown error");
+  });
+  window.addEventListener("unhandledrejection", (event) => {
+    logCrash("unhandledrejection", event.reason || "Unknown rejection");
+  });
   state = createDefaultState();
   const loaded = loadGame();
   if (!loaded) {
@@ -97,8 +176,27 @@ function init() {
   renderTabs();
   computeTotals();
   applySettings();
-  setInterval(() => tick(TICK_RATE), TICK_RATE * 1000);
-  setInterval(saveGame, 10000);
+  initAudio();
+  let lastTime = performance.now();
+  let accumulator = 0;
+  function gameLoop(now) {
+    const delta = Math.min(1, (now - lastTime) / 1000);
+    lastTime = now;
+    accumulator += delta;
+    let steps = 0;
+    const maxSteps = 5;
+    while (accumulator >= TICK_RATE && steps < maxSteps) {
+      safeRun("tick", () => tick(TICK_RATE));
+      accumulator -= TICK_RATE;
+      steps += 1;
+    }
+    if (steps === maxSteps) {
+      accumulator = 0;
+    }
+    requestAnimationFrame(gameLoop);
+  }
+  requestAnimationFrame(gameLoop);
+  setInterval(() => scheduleSave("auto"), 10000);
   requestAnimationFrame(render);
 }
 

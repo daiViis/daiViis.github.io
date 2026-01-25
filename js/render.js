@@ -1,5 +1,10 @@
 function renderStatus() {
-  statusEl.textContent = `Systems steady. ${getStage()}`;
+  const lastLog = state.log && state.log.length ? state.log[0] : null;
+  if (lastLog && lastLog.icon === "[ERR]") {
+    statusEl.textContent = `Error: ${lastLog.text}`;
+  } else {
+    statusEl.textContent = `Systems steady. ${getStage()}`;
+  }
   heatDisplayEl.textContent = `Heat: ${state.heat.toFixed(0)}%`;
   gridStatsEl.textContent = `(${getGridWidth()}x${getGridRows()} | ${state.gridSlots} slots)`;
   blueprintBtn.style.display = state.unlocks.BlueprintConsole ? "inline-flex" : "none";
@@ -21,38 +26,79 @@ function renderStatus() {
   }
 }
 
+function getDisplayProgress(tile, now) {
+  const base = typeof tile.visualProgress === "number" ? tile.visualProgress : tile.progress;
+  const speed = typeof tile.visualSpeed === "number" ? tile.visualSpeed : 0;
+  const lastTick = state.lastTickAt || 0;
+  if (!lastTick || speed <= 0) return Math.max(0, Math.min(1, base));
+  const elapsed = Math.max(0, (now - lastTick) / 1000);
+  const predicted = base + speed * elapsed;
+  if (!Number.isFinite(predicted)) return Math.max(0, Math.min(1, base));
+  return Math.max(0, Math.min(0.999, predicted));
+}
+
+function ensureTileElements(cell) {
+  if (cell._label && cell._heat && cell._progress && cell._bar && cell._transfer) return;
+  cell.innerHTML = "";
+  const label = document.createElement("div");
+  label.className = "label";
+  const heat = document.createElement("div");
+  heat.className = "heat";
+  const progress = document.createElement("div");
+  progress.className = "progress";
+  const bar = document.createElement("div");
+  bar.className = "bar";
+  progress.appendChild(bar);
+  const transfer = document.createElement("div");
+  transfer.className = "transfer";
+  cell.appendChild(label);
+  cell.appendChild(heat);
+  cell.appendChild(progress);
+  cell.appendChild(transfer);
+  cell._label = label;
+  cell._heat = heat;
+  cell._progress = progress;
+  cell._bar = bar;
+  cell._transfer = transfer;
+}
+
 function renderGrid() {
+  const now = performance.now();
   Array.from(gridEl.children).forEach((cell, index) => {
     const tile = state.grid[index];
-    cell.innerHTML = "";
+    if (!tile) return;
+    ensureTileElements(cell);
     cell.classList.toggle("selected", state.selectedTile === index);
+    const label = cell._label;
+    const heat = cell._heat;
+    const progress = cell._progress;
+    const bar = cell._bar;
+    const transfer = cell._transfer;
     if (!tile.building) {
-      cell.innerHTML = `<div class="label">Empty</div>`;
+      if (label) label.textContent = "Empty";
+      if (heat) heat.textContent = "";
+      if (progress) progress.style.display = "none";
+      if (bar) bar.style.width = "0%";
+      if (transfer) transfer.style.opacity = 0;
       cell.title = "Empty tile. Click to build.";
       return;
     }
     const def = BUILDINGS[tile.building];
-    const label = document.createElement("div");
-    label.className = "label";
-    label.textContent = def.name;
-    const heat = document.createElement("div");
-    heat.className = "heat";
-    heat.textContent = def.heat > 0 ? `+${def.heat}` : def.heat;
-    const progress = document.createElement("div");
-    progress.className = "progress";
-    const bar = document.createElement("div");
-    bar.className = "bar";
-    bar.style.width = `${Math.min(100, tile.progress * 100)}%`;
-    progress.appendChild(bar);
-    cell.appendChild(label);
-    cell.appendChild(heat);
-    cell.appendChild(progress);
-    if (tile.transferTime > 0) {
-      const transfer = document.createElement("div");
-      transfer.className = "transfer";
-      transfer.textContent = tile.transferDir === "left" ? "<" : tile.transferDir === "right" ? ">" : tile.transferDir === "up" ? "^" : "v";
-      cell.appendChild(transfer);
-      tile.transferTime -= 0.1;
+    if (label) label.textContent = def.name;
+    if (heat) heat.textContent = def.heat > 0 ? `+${def.heat}` : def.heat;
+    if (progress) progress.style.display = "block";
+    if (bar) {
+      const displayProgress = getDisplayProgress(tile, now);
+      bar.style.width = `${Math.min(100, displayProgress * 100)}%`;
+    }
+    if (transfer) {
+      if (tile.transferTime > 0) {
+        transfer.textContent = tile.transferDir === "left" ? "<" : tile.transferDir === "right" ? ">" : tile.transferDir === "up" ? "^" : "v";
+        transfer.style.opacity = 1;
+        tile.transferTime = Math.max(0, tile.transferTime - 0.1);
+      } else {
+        transfer.style.opacity = 0;
+      }
     }
     const invText = Object.entries(tile.localInv)
       .filter(([, val]) => bnCmp(val, { m: 0, e: 0 }) > 0)
@@ -93,25 +139,40 @@ function renderPanels() {
 let lastStatusRender = 0;
 let lastGridRender = 0;
 let lastPanelRender = 0;
+let lastFrameTime = 0;
+const RENDER_INTERVALS = {
+  status: 200,
+  grid: 140,
+  panels: 320
+};
 
 function render() {
-  const now = performance.now();
-  if (now - lastStatusRender > 100) {
-    renderStatus();
-    if (gameOverOverlayEl) {
-      gameOverOverlayEl.classList.toggle("active", !!state.gameOver);
+  try {
+    const now = performance.now();
+    if (document.hidden) return;
+    if (now - lastFrameTime < 12) return;
+    lastFrameTime = now;
+    if (now - lastStatusRender > RENDER_INTERVALS.status) {
+      renderStatus();
+      if (gameOverOverlayEl) {
+        gameOverOverlayEl.classList.toggle("active", !!state.gameOver);
+      }
+      lastStatusRender = now;
     }
-    lastStatusRender = now;
+    if (now - lastGridRender > RENDER_INTERVALS.grid) {
+      renderGrid();
+      lastGridRender = now;
+    }
+    if (now - lastPanelRender > RENDER_INTERVALS.panels) {
+      renderPanels();
+      lastPanelRender = now;
+    }
+  } catch (err) {
+    if (console && console.error) console.error("Render error", err);
+    if (typeof logCrash === "function") logCrash("render", err);
+  } finally {
+    requestAnimationFrame(render);
   }
-  if (now - lastGridRender > 50) {
-    renderGrid();
-    lastGridRender = now;
-  }
-  if (now - lastPanelRender > 150) {
-    renderPanels();
-    lastPanelRender = now;
-  }
-  requestAnimationFrame(render);
 }
 
 function getBuildingTooltip(def) {
@@ -375,7 +436,6 @@ function renderContracts() {
     contractAreaEl.innerHTML = `
       <div class="card">
         <div><strong>Deliver ${c.amount} ${c.resource}</strong></div>
-        <div class="small">Time left: ${Math.max(0, Math.floor(c.time))}s</div>
         <div class="progress-bar"><div class="fill" style="width:${(c.progress || 0) * 100}%"></div></div>
         <div class="small">Reward: ${rewardText}</div>
       </div>`;
@@ -385,7 +445,6 @@ function renderContracts() {
     contractAreaEl.innerHTML = `
       <div class="card">
         <div><strong>Research ${c.nodeName}</strong></div>
-        <div class="small">Time left: ${Math.max(0, Math.floor(c.time))}s</div>
         <div class="progress-bar"><div class="fill" style="width:${(c.progress || 0) * 100}%"></div></div>
         <div class="small">Reward: ${rewardText}</div>
       </div>`;
@@ -394,7 +453,6 @@ function renderContracts() {
   contractAreaEl.innerHTML = `
     <div class="card">
       <div><strong>Maintain Heat ${c.min}-${c.max}%</strong></div>
-      <div class="small">Time left: ${Math.max(0, Math.floor(c.time))}s</div>
       <div class="progress-bar"><div class="fill" style="width:${(c.progressRatio || 0) * 100}%"></div></div>
       <div class="small">Reward: ${rewardText}</div>
     </div>`;

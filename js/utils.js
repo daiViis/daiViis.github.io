@@ -1,16 +1,20 @@
 function bnFromNumber(value) {
-  if (!value || value <= 0) return { m: 0, e: 0 };
+  if (!Number.isFinite(value) || value <= 0) return { m: 0, e: 0 };
   const e = Math.floor(Math.log10(Math.abs(value)));
   const m = value / Math.pow(10, e);
   return bnNormalize({ m, e });
 }
 function bnNormalize(bn) {
-  if (!bn.m || bn.m === 0) return { m: 0, e: 0 };
+  if (!bn || !Number.isFinite(bn.m) || !Number.isFinite(bn.e) || bn.m <= 0) return { m: 0, e: 0 };
   let m = bn.m;
-  let e = bn.e;
+  let e = Math.floor(bn.e);
   while (m >= 10) { m /= 10; e += 1; }
   while (m < 1) { m *= 10; e -= 1; }
   return { m, e };
+}
+function bnPow10(exp) {
+  if (!Number.isFinite(exp)) return { m: 0, e: 0 };
+  return { m: 1, e: Math.floor(exp) };
 }
 function bnClone(bn) { return { m: bn.m, e: bn.e }; }
 function bnCmp(a, b) {

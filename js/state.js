@@ -1,7 +1,7 @@
 let state = null;
 
 function createTile() {
-  return { building: null, progress: 0, localInv: {}, transferDir: null, transferTime: 0, disabledUntil: 0 };
+  return { building: null, progress: 0, visualProgress: 0, visualSpeed: 0, localInv: {}, transferDir: null, transferTime: 0, disabledUntil: 0 };
 }
 
 function createDefaultState() {
@@ -21,6 +21,7 @@ function createDefaultState() {
     productionRates: {},
     productionBuffer: {},
     productionTimer: 0,
+    lastTickAt: 0,
     storageUsed: { m: 0, e: 0 },
     heat: 0,
     throttleReactor: 0,
@@ -46,6 +47,9 @@ function createDefaultState() {
       bossesDefeated: 0,
       lifetime,
       totalPrestiges: 0
+    },
+    audio: {
+      aiCoreCuePlayed: false
     },
     sabotage: { active: [], cooldown: 90 },
     contract: { active: null, cooldown: 20 },
@@ -89,6 +93,14 @@ function normalizeBN(obj) {
   return { m: 0, e: 0 };
 }
 
+function normalizeLocalInv(inv) {
+  const next = {};
+  Object.entries(inv || {}).forEach(([key, val]) => {
+    next[key] = normalizeBN(val);
+  });
+  return next;
+}
+
 function rehydrateState(loaded) {
   state = createDefaultState();
   if (!loaded) return;
@@ -99,7 +111,9 @@ function rehydrateState(loaded) {
   state.grid = (loaded.grid || []).map(tile => ({
     building: BUILDINGS[tile.building] ? tile.building : null,
     progress: tile.progress || 0,
-    localInv: tile.localInv || {},
+    visualProgress: tile.progress || 0,
+    visualSpeed: 0,
+    localInv: normalizeLocalInv(tile.localInv),
     transferDir: null,
     transferTime: 0,
     disabledUntil: tile.disabledUntil || 0
@@ -120,12 +134,14 @@ function rehydrateState(loaded) {
   state.productionRates = state.productionRates || {};
   state.productionBuffer = state.productionBuffer || {};
   state.totals = state.totals || {};
+  if (typeof state.lastTickAt !== "number") state.lastTickAt = 0;
   RESOURCE_LIST.forEach(r => {
     state.productionRates[r.key] = normalizeBN(state.productionRates[r.key]);
     state.productionBuffer[r.key] = normalizeBN(state.productionBuffer[r.key]);
     state.totals[r.key] = normalizeBN(state.totals[r.key]);
   });
   state.storageUsed = normalizeBN(state.storageUsed || { m: 0, e: 0 });
+  state.audio = Object.assign({ aiCoreCuePlayed: false }, state.audio || {});
   state.settings = Object.assign(state.settings || {}, loaded.settings || {});
   state.permanent = state.permanent || { upgrades: {} };
   state.cooling = Object.assign({ fans: 0 }, state.cooling || {});
@@ -138,9 +154,55 @@ function rehydrateState(loaded) {
   applySettings();
 }
 
+function createSavePayload() {
+  return {
+    version: state.version,
+    gridWidth: state.gridWidth,
+    gridSlots: state.gridSlots,
+    grid: state.grid.map(tile => ({
+      building: tile.building,
+      progress: tile.progress,
+      localInv: tile.localInv,
+      disabledUntil: tile.disabledUntil || 0
+    })),
+    selectedBuilding: state.selectedBuilding,
+    unlocks: state.unlocks,
+    permanent: state.permanent,
+    rules: state.rules,
+    maxRules: state.maxRules,
+    upgrades: state.upgrades,
+    storageCap: state.storageCap,
+    cooling: state.cooling,
+    research: state.research,
+    achievements: state.achievements,
+    stats: state.stats,
+    audio: state.audio,
+    sabotage: state.sabotage,
+    contract: state.contract,
+    boss: state.boss,
+    gameOver: state.gameOver,
+    burnScrap: state.burnScrap,
+    ammo: state.ammo,
+    ammoBuff: state.ammoBuff,
+    paradoxTokens: state.paradoxTokens,
+    modifiers: state.modifiers,
+    milestoneNext: state.milestoneNext,
+    settings: state.settings,
+    perk: state.perk
+  };
+}
+
 function saveGame() {
-  localStorage.setItem(SAVE_KEY, JSON.stringify(state));
-  addLog("[SAVE]", "Factory brain archived.");
+  const start = performance.now();
+  const payload = createSavePayload();
+  const json = JSON.stringify(payload);
+  localStorage.setItem(SAVE_KEY, json);
+  const elapsed = performance.now() - start;
+  if (elapsed > 50) {
+    addLog("[SAVE]", `Save took ${elapsed.toFixed(1)}ms (${Math.round(json.length / 1024)}kb).`);
+  } else {
+    addLog("[SAVE]", "Factory brain archived.");
+  }
 }
 
 function loadGame() {
