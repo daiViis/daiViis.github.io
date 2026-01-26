@@ -84,7 +84,7 @@ const BUILDINGS = {
     efficiency: 1,
     heat: 5,
     glitch: 0,
-    cost: { TimelineInk: 6 },
+    cost: { TimelineInk: 500 },
     desc: "Spits out currency for gods."
   },
   ChronoForge: {
@@ -120,7 +120,7 @@ const BUILDINGS = {
     efficiency: 0,
     heat: -4,
     glitch: 0,
-    cost: { Scrap: 200, Gears: 50 },
+    cost: { AICores: 30 },
     support: "cooling",
     cool: 4,
     desc: "Siphons entropy into ice."
@@ -175,11 +175,7 @@ const RESEARCH_NODES = [
   { id: "lab-unlock", name: "Lab Containment", cost: { AICores: 30 }, prereq: ["printer-unlock"], effect: s => s.unlocks.Lab = true },
   { id: "reactor-unlock", name: "Reactor Etiquette", cost: { RealityShards: 20 }, prereq: ["lab-unlock"], effect: s => s.unlocks.Reactor = true },
   { id: "portal-unlock", name: "Portal Etiquette", cost: { TimelineInk: 15 }, prereq: ["reactor-unlock"], effect: s => s.unlocks.Portal = true },
-  { id: "cryo-unlock", name: "Cryo Plumbing", cost: { Gears: 120 }, prereq: ["basic-logistics"], effect: s => s.unlocks.CryoPipe = true },
-  { id: "void-unlock", name: "Void Cooling", cost: { Circuits: 160 }, prereq: ["cryo-unlock"], effect: s => s.unlocks.VoidRadiator = true },
-  { id: "counter-unlock", name: "Counter-Intel", cost: { Circuits: 120 }, prereq: ["assembler-unlock"], effect: s => s.unlocks.CounterIntel = true },
-  { id: "ashen-reinforcement", name: "Ashen Reinforcement", cost: { BurntScrap: 20 }, prereq: ["basic-logistics"], requiresUnlock: "BurntTech", effect: s => s.modifiers.meltdownResist += 0.2 },
-  { id: "echo-theory", name: "Echo Theory", cost: { EchoDust: 12 }, prereq: ["portal-unlock"], requiresUnlock: "EchoDust", effect: s => s.modifiers.globalSpeed *= 1.1 }
+  { id: "cryo-unlock", name: "Cryo Plumbing", cost: { Gears: 120 }, prereq: ["basic-logistics"], effect: s => s.unlocks.CryoPipe = true }
 ];
 const UPGRADE_LIST = [
   {

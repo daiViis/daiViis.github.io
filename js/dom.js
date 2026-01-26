@@ -1,11 +1,11 @@
 const gridEl = document.getElementById("grid");
+const mainEl = document.getElementById("main");
 const tabsEl = document.getElementById("tabs");
 const resourceBarEl = document.getElementById("resourceBar");
 const statLineEl = document.getElementById("statLine");
 const tabContents = {
   buildings: document.getElementById("tab-buildings"),
   research: document.getElementById("tab-research"),
-  upgrades: document.getElementById("tab-upgrades"),
   achievements: document.getElementById("tab-achievements"),
   stats: document.getElementById("tab-stats")
 };
@@ -14,12 +14,17 @@ const bossAreaEl = document.getElementById("bossArea");
 const heatDisplayEl = document.getElementById("heatDisplay");
 const gridStatsEl = document.getElementById("gridStats");
 const statusEl = document.getElementById("status");
+const runTimerEl = document.getElementById("runTimer");
 const storyAreaEl = document.getElementById("storyArea");
 const floatingLayer = document.getElementById("floatingLayer");
 const fireworksLayer = document.getElementById("fireworksLayer");
 const heatEdgeEl = document.getElementById("heatEdge");
 const fanCounterEl = document.getElementById("fanCounter");
+const storageCounterEl = document.getElementById("storageCounter");
+const burnPurgeItemEl = document.getElementById("burnPurgeItem");
+const burnPurgeToggle = document.getElementById("burnPurgeToggle");
 const automationAreaEl = document.getElementById("automationArea");
+const rightPanelEl = document.getElementById("rightPanel");
 const contextMenuEl = document.getElementById("contextMenu");
 const contextToggleBtn = document.getElementById("contextToggle");
 const contextRemoveBtn = document.getElementById("contextRemove");
@@ -29,6 +34,11 @@ const fanOverclockBtn = document.getElementById("fanOverclock");
 const fanOverclockCost = document.getElementById("fanOverclockCost");
 const fanOverclockDesc = document.getElementById("fanOverclockDesc");
 const fanOverclockCount = document.getElementById("fanOverclockCount");
+const storageContextMenuEl = document.getElementById("storageContextMenu");
+const storageUpgradeBtn = document.getElementById("storageUpgradeBtn");
+const storageUpgradeCost = document.getElementById("storageUpgradeCost");
+const storageUpgradeDesc = document.getElementById("storageUpgradeDesc");
+const storageUpgradeLevel = document.getElementById("storageUpgradeLevel");
 const contextMinerTurbo = document.getElementById("contextMinerTurbo");
 const contextMinerInfo = document.getElementById("contextMinerInfo");
 const contextMinerCost = document.getElementById("contextMinerCost");
@@ -39,6 +49,9 @@ const contextAshUpgrade = document.getElementById("contextAshUpgrade");
 const contextAshInfo = document.getElementById("contextAshInfo");
 const contextAshCost = document.getElementById("contextAshCost");
 const gameOverOverlayEl = document.getElementById("gameOverOverlay");
+const gameOverTitleEl = document.getElementById("gameOverTitle");
+const gameOverLine1El = document.getElementById("gameOverLine1");
+const gameOverLine2El = document.getElementById("gameOverLine2");
 const gameOverMenuBtn = document.getElementById("gameOverMenu");
 const gameOverRestartBtn = document.getElementById("gameOverRestart");
 const winOverlayEl = document.getElementById("winOverlay");
@@ -47,6 +60,7 @@ const prestigeBtn = document.getElementById("prestigeBtn");
 const saveBtn = document.getElementById("saveBtn");
 const reducedMotionToggle = document.getElementById("reducedMotion");
 const colorblindToggle = document.getElementById("colorblind");
+const textSizeSelect = document.getElementById("textSize");
 const shakeToggle = document.getElementById("shakeToggle");
 const fireworksToggle = document.getElementById("fireworksToggle");
 const audioToggle = document.getElementById("audioToggle");
@@ -58,7 +72,6 @@ const perkOptionsEl = document.getElementById("perkOptions");
 const renderCache = {
   buildings: "",
   research: "",
-  upgrades: "",
   achievements: "",
   stats: "",
   automation: ""
@@ -102,11 +115,6 @@ function getResearchRenderKey() {
     return variant ? `${id}:${variant.id}` : id;
   }).join("|");
   return `${base}|${getUnlocksKey()}`;
-}
-
-function getUpgradesRenderKey() {
-  const base = Object.keys(state.upgrades || {}).sort().map(id => `${id}:${state.upgrades[id]}`).join("|");
-  return `${base}|${state.storageCap}|${state.cooling?.fans || 0}`;
 }
 
 function getAchievementsRenderKey() {
@@ -243,4 +251,16 @@ function showFanContextMenu(x, y) {
 function hideFanContextMenu() {
   if (!fanContextMenuEl) return;
   fanContextMenuEl.classList.remove("active");
+}
+
+function showStorageContextMenu(x, y) {
+  if (!storageContextMenuEl) return;
+  storageContextMenuEl.style.left = `${x}px`;
+  storageContextMenuEl.style.top = `${y}px`;
+  storageContextMenuEl.classList.add("active");
+}
+
+function hideStorageContextMenu() {
+  if (!storageContextMenuEl) return;
+  storageContextMenuEl.classList.remove("active");
 }

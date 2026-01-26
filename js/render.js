@@ -1,9 +1,50 @@
+function formatTimer(seconds) {
+  const total = Math.max(0, Math.floor(Number(seconds) || 0));
+  const hrs = Math.floor(total / 3600);
+  const mins = Math.floor((total % 3600) / 60);
+  const secs = total % 60;
+  return `${String(hrs).padStart(2, "0")}:${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+}
+
+function isAutomationUnlocked() {
+  return !!state.unlocks.Printer;
+}
+
+function syncAutomationPanels() {
+  if (!mainEl || !rightPanelEl) return;
+  const unlocked = isAutomationUnlocked();
+  rightPanelEl.style.display = unlocked ? "" : "none";
+  mainEl.classList.toggle("automation-locked", !unlocked);
+  if (automationAreaEl) automationAreaEl.style.display = unlocked ? "" : "none";
+  if (contextAutomationEl) {
+    contextAutomationEl.style.display = unlocked ? "" : "none";
+    if (!unlocked) contextAutomationEl.innerHTML = "";
+  }
+}
+
+function updateGameOverCard() {
+  if (!gameOverTitleEl || !gameOverLine1El || !gameOverLine2El) return;
+  const reason = state.gameOverReason || (state.gameOver ? "storage" : "");
+  if (reason === "heat") {
+    gameOverTitleEl.textContent = "Heat Critical";
+    gameOverLine1El.textContent = "Heat reached 100%. The factory melts down.";
+    gameOverLine2El.textContent = "Balance cooling before the core destabilizes.";
+  } else {
+    gameOverTitleEl.textContent = "Storage Collapse";
+    gameOverLine1El.textContent = "Your vaults ruptured. The factory drowns in its own output.";
+    gameOverLine2El.textContent = "Expand storage next run. Hoard smarter.";
+  }
+}
+
 function renderStatus() {
   const lastLog = state.log && state.log.length ? state.log[0] : null;
   if (lastLog && lastLog.icon === "[ERR]") {
     statusEl.textContent = `Error: ${lastLog.text}`;
   } else {
     statusEl.textContent = `Systems steady. ${getStage()}`;
+  }
+  if (runTimerEl) {
+    runTimerEl.textContent = `Time ${formatTimer(state.playTime)}`;
   }
   heatDisplayEl.textContent = `Heat: ${state.heat.toFixed(0)}%`;
   gridStatsEl.textContent = `(${getGridWidth()}x${getGridRows()} | ${state.gridSlots} slots)`;
@@ -19,6 +60,14 @@ function renderStatus() {
     const limit = getFanLimit();
     fanCounterEl.querySelector(".value").textContent = `${fans}/${limit}`;
   }
+  if (storageCounterEl) {
+    const used = getStorageUsedBn();
+    storageCounterEl.querySelector(".value").textContent = `${bnToString(used)}/${state.storageCap}`;
+  }
+  if (burnPurgeToggle) {
+    burnPurgeToggle.textContent = state.burnScrap.active ? "ON" : "OFF";
+    burnPurgeToggle.classList.toggle("active", state.burnScrap.active);
+  }
   if (heatEdgeEl) {
     const heat = Math.max(0, Math.min(100, state.heat));
     const intensity = heat < 50 ? 0 : Math.min(1, (heat - 50) / 50);
@@ -33,6 +82,8 @@ function renderStatus() {
   if (fanContextMenuEl && fanContextMenuEl.classList.contains("active")) {
     updateFanContextMenu();
   }
+  syncAutomationPanels();
+  if (state.gameOver) updateGameOverCard();
 }
 
 function getResourceColor(res) {
@@ -426,7 +477,11 @@ function renderPanels() {
   renderResources();
   renderContracts();
   renderBoss();
-  renderIfChanged("automation", getAutomationRenderKey(), renderAutomation);
+  if (isAutomationUnlocked()) {
+    renderIfChanged("automation", getAutomationRenderKey(), renderAutomation);
+  } else {
+    renderCache.automation = "";
+  }
 
   if (isTabActive("buildings")) {
     const counts = getBuildingCounts();
@@ -434,9 +489,6 @@ function renderPanels() {
   }
   if (isTabActive("research")) {
     renderIfChanged("research", getResearchRenderKey(), renderResearch);
-  }
-  if (isTabActive("upgrades")) {
-    renderIfChanged("upgrades", getUpgradesRenderKey(), renderUpgrades);
   }
   if (isTabActive("achievements")) {
     renderIfChanged("achievements", getAchievementsRenderKey(), renderAchievements);
@@ -700,59 +752,6 @@ function renderResearch() {
   });
 }
 
-function renderUpgrades() {
-  const used = getStorageUsedBn();
-  const storageInfo = `Storage: ${bnToString(used)} / ${state.storageCap}`;
-  const html = ["<div class=\"list\">"];
-  const burnStatus = state.burnScrap.active ? "ON" : "OFF";
-  html.push(`<div class="card">
-    <div>
-      <div><strong>Burnt Scrap Purge</strong></div>
-      <div class="meta">Consumes 1 Burnt Scrap/sec. Adds +1 heat per building.</div>
-    </div>
-    <button class="btn secondary" data-burntoggle="1">${burnStatus}</button>
-  </div>`);
-  html.push(`<div class="card"><strong>Upgrades Bay</strong><div class="meta">${storageInfo}</div></div>`);
-  UPGRADE_LIST.forEach(upgrade => {
-    if (upgrade.id === "fan-overclock" || upgrade.id === "miner-turbo" || upgrade.id === "smelter-furnace") return;
-    const level = state.upgrades?.[upgrade.id] || 0;
-    const cost = getUpgradeCost(upgrade);
-    const costText = Object.entries(cost).map(([res, amt]) => `${amt} ${res}`).join(", ");
-    const afford = canAfford(cost);
-    const meetsReq = !upgrade.minFans || (state.cooling?.fans || 0) >= upgrade.minFans;
-    const disabled = (!upgrade.repeatable && level > 0) || !afford || !meetsReq;
-    html.push(`
-      <div class="card">
-        <div>
-          <div><strong>${upgrade.name}</strong>${upgrade.repeatable ? ` <span class="small">Lv ${level}</span>` : ""}</div>
-          <div class="meta">${upgrade.desc}</div>
-        </div>
-        <button class="btn secondary" data-upgrade="${upgrade.id}" ${disabled ? "disabled" : ""}>
-          ${!upgrade.repeatable && level > 0 ? "Owned" : `Buy (${costText})`}
-        </button>
-      </div>
-    `);
-  });
-  html.push("</div>");
-  tabContents.upgrades.innerHTML = html.join("");
-  const burnBtn = tabContents.upgrades.querySelector("button[data-burntoggle]");
-  if (burnBtn) {
-    burnBtn.addEventListener("click", () => {
-      toggleBurnScrap();
-      renderCache.upgrades = "";
-    });
-  }
-  tabContents.upgrades.querySelectorAll("button[data-upgrade]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      if (purchaseUpgrade(btn.dataset.upgrade)) {
-        triggerRewardEffect(btn);
-        pulseLatestLog();
-        renderCache.upgrades = "";
-      }
-    });
-  });
-}
-
 function handleResearch(id) {
   const node = RESEARCH_NODES.find(n => n.id === id);
   if (!node) return false;
@@ -844,6 +843,20 @@ function renderContracts() {
   const c = state.contract.active;
   if (!c) {
     contractAreaEl.innerHTML = `<div class="contract-empty small">No contracts.</div>`;
+    return;
+  }
+  if (c.type === "final") {
+    const amount = c.amount || 1000;
+    const progress = Math.min(1, c.progress || 0);
+    const current = Math.min(amount, c.current || 0);
+    contractAreaEl.innerHTML = `
+      <div class="contract-line">
+        <span class="contract-title">Final Contract: Produce ${amount} Godcoins</span>
+        <span class="contract-progress">${current}/${amount}</span>
+        <span class="contract-reward">Victory</span>
+      </div>
+      <div class="contract-bar"><div class="fill" style="width:${progress * 100}%"></div></div>
+    `;
     return;
   }
   const rewardText = c.reward === "grid" ? "+2 grid slots" : "Permanent multiplier";
@@ -1103,6 +1116,10 @@ function renderAutomation() {
 
 function renderContextAutomation(index) {
   if (!contextAutomationEl) return;
+  if (!isAutomationUnlocked()) {
+    contextAutomationEl.innerHTML = "";
+    return;
+  }
   const tile = state.grid[index];
   if (!tile || !tile.building) {
     contextAutomationEl.innerHTML = "";
@@ -1257,8 +1274,11 @@ function renderBoss() {
 function applySettings() {
   document.body.classList.toggle("reduced-motion", state.settings.reducedMotion);
   document.body.classList.toggle("colorblind", state.settings.colorblind);
+  document.body.classList.toggle("text-size-small", state.settings.textSize === "small");
+  document.body.classList.toggle("text-size-large", state.settings.textSize === "large");
   reducedMotionToggle.checked = state.settings.reducedMotion;
   colorblindToggle.checked = state.settings.colorblind;
+  if (textSizeSelect) textSizeSelect.value = state.settings.textSize || "normal";
   shakeToggle.checked = state.settings.shake;
   fireworksToggle.checked = state.settings.fireworks;
   if (audioToggle) audioToggle.checked = !!state.settings.audioEnabled;
@@ -1273,7 +1293,7 @@ function addLog(icon, text) {
 }
 
 function renderTabs() {
-  const tabNames = ["buildings", "research", "upgrades", "achievements", "stats"];
+  const tabNames = ["buildings", "research", "achievements", "stats"];
   tabsEl.innerHTML = tabNames.map(name => `<button class="tab-btn" data-tab="${name}">${name}</button>`).join("");
   tabsEl.querySelectorAll(".tab-btn").forEach(btn => {
     btn.addEventListener("click", () => activateTab(btn.dataset.tab));

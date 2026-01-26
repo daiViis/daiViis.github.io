@@ -8,6 +8,9 @@ const FAN_OVERCLOCK_COST_STEP = 10;
 const FAN_OVERCLOCK_BASE_BONUS = 0.10;
 const FAN_OVERCLOCK_TIER_BONUS = 0.02;
 const FAN_OVERCLOCK_WASTE_INTERVAL = 15;
+const STORAGE_UPGRADE_RESOURCES = ["Scrap", "Gears", "Circuits", "AICores", "RealityShards", "TimelineInk", "Godcoins", "EchoDust", "BurntScrap"];
+const STORAGE_UPGRADE_BASE_COST = 120;
+const STORAGE_UPGRADE_STEP = 50;
 const MINER_TURBO_SPEED_BONUS = 0.03;
 const MINER_TURBO_BASE_COST = { Scrap: 50, Gears: 100 };
 const MINER_TURBO_COST_STEP = { Scrap: 25, Gears: 150 };
@@ -26,6 +29,7 @@ const ASH_UPGRADE_BASE_COST = 50;
 const ASH_UPGRADE_COST_STEP = 25;
 const ASH_UPGRADE_SPEED_BONUS = 0.25;
 const ASH_UPGRADE_HEAT_BONUS = 0.05;
+const FINAL_GODCOIN_TARGET = 1000;
 
 function getGridWidth() {
   return Math.max(3, Math.min(12, state.gridWidth || 3));
@@ -33,6 +37,10 @@ function getGridWidth() {
 
 function getGridRows() {
   return Math.ceil(state.gridSlots / getGridWidth());
+}
+
+function isAutomationUnlocked() {
+  return !!state.unlocks.Printer;
 }
 
 function syncGridWidth() {
@@ -471,6 +479,18 @@ function updateFanContextMenu() {
   if (fanOverclockCost) fanOverclockCost.textContent = `Cost: ${costText}`;
 }
 
+function updateStorageContextMenu() {
+  if (!storageUpgradeBtn) return;
+  const level = getStorageUpgradeLevel();
+  const cost = getStorageUpgradeCost(level);
+  const costText = Object.entries(cost).map(([res, amt]) => `${amt} ${res}`).join(", ");
+  storageUpgradeBtn.textContent = `Storage Upgrade (L${level + 1})`;
+  storageUpgradeBtn.disabled = !canAfford(cost);
+  if (storageUpgradeCost) storageUpgradeCost.textContent = `Cost: ${costText}`;
+  if (storageUpgradeDesc) storageUpgradeDesc.textContent = "Doubles storage capacity.";
+  if (storageUpgradeLevel) storageUpgradeLevel.textContent = `Current level: ${level}`;
+}
+
 function cloneAutomationRule(rule, source) {
   if (!rule || !rule.condition || !rule.action) return null;
   return {
@@ -513,7 +533,7 @@ function handleTileContext(index, event) {
   hideFanContextMenu();
   updateContextMenu(index);
   showContextMenu(event.clientX, event.clientY, index);
-  if (typeof renderContextAutomation === "function") {
+  if (typeof renderContextAutomation === "function" && isAutomationUnlocked()) {
     renderContextAutomation(index);
   }
 }
@@ -535,6 +555,9 @@ function handleTileClick(index) {
   }
   spendCost(def.cost);
   tile.building = buildingKey;
+  if (buildingKey === "Portal") {
+    state.portalBuilt = true;
+  }
   tile.progress = 0;
   tile.disabledUntil = 0;
   tile.minerLevel = 1;
@@ -668,7 +691,25 @@ function getUpgradeLevel(id) {
   return state.upgrades[id] || 0;
 }
 
+function getStorageUpgradeLevel() {
+  return getUpgradeLevel("storage-silo");
+}
+
+function getStorageUpgradeCost(level = getStorageUpgradeLevel()) {
+  const nextLevel = level + 1;
+  const resources = STORAGE_UPGRADE_RESOURCES.slice(0, Math.min(nextLevel, STORAGE_UPGRADE_RESOURCES.length));
+  const cost = {};
+  resources.forEach((res, idx) => {
+    const stagger = Math.max(0, nextLevel - 1 - idx);
+    cost[res] = STORAGE_UPGRADE_BASE_COST + STORAGE_UPGRADE_STEP * stagger;
+  });
+  return cost;
+}
+
 function getUpgradeCost(upgrade) {
+  if (upgrade.id === "storage-silo") {
+    return getStorageUpgradeCost();
+  }
   const level = getUpgradeLevel(upgrade.id);
   const multiplier = upgrade.repeatable ? (1 + level) : 1;
   const cost = {};
@@ -874,11 +915,21 @@ function checkStorageCap() {
   if (cap <= 0) return false;
   const used = getStorageUsedBn();
   if (bnCmp(used, bnFromNumber(cap)) >= 0) {
+    state.gameOverReason = "storage";
     state.gameOver = true;
     addLog("[FAIL]", "Storage collapsed. Game over.");
     return true;
   }
   return false;
+}
+
+function checkHeatGameOver() {
+  if (state.gameOver) return true;
+  if (state.heat < 100) return false;
+  state.gameOverReason = "heat";
+  state.gameOver = true;
+  addLog("[FAIL]", "Heat reached 100%. Game over.");
+  return true;
 }
 
 function getBossDebuff() {
@@ -985,11 +1036,7 @@ function getResourcePercent(res) {
 }
 
 function checkPortalWin() {
-  if (state.gameWon) return true;
-  const hasPortal = state.grid.some(tile => tile.building === "Portal");
-  if (!hasPortal) return false;
-  state.gameWon = true;
-  addLog("[WIN]", "Portal online. The factory bends to your will.");
+  if (!state.gameWon) return false;
   if (winOverlayEl) winOverlayEl.classList.add("active");
   return true;
 }
@@ -1074,6 +1121,12 @@ function getAutomationBuildTarget(action, tileIndex) {
 }
 
 function applyAutomation() {
+  if (!isAutomationUnlocked()) {
+    state.grid.forEach(tile => {
+      if (tile) tile.automationDisabled = false;
+    });
+    return;
+  }
   const rules = state.rules || [];
   const snapshot = buildAutomationSnapshot();
   const powerState = {};
@@ -1127,8 +1180,34 @@ function applyAutomation() {
   buildTargets.forEach(target => autoBuild(target));
 }
 
+function ensureFinalContract() {
+  if (!state.portalBuilt || state.gameWon) return false;
+  const have = bnToNumber(state.stats.lifetime.Godcoins || { m: 0, e: 0 });
+  const current = Math.min(FINAL_GODCOIN_TARGET, Math.floor(have));
+  const progress = Math.min(1, current / FINAL_GODCOIN_TARGET);
+  const finalContract = state.contract.final || {
+    type: "final",
+    resource: "Godcoins",
+    amount: FINAL_GODCOIN_TARGET,
+    progress: 0,
+    current: 0
+  };
+  finalContract.amount = FINAL_GODCOIN_TARGET;
+  finalContract.current = current;
+  finalContract.progress = progress;
+  state.contract.final = finalContract;
+  state.contract.active = finalContract;
+  if (progress >= 1) {
+    state.gameWon = true;
+    addLog("[WIN]", "1000 Godcoins minted. The portal crowns your run.");
+    if (winOverlayEl) winOverlayEl.classList.add("active");
+  }
+  return true;
+}
+
 function applyContracts(dt) {
   if (processTutorialContracts()) return;
+  if (ensureFinalContract()) return;
   state.contract.cooldown -= dt;
   if (!state.contract.active && state.contract.cooldown <= 0) {
     state.contract.active = generateContract();
@@ -1331,6 +1410,9 @@ function autoBuild(target) {
   const index = emptyTiles[Math.floor(Math.random() * emptyTiles.length)];
   spendCost(def.cost);
   state.grid[index].building = target;
+  if (target === "Portal") {
+    state.portalBuilt = true;
+  }
   state.grid[index].progress = 0;
   state.grid[index].disabledUntil = 0;
   state.grid[index].minerLevel = 1;
@@ -1372,6 +1454,7 @@ function checkAICoreCue() {
 function tick(dt) {
   if (state.gameOver) return;
   if (checkPortalWin()) return;
+  state.playTime = (state.playTime || 0) + dt;
   const frameStart = performance.now();
   const budgetMs = 8;
   const outOfTime = () => performance.now() - frameStart > budgetMs;
@@ -1519,8 +1602,10 @@ function tick(dt) {
   computeTotals();
   applyAutomation();
   updateBurntScrap(effectiveDt);
+  if (checkHeatGameOver()) return;
   if (checkStorageCap()) return;
   updateHeatAndGlitch(effectiveDt, bossDebuff);
+  if (checkHeatGameOver()) return;
   maybeMeltdown();
   applySabotage(effectiveDt);
   applyContracts(effectiveDt);

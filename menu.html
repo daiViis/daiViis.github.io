@@ -23,6 +23,24 @@
         <button class="btn secondary" id="continueRun">Continue</button>
       </div>
       <div class="small" style="margin-top:10px;">Tip: Storage caps end runs. Upgrade silos early.</div>
+      <div class="patch-changes">
+        <div class="card">
+          <div>
+            <div><strong>Patch Changes</strong></div>
+            <div class="meta">Changes 001</div>
+          </div>
+        </div>
+        <div class="small patch-list">
+          <div>- Removed research upgrades: Void Cooling, Counter-Intel, Ashen Reinforcement, Echo Theory.</div>
+          <div>- Rebalanced costs: Cryo Pipe now costs 30 AI Cores; Portal now costs 500 Timeline Ink.</div>
+          <div>- Automation unlocks with Printer License; right panel and context automation stay hidden until then.</div>
+          <div>- Heat reaching 100% now triggers game over with heat-specific messaging.</div>
+          <div>- Added a top-left run timer that persists in save data.</div>
+          <div>- Win condition is now 1000 Godcoins after building the first Portal, delivered as the final contract.</div>
+          <div>- Added UI text size setting (smaller, normal, bigger).</div>
+          <div>- Updated the menu roadmap for First Planet End Game with the planned upgrades list.</div>
+        </div>
+      </div>
       <div class="roadmap">
         <div class="roadmap-header">
           <div>
@@ -31,7 +49,9 @@
           </div>
           <div class="roadmap-badge">WIP</div>
         </div>
-        <div class="roadmap-track">
+        <div class="roadmap-track-wrap">
+          <button class="roadmap-nav" type="button" data-roadmap-nav="left" aria-label="Scroll roadmap left">‹</button>
+          <div class="roadmap-track" id="roadmapTrack" aria-label="Roadmap timeline">
           <div class="roadmap-item">
             <div class="roadmap-node"></div>
             <div class="roadmap-card">
@@ -50,7 +70,12 @@
             <div class="roadmap-node"></div>
             <div class="roadmap-card">
               <div class="roadmap-name">First Planet End Game</div>
-              <div class="roadmap-note">Portal scale milestones and final boss.</div>
+              <div class="roadmap-note">Portal scale milestones and final boss.<br>
+              - Improving Labs producing new material for upgrading buildings<br>
+              - Firefighting after the destruction of a building by heat<br>
+              - Removing Local Burned scrap on newly unlocked grid cells<br>
+              - Local disasters (small chance to destroy players progress)<br>
+              - Interactive grid (rotation, movement, zooming)</div>
             </div>
           </div>
           <div class="roadmap-item">
@@ -74,6 +99,8 @@
               <div class="roadmap-note">Railguns, gates, and logistics routes.</div>
             </div>
           </div>
+          </div>
+          <button class="roadmap-nav" type="button" data-roadmap-nav="right" aria-label="Scroll roadmap right">›</button>
         </div>
       </div>
     </div>
@@ -99,6 +126,8 @@ const menuAudio = document.getElementById("menuAudio");
 const consentOverlay = document.getElementById("audioConsentOverlay");
 const consentAllow = document.getElementById("audioConsentAllow");
 const consentDecline = document.getElementById("audioConsentDecline");
+const roadmapTrack = document.getElementById("roadmapTrack");
+const roadmapNavButtons = document.querySelectorAll("[data-roadmap-nav]");
 const hasSave = !!localStorage.getItem(saveKey);
 continueBtn.disabled = !hasSave;
 
@@ -145,6 +174,19 @@ continueBtn.addEventListener("click", () => {
 });
 
 applyMenuAudioConsent();
+
+if (roadmapTrack) {
+  const scrollByAmount = () => Math.max(260, Math.round(roadmapTrack.clientWidth * 0.7));
+  roadmapNavButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const dir = btn.dataset.roadmapNav === "left" ? -1 : 1;
+      roadmapTrack.scrollBy({ left: scrollByAmount() * dir, behavior: "smooth" });
+    });
+  });
+  roadmapTrack.addEventListener("wheel", event => {
+    event.preventDefault();
+  }, { passive: false });
+}
 </script>
 </body>
 </html>

@@ -187,6 +187,7 @@ function createDefaultState() {
     productionBuffer: {},
     productionTimer: 0,
     lastTickAt: 0,
+    playTime: 0,
     storageUsed: { m: 0, e: 0 },
     heat: 0,
     throttleReactor: 0,
@@ -221,10 +222,12 @@ function createDefaultState() {
       aiCoreCuePlayed: false
     },
     sabotage: { active: [], cooldown: 90 },
-    contract: { active: null, cooldown: 20, tutorial: createTutorialContracts() },
+    contract: { active: null, cooldown: 20, tutorial: createTutorialContracts(), final: null },
     boss: { active: null, defeated: [] },
     gameOver: false,
+    gameOverReason: null,
     gameWon: false,
+    portalBuilt: false,
     burnScrap: { active: false, timer: 0 },
     ammo: 0,
     ammoBuff: 0,
@@ -253,7 +256,8 @@ function createDefaultState() {
       shake: true,
       fireworks: true,
       audioEnabled: true,
-      audioVolume: 0.6
+      audioVolume: 0.6,
+      textSize: "normal"
     },
     perk: null
   };
@@ -308,6 +312,9 @@ function rehydrateState(loaded) {
   if (state.grid.length > state.gridSlots) {
     state.grid = state.grid.slice(0, state.gridSlots);
   }
+  if (typeof state.portalBuilt !== "boolean") {
+    state.portalBuilt = state.grid.some(tile => tile.building === "Portal");
+  }
   state.rules = normalizeAutomationRules(state.rules);
   state.buildingRuleDefaults = state.buildingRuleDefaults || {};
   Object.keys(state.buildingRuleDefaults).forEach(key => {
@@ -327,6 +334,7 @@ function rehydrateState(loaded) {
   state.productionBuffer = state.productionBuffer || {};
   state.totals = state.totals || {};
   if (typeof state.lastTickAt !== "number") state.lastTickAt = 0;
+  if (typeof state.playTime !== "number") state.playTime = 0;
   RESOURCE_LIST.forEach(r => {
     state.productionRates[r.key] = normalizeBN(state.productionRates[r.key]);
     state.productionBuffer[r.key] = normalizeBN(state.productionBuffer[r.key]);
@@ -335,6 +343,9 @@ function rehydrateState(loaded) {
   state.storageUsed = normalizeBN(state.storageUsed || { m: 0, e: 0 });
   state.audio = Object.assign({ aiCoreCuePlayed: false }, state.audio || {});
   state.settings = Object.assign(state.settings || {}, loaded.settings || {});
+  if (!state.settings.textSize || !["small", "normal", "large"].includes(state.settings.textSize)) {
+    state.settings.textSize = "normal";
+  }
   state.permanent = state.permanent || { upgrades: {} };
   state.cooling = Object.assign({ fans: 0 }, state.cooling || {});
   const fanTier = getFanTierIndexFromCount(state.cooling?.fans || 0);
@@ -348,10 +359,13 @@ function rehydrateState(loaded) {
   if (!state.modifiers || typeof state.modifiers !== "object") state.modifiers = {};
   if (typeof state.modifiers.fanCoolMultiplier !== "number") state.modifiers.fanCoolMultiplier = 1;
   if (typeof state.gameWon !== "boolean") state.gameWon = false;
+  if (typeof state.gameOverReason !== "string") {
+    state.gameOverReason = state.gameOver ? "storage" : null;
+  }
   state.upgrades = state.upgrades || {};
   if (typeof state.storageCap !== "number") state.storageCap = 600;
   state.burnScrap = Object.assign({ active: false, timer: 0 }, state.burnScrap || {});
-  state.contract = Object.assign({ active: null, cooldown: 20, tutorial: [] }, state.contract || {});
+  state.contract = Object.assign({ active: null, cooldown: 20, tutorial: [], final: null }, state.contract || {});
   if (!Array.isArray(state.contract.tutorial)) state.contract.tutorial = [];
   if (state.contract.tutorial.length === 0 && (state.stats.contractsCompleted || 0) === 0) {
     state.contract.tutorial = createTutorialContracts();
@@ -395,12 +409,15 @@ function createSavePayload() {
     research: state.research,
     achievements: state.achievements,
     stats: state.stats,
+    playTime: state.playTime,
     audio: state.audio,
     sabotage: state.sabotage,
     contract: state.contract,
     boss: state.boss,
     gameOver: state.gameOver,
+    gameOverReason: state.gameOverReason,
     gameWon: state.gameWon,
+    portalBuilt: state.portalBuilt,
     burnScrap: state.burnScrap,
     ammo: state.ammo,
     ammoBuff: state.ammoBuff,

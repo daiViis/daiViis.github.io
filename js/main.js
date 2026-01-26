@@ -152,6 +152,12 @@ saveBtn.addEventListener("click", () => scheduleSave("manual"));
 prestigeBtn.addEventListener("click", () => showPrestigeOverlay());
 reducedMotionToggle.addEventListener("change", e => { state.settings.reducedMotion = e.target.checked; applySettings(); });
 colorblindToggle.addEventListener("change", e => { state.settings.colorblind = e.target.checked; applySettings(); });
+if (textSizeSelect) {
+  textSizeSelect.addEventListener("change", e => {
+    state.settings.textSize = e.target.value;
+    applySettings();
+  });
+}
 shakeToggle.addEventListener("change", e => { state.settings.shake = e.target.checked; });
 fireworksToggle.addEventListener("change", e => { state.settings.fireworks = e.target.checked; });
 if (audioToggle) {
@@ -175,11 +181,15 @@ document.addEventListener("click", (event) => {
   if (fanContextMenuEl && fanContextMenuEl.classList.contains("active")) {
     if (!fanContextMenuEl.contains(event.target)) hideFanContextMenu();
   }
+  if (storageContextMenuEl && storageContextMenuEl.classList.contains("active")) {
+    if (!storageContextMenuEl.contains(event.target)) hideStorageContextMenu();
+  }
 });
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") {
     hideContextMenu();
     hideFanContextMenu();
+    hideStorageContextMenu();
   }
 });
 contextRemoveBtn.addEventListener("click", () => {
@@ -237,17 +247,41 @@ if (fanCounterEl) {
   fanCounterEl.addEventListener("contextmenu", (event) => {
     event.preventDefault();
     hideContextMenu();
+    hideStorageContextMenu();
     updateFanContextMenu();
     showFanContextMenu(event.clientX, event.clientY);
+  });
+}
+if (storageCounterEl) {
+  storageCounterEl.addEventListener("contextmenu", (event) => {
+    event.preventDefault();
+    hideContextMenu();
+    hideFanContextMenu();
+    updateStorageContextMenu();
+    showStorageContextMenu(event.clientX, event.clientY);
   });
 }
 if (fanOverclockBtn) {
   fanOverclockBtn.addEventListener("click", () => {
     if (purchaseFanOverclock()) {
       triggerRewardEffect(fanCounterEl);
-      renderCache.upgrades = "";
     }
     hideFanContextMenu();
+  });
+}
+if (storageUpgradeBtn) {
+  storageUpgradeBtn.addEventListener("click", () => {
+    if (purchaseUpgrade("storage-silo")) {
+      triggerRewardEffect(storageCounterEl);
+      updateStorageContextMenu();
+    }
+    hideStorageContextMenu();
+  });
+}
+if (burnPurgeToggle) {
+  burnPurgeToggle.addEventListener("click", () => {
+    toggleBurnScrap();
+    triggerRewardEffect(burnPurgeToggle);
   });
 }
 gameOverMenuBtn.addEventListener("click", () => {

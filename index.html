@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
@@ -12,8 +12,9 @@
 </video>
 <div id="app">
   <header>
+    <div id="runTimer" class="run-timer">Time 00:00:00</div>
     <div id="title">Factory 84</div>
-    <div class="wip-tag">WIP build · Win by building Portal</div>
+    <div class="wip-tag">WIP build - Win by minting 1000 Godcoins</div>
     <div id="status">Reality is 97% stable.</div>
     <div id="header-actions">
       <button class="btn secondary" id="saveBtn" title="Save to localStorage">Save</button>
@@ -23,6 +24,14 @@
       </label>
       <label class="toggle" title="Colorblind-friendly palette">
         <input type="checkbox" id="colorblind" /> Colorblind
+      </label>
+      <label class="toggle" title="UI text size">
+        <span>Text</span>
+        <select id="textSize">
+          <option value="small">Smaller</option>
+          <option value="normal" selected>Normal</option>
+          <option value="large">Bigger</option>
+        </select>
       </label>
       <label class="toggle" title="Screen shake on major events">
         <input type="checkbox" id="shakeToggle" checked /> Shake
@@ -47,7 +56,6 @@
       <div id="tab-contents">
         <div id="tab-buildings" class="tab"></div>
         <div id="tab-research" class="tab"></div>
-        <div id="tab-upgrades" class="tab"></div>
         <div id="tab-achievements" class="tab"></div>
         <div id="tab-stats" class="tab"></div>
       </div>
@@ -70,6 +78,16 @@
           <span class="icon">🌀</span>
           <span class="label">Fans</span>
           <span class="value">0</span>
+        </div>
+        <div class="support-item" id="storageCounter" title="Storage capacity. Right-click for upgrades.">
+          <span class="icon">ST</span>
+          <span class="label">Storage</span>
+          <span class="value">0/0</span>
+        </div>
+        <div class="support-item" id="burnPurgeItem" title="Toggle Burnt Scrap Purge.">
+          <span class="icon">BS</span>
+          <span class="label">Purge</span>
+          <button class="purge-toggle" id="burnPurgeToggle" type="button">OFF</button>
         </div>
       </div>
       <div id="contractArea" class="contract-mini"></div>
@@ -103,11 +121,17 @@
   <div id="fanOverclockDesc" class="small">Adds +10% cooling per fan.</div>
   <div id="fanOverclockCount" class="small"></div>
 </div>
+<div id="storageContextMenu">
+  <button id="storageUpgradeBtn" class="btn secondary" type="button">Storage Upgrade</button>
+  <div id="storageUpgradeCost" class="small"></div>
+  <div id="storageUpgradeDesc" class="small"></div>
+  <div id="storageUpgradeLevel" class="small"></div>
+</div>
 <div id="gameOverOverlay">
   <div id="gameOverCard">
-    <div class="gameover-title">Storage Collapse</div>
-    <div class="small">Your vaults ruptured. The factory drowns in its own output.</div>
-    <div class="small">Expand storage next run. Hoard smarter.</div>
+    <div class="gameover-title" id="gameOverTitle">Storage Collapse</div>
+    <div class="small" id="gameOverLine1">Your vaults ruptured. The factory drowns in its own output.</div>
+    <div class="small" id="gameOverLine2">Expand storage next run. Hoard smarter.</div>
     <div class="gameover-actions">
       <button class="btn" id="gameOverMenu">Main Menu</button>
       <button class="btn secondary" id="gameOverRestart">Restart Run</button>
@@ -116,8 +140,8 @@
 </div>
 <div id="winOverlay">
   <div id="winCard">
-    <div class="gameover-title">Portal Online</div>
-    <div class="small">The factory folds into the portal. You win... for now.</div>
+    <div class="gameover-title">Godcoins Ascendant</div>
+    <div class="small">1000 Godcoins minted. The portal recognizes your claim.</div>
     <div class="gameover-actions">
       <a class="btn secondary" id="winMenu" href="index.html">Back to Menu</a>
     </div>
@@ -141,3 +165,4 @@
 <script src="js/main.js"></script>
 </body>
 </html>
+
