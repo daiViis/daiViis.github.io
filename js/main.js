@@ -3,6 +3,7 @@ const CRASH_LOG_LIMIT = 50;
 let savePending = false;
 const bgmEl = document.getElementById("bgm");
 const aicoreCueEl = document.getElementById("aicoreCue");
+const upgradeCueEl = document.getElementById("upgradeCue");
 const BGM_TRACKS = [
   "audio/01.mp3",
   "audio/02.mp3",
@@ -49,6 +50,7 @@ function syncAudioSettings() {
   const active = isAudioAllowed() && isAudioEnabled();
   if (bgmEl) bgmEl.volume = volume;
   if (aicoreCueEl) aicoreCueEl.volume = volume;
+  if (upgradeCueEl) upgradeCueEl.volume = volume;
   if (!bgmEl) return;
   if (!active) {
     bgmEl.pause();
@@ -88,6 +90,12 @@ function playAICoreCue() {
   if (bgmEl && !bgmEl.paused) bgmEl.pause();
   aicoreCueEl.currentTime = 0;
   playWithGestureFallback(aicoreCueEl);
+}
+
+function playUpgradeCue() {
+  if (!isAudioAllowed() || !isAudioEnabled() || !upgradeCueEl) return;
+  upgradeCueEl.currentTime = 0;
+  playWithGestureFallback(upgradeCueEl);
 }
 
 function logCrash(context, error) {

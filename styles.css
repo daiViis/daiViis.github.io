@@ -1373,6 +1373,89 @@ header {
   cursor: pointer;
 }
 .perk:hover { border-color: var(--accent); }
+.intro-page {
+  margin: 0;
+  background: #05070d;
+}
+.intro-wrap {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: #05070d;
+}
+.intro-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  background: #05070d;
+}
+.intro-skip {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  z-index: 2;
+}
+.intro-blocked {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: fit-content;
+  height: fit-content;
+  padding: 14px 24px;
+  border-radius: 999px;
+  background: rgba(2,6,23,0.85);
+  border: 1px solid rgba(148,163,184,0.4);
+  color: var(--text);
+  font-size: var(--font-13);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: none;
+  z-index: 2;
+  box-shadow: 0 0 24px rgba(34,211,238,0.2);
+  animation: introPulse 1.6s ease-in-out infinite;
+}
+.intro-blocked.active {
+  display: block;
+}
+@keyframes introPulse {
+  0% { transform: scale(1); box-shadow: 0 0 18px rgba(34,211,238,0.2); opacity: 0.9; }
+  50% { transform: scale(1.06); box-shadow: 0 0 32px rgba(34,211,238,0.35); opacity: 1; }
+  100% { transform: scale(1); box-shadow: 0 0 18px rgba(34,211,238,0.2); opacity: 0.9; }
+}
+.intro-prompt {
+  position: absolute;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(2,6,23,0.7);
+  z-index: 2;
+}
+.intro-prompt.active {
+  display: flex;
+}
+.intro-card {
+  background: rgba(2,6,23,0.9);
+  border: 1px solid rgba(148,163,184,0.2);
+  border-radius: 14px;
+  padding: 18px 22px;
+  min-width: min(360px, 88vw);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 18px 40px rgba(0,0,0,0.5);
+}
+.intro-title {
+  font-size: var(--font-20);
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
 @media (max-width: 1200px) {
   #main { grid-template-columns: 1fr; }
   #main.automation-locked { grid-template-columns: 1fr; }

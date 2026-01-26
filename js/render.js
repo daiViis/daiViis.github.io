@@ -805,6 +805,7 @@ function handleResearch(id) {
     node.effect(state);
     addLog("[RESEARCH]", `Research complete: ${node.name}.`);
   }
+  if (typeof playUpgradeCue === "function") playUpgradeCue();
   return true;
 }
 

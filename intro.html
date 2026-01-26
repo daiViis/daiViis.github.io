@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Factory 84: Timeline Intro</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body class="intro-page">
+  <div class="intro-wrap">
+    <video id="introVideo" class="intro-video" playsinline preload="auto">
+      <source src="video/Timeline_Intro.mov" />
+    </video>
+    <button class="btn secondary intro-skip" id="introSkip" type="button">Skip</button>
+    <div class="intro-blocked active" id="introBlocked">Click to play</div>
+    <div class="intro-prompt" id="introPrompt">
+      <div class="intro-card">
+        <div class="intro-title">Press Enter</div>
+        <div class="small">You can start your run now.</div>
+        <button class="btn" id="introEnter" type="button">Enter</button>
+      </div>
+    </div>
+  </div>
+<script>
+const introVideo = document.getElementById("introVideo");
+const introSkip = document.getElementById("introSkip");
+const introPrompt = document.getElementById("introPrompt");
+const introEnter = document.getElementById("introEnter");
+const introBlocked = document.getElementById("introBlocked");
+let hasStarted = false;
+
+function showPrompt() {
+  if (!introPrompt) return;
+  introPrompt.classList.add("active");
+}
+
+function goToGame() {
+  window.location.href = "index.html";
+}
+
+function attemptPlay() {
+  if (!introVideo) return;
+  const tryPlay = introVideo.play();
+  if (tryPlay && tryPlay.catch) {
+    tryPlay.catch(() => {
+      if (introBlocked) introBlocked.classList.add("active");
+    });
+  }
+}
+
+if (introVideo) {
+  introVideo.addEventListener("ended", showPrompt);
+}
+
+if (introSkip) {
+  introSkip.addEventListener("click", () => {
+    showPrompt();
+  });
+}
+
+if (introEnter) {
+  introEnter.addEventListener("click", goToGame);
+}
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    if (introPrompt && introPrompt.classList.contains("active")) {
+      goToGame();
+    } else {
+      showPrompt();
+    }
+  }
+});
+
+document.addEventListener("click", () => {
+  if (!introVideo || hasStarted) return;
+  hasStarted = true;
+  introVideo.muted = false;
+  if (introBlocked) introBlocked.classList.remove("active");
+  attemptPlay();
+});
+</script>
+</body>
+</html>
