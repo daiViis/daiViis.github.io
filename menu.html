@@ -8,99 +8,97 @@
 </head>
 <body>
 <div id="app" style="grid-template-rows: 1fr;">
-  <section class="panel" style="margin: auto; width: min(720px, 92vw);">
-    <div id="title" style="font-size: 22px;">Factory 84</div>
-    <div class="small" style="margin-top: 6px;">The Infinite Production Spiral</div>
-    <div style="margin-top: 16px;">
-      <div class="card">
-        <div>
-          <div><strong>Main Menu</strong></div>
-          <div class="meta">You are the foreman of a factory that eats reality. Choose your timeline.</div>
+  <section class="panel menu-panel">
+    <div class="menu-layout">
+      <div class="menu-left">
+        <div id="title" style="font-size: 22px;">Factory 84</div>
+        <div class="small" style="margin-top: 6px;">The Infinite Production Spiral</div>
+        <div style="margin-top: 16px;">
+          <div class="card">
+            <div>
+              <div><strong>Main Menu</strong></div>
+              <div class="meta">You are the foreman of a factory that eats reality. Choose your timeline.</div>
+            </div>
+          </div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
+            <button class="btn" id="startNew">Start New Run</button>
+            <button class="btn secondary" id="continueRun">Continue</button>
+          </div>
+          <div class="small" style="margin-top:10px;">Tip: Storage caps end runs. Upgrade silos early.</div>
+          <div class="roadmap">
+            <div class="roadmap-header">
+              <div>
+                <div class="roadmap-title">Roadmap</div>
+                <div class="roadmap-subtitle">In the pipeline</div>
+              </div>
+              <div class="roadmap-badge">WIP</div>
+            </div>
+            <div class="roadmap-track-wrap">
+              <button class="roadmap-nav" type="button" data-roadmap-nav="left" aria-label="Scroll roadmap left">‹</button>
+              <div class="roadmap-track" id="roadmapTrack" aria-label="Roadmap timeline">
+              <div class="roadmap-item">
+                <div class="roadmap-node"></div>
+                <div class="roadmap-card">
+                  <div class="roadmap-name">Automation</div>
+                  <div class="roadmap-note">Factory rules and grid babysitters.</div>
+                </div>
+              </div>
+              <div class="roadmap-item">
+                <div class="roadmap-node"></div>
+                <div class="roadmap-card">
+                  <div class="roadmap-name">UI Polish</div>
+                  <div class="roadmap-note">Sharper panels, clearer stats, less clutter.</div>
+                </div>
+              </div>
+              <div class="roadmap-item">
+                <div class="roadmap-node"></div>
+                <div class="roadmap-card">
+                  <div class="roadmap-name">First Planet End Game</div>
+                  <div class="roadmap-note">Portal scale milestones and final boss.<br>
+                  - Improving Labs producing new material for upgrading buildings<br>
+                  - Firefighting after the destruction of a building by heat<br>
+                  - Removing Local Burned scrap on newly unlocked grid cells<br>
+                  - Local disasters (small chance to destroy players progress)<br>
+                  - Interactive grid (rotation, movement, zooming)</div>
+                </div>
+              </div>
+              <div class="roadmap-item">
+                <div class="roadmap-node"></div>
+                <div class="roadmap-card">
+                  <div class="roadmap-name">Continents War</div>
+                  <div class="roadmap-note">Faction influence across the surface.</div>
+                </div>
+              </div>
+              <div class="roadmap-item">
+                <div class="roadmap-node"></div>
+                <div class="roadmap-card">
+                  <div class="roadmap-name">Multiple Planets</div>
+                  <div class="roadmap-note">Chain worlds into a production empire.</div>
+                </div>
+              </div>
+              <div class="roadmap-item">
+                <div class="roadmap-node"></div>
+                <div class="roadmap-card">
+                  <div class="roadmap-name">Interplanetary Transport</div>
+                  <div class="roadmap-note">Railguns, gates, and logistics routes.</div>
+                </div>
+              </div>
+              </div>
+              <button class="roadmap-nav" type="button" data-roadmap-nav="right" aria-label="Scroll roadmap right">›</button>
+            </div>
+          </div>
         </div>
       </div>
-      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
-        <button class="btn" id="startNew">Start New Run</button>
-        <button class="btn secondary" id="continueRun">Continue</button>
-      </div>
-      <div class="small" style="margin-top:10px;">Tip: Storage caps end runs. Upgrade silos early.</div>
-      <div class="patch-changes">
+      <div class="menu-right">
         <div class="card">
           <div>
             <div><strong>Patch Changes</strong></div>
-            <div class="meta">Changes 001</div>
+            <div class="meta">Select a file to read patch notes.</div>
           </div>
         </div>
-        <div class="small patch-list">
-          <div>- Removed research upgrades: Void Cooling, Counter-Intel, Ashen Reinforcement, Echo Theory.</div>
-          <div>- Rebalanced costs: Cryo Pipe now costs 30 AI Cores; Portal now costs 500 Timeline Ink.</div>
-          <div>- Automation unlocks with Printer License; right panel and context automation stay hidden until then.</div>
-          <div>- Heat reaching 100% now triggers game over with heat-specific messaging.</div>
-          <div>- Added a top-left run timer that persists in save data.</div>
-          <div>- Win condition is now 1000 Godcoins after building the first Portal, delivered as the final contract.</div>
-          <div>- Added UI text size setting (smaller, normal, bigger).</div>
-          <div>- Updated the menu roadmap for First Planet End Game with the planned upgrades list.</div>
-        </div>
-      </div>
-      <div class="roadmap">
-        <div class="roadmap-header">
-          <div>
-            <div class="roadmap-title">Roadmap</div>
-            <div class="roadmap-subtitle">In the pipeline</div>
-          </div>
-          <div class="roadmap-badge">WIP</div>
-        </div>
-        <div class="roadmap-track-wrap">
-          <button class="roadmap-nav" type="button" data-roadmap-nav="left" aria-label="Scroll roadmap left">‹</button>
-          <div class="roadmap-track" id="roadmapTrack" aria-label="Roadmap timeline">
-          <div class="roadmap-item">
-            <div class="roadmap-node"></div>
-            <div class="roadmap-card">
-              <div class="roadmap-name">Automation</div>
-              <div class="roadmap-note">Factory rules and grid babysitters.</div>
-            </div>
-          </div>
-          <div class="roadmap-item">
-            <div class="roadmap-node"></div>
-            <div class="roadmap-card">
-              <div class="roadmap-name">UI Polish</div>
-              <div class="roadmap-note">Sharper panels, clearer stats, less clutter.</div>
-            </div>
-          </div>
-          <div class="roadmap-item">
-            <div class="roadmap-node"></div>
-            <div class="roadmap-card">
-              <div class="roadmap-name">First Planet End Game</div>
-              <div class="roadmap-note">Portal scale milestones and final boss.<br>
-              - Improving Labs producing new material for upgrading buildings<br>
-              - Firefighting after the destruction of a building by heat<br>
-              - Removing Local Burned scrap on newly unlocked grid cells<br>
-              - Local disasters (small chance to destroy players progress)<br>
-              - Interactive grid (rotation, movement, zooming)</div>
-            </div>
-          </div>
-          <div class="roadmap-item">
-            <div class="roadmap-node"></div>
-            <div class="roadmap-card">
-              <div class="roadmap-name">Continents War</div>
-              <div class="roadmap-note">Faction influence across the surface.</div>
-            </div>
-          </div>
-          <div class="roadmap-item">
-            <div class="roadmap-node"></div>
-            <div class="roadmap-card">
-              <div class="roadmap-name">Multiple Planets</div>
-              <div class="roadmap-note">Chain worlds into a production empire.</div>
-            </div>
-          </div>
-          <div class="roadmap-item">
-            <div class="roadmap-node"></div>
-            <div class="roadmap-card">
-              <div class="roadmap-name">Interplanetary Transport</div>
-              <div class="roadmap-note">Railguns, gates, and logistics routes.</div>
-            </div>
-          </div>
-          </div>
-          <button class="roadmap-nav" type="button" data-roadmap-nav="right" aria-label="Scroll roadmap right">›</button>
+        <div class="patch-browser">
+          <div class="patch-files" id="patchFileList"></div>
+          <iframe class="patch-viewer" id="patchContent" title="Patch notes viewer"></iframe>
         </div>
       </div>
     </div>
@@ -128,6 +126,11 @@ const consentAllow = document.getElementById("audioConsentAllow");
 const consentDecline = document.getElementById("audioConsentDecline");
 const roadmapTrack = document.getElementById("roadmapTrack");
 const roadmapNavButtons = document.querySelectorAll("[data-roadmap-nav]");
+const patchFileList = document.getElementById("patchFileList");
+const patchContent = document.getElementById("patchContent");
+const patchFiles = [
+  { name: "changes_001.md", title: "Changes 001", path: "Updates/changes_001.md" }
+];
 const hasSave = !!localStorage.getItem(saveKey);
 continueBtn.disabled = !hasSave;
 
@@ -174,6 +177,31 @@ continueBtn.addEventListener("click", () => {
 });
 
 applyMenuAudioConsent();
+
+function loadPatchFile(file) {
+  if (!file || !file.path) return;
+  if (patchContent) {
+    patchContent.src = file.path;
+  }
+}
+
+function renderPatchFileList() {
+  if (!patchFileList) return;
+  patchFileList.innerHTML = patchFiles.map((file, index) => `
+    <button class="btn secondary patch-file-btn" data-patch-index="${index}" type="button">${file.title}</button>
+  `).join("");
+  patchFileList.querySelectorAll("[data-patch-index]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      patchFileList.querySelectorAll(".patch-file-btn").forEach(el => el.classList.remove("active"));
+      btn.classList.add("active");
+      loadPatchFile(patchFiles[Number(btn.dataset.patchIndex)]);
+    });
+  });
+  const firstBtn = patchFileList.querySelector(".patch-file-btn");
+  if (firstBtn) firstBtn.click();
+}
+
+renderPatchFileList();
 
 if (roadmapTrack) {
   const scrollByAmount = () => Math.max(260, Math.round(roadmapTrack.clientWidth * 0.7));

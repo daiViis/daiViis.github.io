@@ -68,26 +68,39 @@
         </div>
         <div class="stack-right">
           <div class="small" id="heatDisplay">Heat: 0%</div>
-          <button class="btn secondary" id="buySlotBtn" title="Buy a grid slot">Buy Slot</button>
           <button class="btn secondary" id="blueprintBtn" title="Auto-place selected building" style="display:none;">Blueprint</button>
         </div>
       </div>
       <div id="grid"></div>
       <div id="supportBar" class="support-bar">
-        <div class="support-item" id="fanCounter" title="Fans reduce heat without using grid space.">
-          <span class="icon">🌀</span>
-          <span class="label">Fans</span>
-          <span class="value">0</span>
+        <div class="support-row">
+          <div class="support-item" id="fanCounter" title="Fans reduce heat without using grid space.">
+            <span class="icon">🌀</span>
+            <span class="label">Fans</span>
+            <span class="value">0</span>
+          </div>
+          <div class="support-item" id="storageCounter" title="Storage capacity. Right-click for upgrades.">
+            <span class="icon">ST</span>
+            <span class="label">Storage</span>
+            <span class="value">0/0</span>
+          </div>
         </div>
-        <div class="support-item" id="storageCounter" title="Storage capacity. Right-click for upgrades.">
-          <span class="icon">ST</span>
-          <span class="label">Storage</span>
-          <span class="value">0/0</span>
-        </div>
-        <div class="support-item" id="burnPurgeItem" title="Toggle Burnt Scrap Purge.">
-          <span class="icon">BS</span>
-          <span class="label">Purge</span>
-          <button class="purge-toggle" id="burnPurgeToggle" type="button">OFF</button>
+        <div class="support-row support-column">
+          <button class="support-item support-action big emergency" id="emergencyBtn" type="button" title="Emergency shutdown: powers off all buildings for 60s.">
+            <span class="support-row">
+              <span class="label">Emergency</span>
+            </span>
+            <span class="value">READY</span>
+          </button>
+          <button class="support-item support-action big buy-slot" id="buySlotBtn" type="button" title="Buy a grid slot">
+            <span class="support-row">
+              <span class="label">Buy Slot</span>
+            </span>
+            <span class="support-cost cost-row">
+              <span class="cost-item"><span class="res-icon res-Scrap">S</span><span class="res-amt">150</span></span>
+              <span class="cost-item"><span class="res-icon res-Gears">G</span><span class="res-amt">20</span></span>
+            </span>
+          </button>
         </div>
       </div>
       <div id="contractArea" class="contract-mini"></div>

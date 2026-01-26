@@ -152,18 +152,18 @@ const BUILDINGS = {
   },
   AshCleaner: {
     name: "Ash Cleaner",
-    inputs: [{ res: "BurntScrap", amt: 0.25 }],
+    inputs: [{ res: "BurntScrap", amt: 2 }],
     outputs: [],
     speed: 1,
     efficiency: 1,
     heat: 0.5,
     glitch: 0,
     cost: { Scrap: 80 },
-    desc: "Consumes 0.25 Burnt Scrap/sec. Shuts down when out."
+    desc: "Consumes 2 Burnt Scrap/sec. Shuts down when out."
   }
 };
 const RESEARCH_NODES = [
-  { id: "basic-logistics", name: "Basic Logistics", cost: { Scrap: 150 }, prereq: [], effect: s => s.modifiers.transferBoost += 0.1 },
+  { id: "basic-logistics", name: "Basic Logistics", cost: { Scrap: 150 }, prereq: [], effect: s => { s.modifiers.transferBoost += 0.1; s.unlocks.BuySlot = true; } },
   { id: "assembler-unlock", name: "Assembler Doctrine", cost: { Gears: 60 }, prereq: ["basic-logistics"], unstable: true,
     variants: [
       { id: "assembler-speed", name: "Speed Focus", desc: "+25% Assembler speed", apply: s => s.modifiers.assemblerSpeed *= 1.25 },

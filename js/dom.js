@@ -21,8 +21,6 @@ const fireworksLayer = document.getElementById("fireworksLayer");
 const heatEdgeEl = document.getElementById("heatEdge");
 const fanCounterEl = document.getElementById("fanCounter");
 const storageCounterEl = document.getElementById("storageCounter");
-const burnPurgeItemEl = document.getElementById("burnPurgeItem");
-const burnPurgeToggle = document.getElementById("burnPurgeToggle");
 const automationAreaEl = document.getElementById("automationArea");
 const rightPanelEl = document.getElementById("rightPanel");
 const contextMenuEl = document.getElementById("contextMenu");
@@ -67,6 +65,7 @@ const audioToggle = document.getElementById("audioToggle");
 const audioVolume = document.getElementById("audioVolume");
 const blueprintBtn = document.getElementById("blueprintBtn");
 const buySlotBtn = document.getElementById("buySlotBtn");
+const emergencyBtn = document.getElementById("emergencyBtn");
 const prestigeOverlay = document.getElementById("prestigeOverlay");
 const perkOptionsEl = document.getElementById("perkOptions");
 const renderCache = {
@@ -114,7 +113,8 @@ function getResearchRenderKey() {
     const variant = state.research[id + "-variant"];
     return variant ? `${id}:${variant.id}` : id;
   }).join("|");
-  return `${base}|${getUnlocksKey()}`;
+  const contractKey = state.contract?.active?.type === "research" ? state.contract.active.nodeId : "";
+  return `${base}|${getUnlocksKey()}|${contractKey}`;
 }
 
 function getAchievementsRenderKey() {

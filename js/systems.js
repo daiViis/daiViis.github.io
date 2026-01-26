@@ -1,4 +1,6 @@
 const POWER_TOGGLE_COOLDOWN_MS = 30000;
+const EMERGENCY_SHUTDOWN_MS = 60000;
+const EMERGENCY_COOLDOWN_MS = 15 * 60 * 1000;
 const FAN_BASE_COST = BUILDINGS.Fan?.cost?.Scrap || 100;
 const FAN_COST_STEP = 50;
 const FAN_TIER_BASE = 100;
@@ -238,6 +240,7 @@ function getSmelterExtraCycleInterval(tile) {
 }
 
 function applySmelterCycleEffects(tile) {
+  if (!tile || isTilePaused(tile)) return;
   const level = getSmelterLevel(tile);
   const waste = SMELTER_WASTE_PER_CYCLE * level;
   if (waste > 0) addBurntScrap(waste);
@@ -268,7 +271,7 @@ function getAshHeatMultiplier(tile) {
 
 function getAshUpgradeCost(tile) {
   const level = getAshLevel(tile);
-  return { Scrap: ASH_UPGRADE_BASE_COST + ASH_UPGRADE_COST_STEP * Math.max(0, level - 1) };
+  return { Circuits: ASH_UPGRADE_BASE_COST + ASH_UPGRADE_COST_STEP * Math.max(0, level - 1) };
 }
 
 function updateMinerWaste(tile, dt) {
@@ -617,6 +620,29 @@ function toggleBuildingPower(index) {
   return true;
 }
 
+function triggerEmergencyShutdown() {
+  const now = Date.now();
+  state.emergency = state.emergency || { cooldownUntil: 0, shutdownUntil: 0 };
+  if (state.emergency.cooldownUntil && now < state.emergency.cooldownUntil) {
+    const remaining = Math.ceil((state.emergency.cooldownUntil - now) / 1000);
+    addLog("[EMERGENCY]", `Emergency cooldown ${remaining}s remaining.`);
+    return false;
+  }
+  let any = false;
+  const shutdownUntil = now + EMERGENCY_SHUTDOWN_MS;
+  state.grid.forEach(tile => {
+    if (!tile || !tile.building) return;
+    tile.disabledUntil = Math.max(tile.disabledUntil || 0, shutdownUntil);
+    tile.visualSpeed = 0;
+    tile.visualProgress = tile.progress;
+    any = true;
+  });
+  state.emergency.shutdownUntil = shutdownUntil;
+  state.emergency.cooldownUntil = now + EMERGENCY_COOLDOWN_MS;
+  addLog("[EMERGENCY]", any ? "Emergency shutdown engaged. Systems reboot in 60s." : "Emergency shutdown engaged. No buildings online.");
+  return true;
+}
+
 function purchaseFanOverclock() {
   if (getFanCount() < FAN_OVERCLOCK_MIN_FANS) return false;
   const cost = getFanOverclockCost();
@@ -735,12 +761,6 @@ function purchaseUpgrade(id) {
   triggerScreenReward("good");
   pulseLatestLog();
   return true;
-}
-
-function toggleBurnScrap() {
-  state.burnScrap.active = !state.burnScrap.active;
-  addLog("[BURN]", state.burnScrap.active ? "Burnt Scrap purge engaged." : "Burnt Scrap purge halted.");
-  pulseLatestLog();
 }
 
 function consumeResource(res, amount) {
@@ -877,22 +897,6 @@ function transferResources() {
 
 function reverseDir(dir) {
   return { left: "right", right: "left", up: "down", down: "up" }[dir];
-}
-
-function updateBurntScrap(dt) {
-  if (!state.burnScrap.active) return;
-  state.burnScrap.timer += dt;
-  if (state.burnScrap.timer < 1) return;
-  state.burnScrap.timer = 0;
-  const have = state.totals.BurntScrap || { m: 0, e: 0 };
-  if (bnCmp(have, bnFromNumber(1)) < 0) return;
-  if (!consumeResource("BurntScrap", bnFromNumber(1))) return;
-  if (state.totals && state.totals.BurntScrap) {
-    bnSubInPlace(state.totals.BurntScrap, bnFromNumber(1));
-  }
-  const buildingCount = state.grid.reduce((acc, tile) => acc + (tile.building ? 1 : 0), 0);
-  state.heat = Math.min(100, state.heat + buildingCount);
-  addLog("[BURN]", `Purge consumes 1 Burnt Scrap. Heat +${buildingCount}.`);
 }
 
 function computeTotals() {
@@ -1337,6 +1341,10 @@ function expandGrid(add) {
 
 function buyGridSlot() {
   const maxSlots = 144;
+  if (!state.unlocks.BuySlot) {
+    addLog("[WARN]", "Basic Logistics required to buy grid slots.");
+    return false;
+  }
   if (state.gridSlots >= maxSlots) return false;
   const cost = { Scrap: 150, Gears: 20 };
   if (!canAfford(cost)) return false;
@@ -1601,7 +1609,6 @@ function tick(dt) {
   }
   computeTotals();
   applyAutomation();
-  updateBurntScrap(effectiveDt);
   if (checkHeatGameOver()) return;
   if (checkStorageCap()) return;
   updateHeatAndGlitch(effectiveDt, bossDebuff);

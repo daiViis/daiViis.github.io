@@ -174,6 +174,13 @@ if (audioVolume) {
 }
 blueprintBtn.addEventListener("click", () => autoBuild(state.selectedBuilding));
 buySlotBtn.addEventListener("click", () => buyGridSlot());
+if (emergencyBtn) {
+  emergencyBtn.addEventListener("click", () => {
+    if (triggerEmergencyShutdown()) {
+      pulseLatestLog();
+    }
+  });
+}
 document.addEventListener("click", (event) => {
   if (contextMenuEl && contextMenuEl.classList.contains("active")) {
     if (!contextMenuEl.contains(event.target)) hideContextMenu();
@@ -276,12 +283,6 @@ if (storageUpgradeBtn) {
       updateStorageContextMenu();
     }
     hideStorageContextMenu();
-  });
-}
-if (burnPurgeToggle) {
-  burnPurgeToggle.addEventListener("click", () => {
-    toggleBurnScrap();
-    triggerRewardEffect(burnPurgeToggle);
   });
 }
 gameOverMenuBtn.addEventListener("click", () => {

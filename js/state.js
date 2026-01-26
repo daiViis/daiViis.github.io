@@ -195,7 +195,7 @@ function createDefaultState() {
     unlocks: {
       Miner: true, Smelter: true, Assembler: true, Printer: false, Lab: false, Reactor: false, Portal: false,
       ChronoForge: false, Fan: true, CryoPipe: false, VoidRadiator: false, CounterIntel: false,
-      AshCleaner: true, BurntTech: false, EchoDust: false, BlueprintConsole: false
+      AshCleaner: true, BurntTech: false, EchoDust: false, BlueprintConsole: false, BuySlot: false
     },
     permanent: { upgrades: {} },
     rules: [],
@@ -228,7 +228,7 @@ function createDefaultState() {
     gameOverReason: null,
     gameWon: false,
     portalBuilt: false,
-    burnScrap: { active: false, timer: 0 },
+    emergency: { cooldownUntil: 0, shutdownUntil: 0 },
     ammo: 0,
     ammoBuff: 0,
     paradoxTokens: { m: 0, e: 0 },
@@ -364,7 +364,9 @@ function rehydrateState(loaded) {
   }
   state.upgrades = state.upgrades || {};
   if (typeof state.storageCap !== "number") state.storageCap = 600;
-  state.burnScrap = Object.assign({ active: false, timer: 0 }, state.burnScrap || {});
+  state.emergency = Object.assign({ cooldownUntil: 0, shutdownUntil: 0 }, state.emergency || {});
+  state.emergency.cooldownUntil = Number(state.emergency.cooldownUntil) || 0;
+  state.emergency.shutdownUntil = Number(state.emergency.shutdownUntil) || 0;
   state.contract = Object.assign({ active: null, cooldown: 20, tutorial: [], final: null }, state.contract || {});
   if (!Array.isArray(state.contract.tutorial)) state.contract.tutorial = [];
   if (state.contract.tutorial.length === 0 && (state.stats.contractsCompleted || 0) === 0) {
@@ -372,6 +374,10 @@ function rehydrateState(loaded) {
   }
   if (state.selectedBuilding && BUILDINGS[state.selectedBuilding]?.global) {
     state.selectedBuilding = "Miner";
+  }
+  state.research = state.research || {};
+  if (state.research["basic-logistics"]) {
+    state.unlocks.BuySlot = true;
   }
   applySettings();
 }
@@ -418,7 +424,7 @@ function createSavePayload() {
     gameOverReason: state.gameOverReason,
     gameWon: state.gameWon,
     portalBuilt: state.portalBuilt,
-    burnScrap: state.burnScrap,
+    emergency: state.emergency,
     ammo: state.ammo,
     ammoBuff: state.ammoBuff,
     paradoxTokens: state.paradoxTokens,

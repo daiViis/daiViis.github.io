@@ -49,11 +49,42 @@ function renderStatus() {
   heatDisplayEl.textContent = `Heat: ${state.heat.toFixed(0)}%`;
   gridStatsEl.textContent = `(${getGridWidth()}x${getGridRows()} | ${state.gridSlots} slots)`;
   blueprintBtn.style.display = state.unlocks.BlueprintConsole ? "inline-flex" : "none";
-  const slotCost = { Scrap: 150, Gears: 20 };
-  const canBuySlot = state.gridSlots < 144 && canAfford(slotCost);
   if (buySlotBtn) {
-    buySlotBtn.disabled = !canBuySlot;
-    buySlotBtn.textContent = `Buy Slot (150 Scrap + 20 Gears)`;
+    const unlocked = !!state.unlocks.BuySlot;
+    buySlotBtn.style.display = unlocked ? "" : "none";
+    if (unlocked) {
+      const slotCost = { Scrap: 150, Gears: 20 };
+      const maxed = state.gridSlots >= 144;
+      const canBuySlot = !maxed && canAfford(slotCost);
+      const costEl = buySlotBtn.querySelector(".support-cost");
+      if (costEl) {
+        if (maxed) {
+          costEl.innerHTML = `<span class="build-cost small">MAX</span>`;
+        } else {
+          costEl.innerHTML = `
+            <span class="cost-item"><span class="res-icon res-Scrap">S</span><span class="res-amt">150</span></span>
+            <span class="cost-item"><span class="res-icon res-Gears">G</span><span class="res-amt">20</span></span>
+          `;
+        }
+      }
+      buySlotBtn.disabled = !canBuySlot;
+    }
+  }
+  if (emergencyBtn) {
+    const now = Date.now();
+    const emergency = state.emergency || {};
+    const cooldownRemaining = Math.max(0, (emergency.cooldownUntil || 0) - now);
+    const shutdownRemaining = Math.max(0, (emergency.shutdownUntil || 0) - now);
+    let valueText = "READY";
+    if (shutdownRemaining > 0) {
+      valueText = `OFF ${formatTimer(Math.ceil(shutdownRemaining / 1000))}`;
+    } else if (cooldownRemaining > 0) {
+      valueText = `COOLDOWN ${formatTimer(Math.ceil(cooldownRemaining / 1000))}`;
+    }
+    const valueEl = emergencyBtn.querySelector(".value");
+    if (valueEl) valueEl.textContent = valueText;
+    emergencyBtn.disabled = cooldownRemaining > 0;
+    emergencyBtn.classList.toggle("cooldown", cooldownRemaining > 0);
   }
   if (fanCounterEl) {
     const fans = state.cooling?.fans || 0;
@@ -63,10 +94,6 @@ function renderStatus() {
   if (storageCounterEl) {
     const used = getStorageUsedBn();
     storageCounterEl.querySelector(".value").textContent = `${bnToString(used)}/${state.storageCap}`;
-  }
-  if (burnPurgeToggle) {
-    burnPurgeToggle.textContent = state.burnScrap.active ? "ON" : "OFF";
-    burnPurgeToggle.classList.toggle("active", state.burnScrap.active);
   }
   if (heatEdgeEl) {
     const heat = Math.max(0, Math.min(100, state.heat));
@@ -717,8 +744,11 @@ function renderBuildings(counts) {
 }
 
 function renderResearch() {
+  const basicLogisticsContractActive = state.contract?.active?.type === "research"
+    && state.contract.active.nodeId === "basic-logistics";
   const html = ["<div class=\"list\">"];
   RESEARCH_NODES.forEach(node => {
+    if (node.id === "basic-logistics" && !state.research[node.id] && !basicLogisticsContractActive) return;
     const purchased = state.research[node.id];
     const prereqMet = node.prereq.every(id => state.research[id]);
     const unlockOk = !node.requiresUnlock || state.unlocks[node.requiresUnlock];
@@ -755,6 +785,11 @@ function renderResearch() {
 function handleResearch(id) {
   const node = RESEARCH_NODES.find(n => n.id === id);
   if (!node) return false;
+  if (id === "basic-logistics") {
+    const contract = state.contract?.active;
+    const allowed = contract && contract.type === "research" && contract.nodeId === "basic-logistics";
+    if (!allowed) return false;
+  }
   if (state.research[id]) return false;
   if (!node.prereq.every(req => state.research[req])) return false;
   if (node.requiresUnlock && !state.unlocks[node.requiresUnlock]) return false;
