@@ -12,11 +12,21 @@
 </video>
 <div id="app">
   <header>
-    <div id="runTimer" class="run-timer">Time 00:00:00</div>
-    <div id="title">Factory 84</div>
-    <div class="wip-tag">WIP build - Win by minting 1000 Godcoins</div>
-    <div id="status">Reality is 97% stable.</div>
-    <div id="header-actions">
+    <div class="header-left">
+      <div id="runTimer" class="run-timer">Time 00:00:00</div>
+      <div class="header-meta">
+        <div id="title">Factory 84</div>
+        <div class="wip-tag">WIP build - Win by minting 1000 Godcoins</div>
+        <div id="status">Reality is 97% stable.</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div id="headerStorage" class="header-storage">Storage 0/0</div>
+      <button class="btn secondary icon-btn" id="headerMenuToggle" type="button" aria-expanded="false" aria-controls="header-actions" title="Menu">
+        ☰
+      </button>
+    </div>
+    <div id="header-actions" class="header-actions">
       <button class="btn secondary" id="saveBtn" title="Save to localStorage">Save</button>
       <button class="btn secondary" id="prestigeBtn" title="Timeline Reboot">Timeline Reboot</button>
       <label class="toggle" title="Reduce animations">
@@ -179,4 +189,3 @@
 <script src="js/main.js"></script>
 </body>
 </html>
-

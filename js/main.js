@@ -180,6 +180,16 @@ if (audioVolume) {
     syncAudioSettings();
   });
 }
+if (headerMenuToggle && headerActionsEl) {
+  const setHeaderMenuOpen = (isOpen) => {
+    headerActionsEl.classList.toggle("open", isOpen);
+    headerMenuToggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+  };
+  headerMenuToggle.addEventListener("click", (event) => {
+    event.stopPropagation();
+    setHeaderMenuOpen(!headerActionsEl.classList.contains("open"));
+  });
+}
 blueprintBtn.addEventListener("click", () => autoBuild(state.selectedBuilding));
 buySlotBtn.addEventListener("click", () => buyGridSlot());
 if (emergencyBtn) {
@@ -190,6 +200,12 @@ if (emergencyBtn) {
   });
 }
 document.addEventListener("click", (event) => {
+  if (headerActionsEl && headerActionsEl.classList.contains("open")) {
+    if (!headerActionsEl.contains(event.target) && !headerMenuToggle?.contains(event.target)) {
+      headerActionsEl.classList.remove("open");
+      if (headerMenuToggle) headerMenuToggle.setAttribute("aria-expanded", "false");
+    }
+  }
   if (contextMenuEl && contextMenuEl.classList.contains("active")) {
     if (!contextMenuEl.contains(event.target)) hideContextMenu();
   }
@@ -202,6 +218,8 @@ document.addEventListener("click", (event) => {
 });
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") {
+    if (headerActionsEl) headerActionsEl.classList.remove("open");
+    if (headerMenuToggle) headerMenuToggle.setAttribute("aria-expanded", "false");
     hideContextMenu();
     hideFanContextMenu();
     hideStorageContextMenu();
@@ -319,6 +337,13 @@ tabContents.buildings.addEventListener("pointerdown", (event) => {
   const def = BUILDINGS[key];
   if (def.global) {
     if (safeRun("buyGlobalSupport", () => buyGlobalSupport(key))) {
+      triggerRewardEffect(btn);
+    }
+    return;
+  }
+  if (state.settings.autoPlace) {
+    setSelectedBuilding(key);
+    if (safeRun("autoPlaceBuild", () => autoPlaceBuild(key))) {
       triggerRewardEffect(btn);
     }
     return;

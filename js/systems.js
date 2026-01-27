@@ -1450,14 +1450,17 @@ function updateBoss(dt) {
   }
 }
 
-function autoBuild(target) {
+function autoBuild(target, options = {}) {
   if (!state.unlocks[target]) return;
   const def = BUILDINGS[target];
   if (def.global) return;
   if (!canAfford(def.cost)) return;
-  const emptyTiles = state.grid.map((t, i) => t.building ? null : i).filter(i => i !== null);
+  const emptyTiles = state.grid
+    .map((t, i) => (!t.building && !t.dirty ? i : null))
+    .filter(i => i !== null);
   if (!emptyTiles.length) return;
-  const index = emptyTiles[Math.floor(Math.random() * emptyTiles.length)];
+  const mode = options.mode || "random";
+  const index = mode === "first" ? emptyTiles[0] : emptyTiles[Math.floor(Math.random() * emptyTiles.length)];
   spendCost(def.cost);
   state.grid[index].building = target;
   if (target === "Portal") {
@@ -1473,8 +1476,21 @@ function autoBuild(target) {
   state.grid[index].ashLevel = 1;
   resetTileAutomation(state.grid[index]);
   applyDefaultAutomationRules(state.grid[index], target);
-  addLog("[RULE]", `Auto-built ${def.name}.`);
+  const logTag = options.logTag || "[RULE]";
+  const logMessage = options.logMessage || `Auto-built ${def.name}.`;
+  addLog(logTag, logMessage);
   triggerBuildEffect(index);
+  if (options.pulse) pulseLatestLog();
+  return true;
+}
+
+function autoPlaceBuild(target) {
+  return autoBuild(target, {
+    mode: "first",
+    logTag: "[AUTO]",
+    logMessage: `Auto-placed ${BUILDINGS[target]?.name || target}.`,
+    pulse: true
+  });
 }
 
 function applyAchievements() {
