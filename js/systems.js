@@ -32,6 +32,8 @@ const ASH_UPGRADE_COST_STEP = 25;
 const ASH_UPGRADE_SPEED_BONUS = 0.25;
 const ASH_UPGRADE_HEAT_BONUS = 0.05;
 const FINAL_GODCOIN_TARGET = 1000;
+const GRID_DIRT_CLEAN_COST = 500;
+const GRID_DIRT_BURNT_AMOUNT = 500;
 
 function getGridWidth() {
   return Math.max(3, Math.min(12, state.gridWidth || 3));
@@ -39,6 +41,25 @@ function getGridWidth() {
 
 function getGridRows() {
   return Math.ceil(state.gridSlots / getGridWidth());
+}
+
+function getGridDirtChance() {
+  const cap = state.storageCap || 0;
+  if (cap <= 0) return 0.01;
+  const used = Math.min(cap, bnToNumber(getStorageUsedBn()));
+  const freeRatio = Math.max(0, (cap - used) / cap);
+  const burntStored = Math.max(0, bnToNumber(state.totals?.BurntScrap || { m: 0, e: 0 }));
+  const burntPct = Math.min(1, burntStored / cap);
+  return Math.min(1, 0.01 + freeRatio * burntPct);
+}
+
+function maybeDirtyGridTile(tile) {
+  if (!tile) return false;
+  const chance = getGridDirtChance();
+  if (Math.random() >= chance) return false;
+  tile.dirty = true;
+  tile.dirtyBurntScrap = GRID_DIRT_BURNT_AMOUNT;
+  return true;
 }
 
 function isAutomationUnlocked() {
@@ -545,6 +566,22 @@ function handleTileClick(index) {
   const tile = state.grid[index];
   if (tile.building) {
     state.selectedTile = index;
+    return;
+  }
+  if (tile.dirty) {
+    const cost = { Scrap: GRID_DIRT_CLEAN_COST };
+    if (!canAfford(cost)) {
+      addLog("[WARN]", `Grid slot clogged. Clean for ${GRID_DIRT_CLEAN_COST} Scrap.`);
+      return;
+    }
+    spendCost(cost);
+    tile.dirty = false;
+    const burntAmount = tile.dirtyBurntScrap || GRID_DIRT_BURNT_AMOUNT;
+    tile.dirtyBurntScrap = 0;
+    addBurntScrap(burntAmount);
+    addLog("[GRID]", `Grid slot cleaned. ${burntAmount} Burnt Scrap moved to storage.`);
+    triggerBuildEffect(index);
+    pulseLatestLog();
     return;
   }
   const buildingKey = state.selectedBuilding;
@@ -1350,10 +1387,15 @@ function buyGridSlot() {
   if (!canAfford(cost)) return false;
   spendCost(cost);
   state.gridSlots = Math.min(maxSlots, state.gridSlots + 1);
-  state.grid.push(createTile());
+  const tile = createTile();
+  const dirtied = maybeDirtyGridTile(tile);
+  state.grid.push(tile);
   syncGridWidth();
   buildGrid();
   addLog("[GRID]", "Purchased +1 grid slot.");
+  if (dirtied) {
+    addLog("[GRID]", `New grid slot clogged with ${GRID_DIRT_BURNT_AMOUNT} Burnt Scrap. Clean for ${GRID_DIRT_CLEAN_COST} Scrap.`);
+  }
   triggerBuildEffect(state.grid.length - 1);
   triggerScreenReward("good");
   pulseLatestLog();

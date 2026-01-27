@@ -417,19 +417,26 @@ function renderGrid() {
       cell.classList.remove("portal");
       cell.classList.remove("cryo");
       cell.classList.remove("ash-cleaner");
+      cell.classList.toggle("dirty", !!tile.dirty);
       cell.style.setProperty("--tile-accent", "transparent");
-      if (label) label.textContent = "Empty";
+      if (label) label.textContent = tile.dirty ? "Dirty" : "Empty";
       if (heat) heat.textContent = "";
       if (progress) progress.style.display = "none";
       if (bar) bar.style.width = "0%";
       if (transfer) transfer.style.opacity = 0;
-      cell.title = "Empty tile. Click to build.";
+      if (tile.dirty) {
+        const burntAmount = tile.dirtyBurntScrap || 0;
+        cell.title = `Dirty tile. Clean for 500 Scrap before building.\nContains ${burntAmount} Burnt Scrap.`;
+      } else {
+        cell.title = "Empty tile. Click to build.";
+      }
       return;
     }
     const def = BUILDINGS[tile.building];
     const autoDisabled = !!tile.automationDisabled;
     const disabled = isTilePaused(tile);
     cell.classList.toggle("disabled", disabled);
+    cell.classList.remove("dirty");
     cell.classList.toggle("miner", tile.building === "Miner");
     cell.classList.toggle("smelter", tile.building === "Smelter");
     cell.classList.toggle("assembler", tile.building === "Assembler");
@@ -1361,4 +1368,3 @@ function showPrestigeOverlay() {
   });
   prestigeOverlay.classList.add("active");
 }
-

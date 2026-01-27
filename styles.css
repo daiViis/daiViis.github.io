@@ -385,6 +385,10 @@ header {
   transition: border-color 0.15s ease, transform 0.1s ease, background 0.2s ease;
   background: linear-gradient(135deg, rgba(15,23,42,0.9), color-mix(in srgb, var(--tile-accent) 25%, rgba(15,23,42,0.9)));
 }
+.tile.dirty {
+  border-color: rgba(239, 68, 68, 0.6);
+  background: linear-gradient(135deg, rgba(127, 29, 29, 0.4), rgba(15, 23, 42, 0.9));
+}
 .tile.miner {
   background-image:
     linear-gradient(135deg, rgba(2,6,23,0.55), color-mix(in srgb, var(--tile-accent) 20%, rgba(2,6,23,0.55))),
