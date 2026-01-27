@@ -255,6 +255,7 @@ function createDefaultState() {
     settings: {
       reducedMotion: false,
       colorblind: false,
+      autoPlace: false,
       shake: true,
       fireworks: true,
       audioEnabled: true,

@@ -95,6 +95,10 @@ function renderStatus() {
     const used = getStorageUsedBn();
     storageCounterEl.querySelector(".value").textContent = `${bnToString(used)}/${state.storageCap}`;
   }
+  if (headerStorageEl) {
+    const used = getStorageUsedBn();
+    headerStorageEl.textContent = `Storage ${bnToString(used)}/${state.storageCap}`;
+  }
   if (heatEdgeEl) {
     const heat = Math.max(0, Math.min(100, state.heat));
     const intensity = heat < 50 ? 0 : Math.min(1, (heat - 50) / 50);
@@ -747,7 +751,21 @@ function renderBuildings(counts) {
       </div>
     </button>`;
   }).join("");
-  tabContents.buildings.innerHTML = `<div class="buildings-grid">${list}</div>`;
+  const autoPlaceChecked = state.settings.autoPlace ? "checked" : "";
+  tabContents.buildings.innerHTML = `
+    <div class="buildings-controls">
+      <label class="toggle building-toggle" title="Auto place on the first empty tile">
+        <input type="checkbox" id="autoPlaceToggle" ${autoPlaceChecked} /> Auto-place
+      </label>
+    </div>
+    <div class="buildings-grid">${list}</div>
+  `;
+  const autoPlaceToggle = tabContents.buildings.querySelector("#autoPlaceToggle");
+  if (autoPlaceToggle) {
+    autoPlaceToggle.addEventListener("change", (event) => {
+      state.settings.autoPlace = event.target.checked;
+    });
+  }
 }
 
 function renderResearch() {
