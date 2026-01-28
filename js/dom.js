@@ -26,10 +26,6 @@ const fanCounterEl = document.getElementById("fanCounter");
 const storageCounterEl = document.getElementById("storageCounter");
 const automationAreaEl = document.getElementById("automationArea");
 const rightPanelEl = document.getElementById("rightPanel");
-const contextMenuEl = document.getElementById("contextMenu");
-const contextToggleBtn = document.getElementById("contextToggle");
-const contextRemoveBtn = document.getElementById("contextRemove");
-const contextAutomationEl = document.getElementById("contextAutomation");
 const fanContextMenuEl = document.getElementById("fanContextMenu");
 const fanOverclockBtn = document.getElementById("fanOverclock");
 const fanOverclockCost = document.getElementById("fanOverclockCost");
@@ -40,15 +36,6 @@ const storageUpgradeBtn = document.getElementById("storageUpgradeBtn");
 const storageUpgradeCost = document.getElementById("storageUpgradeCost");
 const storageUpgradeDesc = document.getElementById("storageUpgradeDesc");
 const storageUpgradeLevel = document.getElementById("storageUpgradeLevel");
-const contextMinerTurbo = document.getElementById("contextMinerTurbo");
-const contextMinerInfo = document.getElementById("contextMinerInfo");
-const contextMinerCost = document.getElementById("contextMinerCost");
-const contextSmelterFurnace = document.getElementById("contextSmelterFurnace");
-const contextSmelterInfo = document.getElementById("contextSmelterInfo");
-const contextSmelterCost = document.getElementById("contextSmelterCost");
-const contextAshUpgrade = document.getElementById("contextAshUpgrade");
-const contextAshInfo = document.getElementById("contextAshInfo");
-const contextAshCost = document.getElementById("contextAshCost");
 const gameOverOverlayEl = document.getElementById("gameOverOverlay");
 const gameOverTitleEl = document.getElementById("gameOverTitle");
 const gameOverLine1El = document.getElementById("gameOverLine1");
@@ -150,12 +137,7 @@ function getAutomationRenderKey() {
     ].join(":");
   };
   const rulesKey = (state.rules || []).map(ruleKey).join("|");
-  const defaults = state.buildingRuleDefaults || {};
-  const defaultsKey = Object.keys(defaults).sort().map(key => {
-    const list = defaults[key] || [];
-    return `${key}:${list.map(ruleKey).join(",")}`;
-  }).join("|");
-  return `${rulesKey}|${defaultsKey}|${state.maxRules || 0}`;
+  return `${rulesKey}|${state.maxRules || 0}`;
 }
 
 function setSelectedBuilding(key) {
@@ -228,20 +210,6 @@ function pulseLatestLog() {
   } else if (statusEl) {
     pulseElement(statusEl, "btn-reward", 600);
   }
-}
-
-function showContextMenu(x, y, index) {
-  if (!contextMenuEl) return;
-  contextMenuEl.style.left = `${x}px`;
-  contextMenuEl.style.top = `${y}px`;
-  contextMenuEl.dataset.index = index;
-  contextMenuEl.classList.add("active");
-}
-
-function hideContextMenu() {
-  if (!contextMenuEl) return;
-  contextMenuEl.classList.remove("active");
-  contextMenuEl.dataset.index = "";
 }
 
 function showFanContextMenu(x, y) {

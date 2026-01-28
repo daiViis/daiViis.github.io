@@ -206,9 +206,6 @@ document.addEventListener("click", (event) => {
       if (headerMenuToggle) headerMenuToggle.setAttribute("aria-expanded", "false");
     }
   }
-  if (contextMenuEl && contextMenuEl.classList.contains("active")) {
-    if (!contextMenuEl.contains(event.target)) hideContextMenu();
-  }
   if (fanContextMenuEl && fanContextMenuEl.classList.contains("active")) {
     if (!fanContextMenuEl.contains(event.target)) hideFanContextMenu();
   }
@@ -220,66 +217,13 @@ document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") {
     if (headerActionsEl) headerActionsEl.classList.remove("open");
     if (headerMenuToggle) headerMenuToggle.setAttribute("aria-expanded", "false");
-    hideContextMenu();
     hideFanContextMenu();
     hideStorageContextMenu();
   }
 });
-contextRemoveBtn.addEventListener("click", () => {
-  const index = parseInt(contextMenuEl.dataset.index || "", 10);
-  if (Number.isFinite(index)) {
-    removeBuilding(index);
-  }
-  hideContextMenu();
-});
-if (contextToggleBtn) {
-  contextToggleBtn.addEventListener("click", () => {
-    const index = parseInt(contextMenuEl.dataset.index || "", 10);
-    if (Number.isFinite(index)) {
-      if (toggleBuildingPower(index)) {
-        pulseLatestLog();
-      }
-    }
-    hideContextMenu();
-  });
-}
-if (contextMinerTurbo) {
-  contextMinerTurbo.addEventListener("click", () => {
-    const index = parseInt(contextMenuEl.dataset.index || "", 10);
-    if (Number.isFinite(index)) {
-      if (upgradeMinerTurbo(index)) {
-        triggerRewardEffect(contextMinerTurbo);
-      }
-    }
-    hideContextMenu();
-  });
-}
-if (contextSmelterFurnace) {
-  contextSmelterFurnace.addEventListener("click", () => {
-    const index = parseInt(contextMenuEl.dataset.index || "", 10);
-    if (Number.isFinite(index)) {
-      if (upgradeSmelterFurnace(index)) {
-        triggerRewardEffect(contextSmelterFurnace);
-      }
-    }
-    hideContextMenu();
-  });
-}
-if (contextAshUpgrade) {
-  contextAshUpgrade.addEventListener("click", () => {
-    const index = parseInt(contextMenuEl.dataset.index || "", 10);
-    if (Number.isFinite(index)) {
-      if (upgradeAshCleaner(index)) {
-        triggerRewardEffect(contextAshUpgrade);
-      }
-    }
-    hideContextMenu();
-  });
-}
 if (fanCounterEl) {
   fanCounterEl.addEventListener("contextmenu", (event) => {
     event.preventDefault();
-    hideContextMenu();
     hideStorageContextMenu();
     updateFanContextMenu();
     showFanContextMenu(event.clientX, event.clientY);
@@ -288,7 +232,6 @@ if (fanCounterEl) {
 if (storageCounterEl) {
   storageCounterEl.addEventListener("contextmenu", (event) => {
     event.preventDefault();
-    hideContextMenu();
     hideFanContextMenu();
     updateStorageContextMenu();
     showStorageContextMenu(event.clientX, event.clientY);

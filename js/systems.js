@@ -10,6 +10,7 @@ const FAN_OVERCLOCK_COST_STEP = 10;
 const FAN_OVERCLOCK_BASE_BONUS = 0.10;
 const FAN_OVERCLOCK_TIER_BONUS = 0.02;
 const FAN_OVERCLOCK_WASTE_INTERVAL = 15;
+const PASSIVE_COOLING = 1.5;
 const STORAGE_UPGRADE_RESOURCES = ["Scrap", "Gears", "Circuits", "AICores", "RealityShards", "TimelineInk", "Godcoins", "EchoDust", "BurntScrap"];
 const STORAGE_UPGRADE_BASE_COST = 120;
 const STORAGE_UPGRADE_STEP = 50;
@@ -98,18 +99,69 @@ function buildGrid() {
     progress.appendChild(bar);
     const transfer = document.createElement("div");
     transfer.className = "transfer";
+    const actions = document.createElement("div");
+    actions.className = "tile-actions";
+    const upgradeBtn = document.createElement("button");
+    upgradeBtn.className = "tile-action-btn tile-action-upgrade";
+    upgradeBtn.type = "button";
+    const upgradeIcon = document.createElement("span");
+    upgradeIcon.className = "tile-action-icon";
+    upgradeIcon.textContent = "⬆";
+    const upgradeCost = document.createElement("span");
+    upgradeCost.className = "tile-action-cost";
+    upgradeBtn.appendChild(upgradeIcon);
+    upgradeBtn.appendChild(upgradeCost);
+    const powerBtn = document.createElement("button");
+    powerBtn.className = "tile-action-btn tile-action-power";
+    powerBtn.type = "button";
+    const powerIcon = document.createElement("span");
+    powerIcon.className = "tile-action-icon";
+    powerIcon.textContent = "⏻";
+    powerBtn.appendChild(powerIcon);
+    actions.appendChild(upgradeBtn);
+    actions.appendChild(powerBtn);
     cell.appendChild(label);
     cell.appendChild(heat);
     cell.appendChild(progress);
     cell.appendChild(transfer);
+    cell.appendChild(actions);
     cell._label = label;
     cell._heat = heat;
     cell._progress = progress;
     cell._bar = bar;
     cell._transfer = transfer;
+    cell._actions = actions;
+    cell._upgradeBtn = upgradeBtn;
+    cell._upgradeCost = upgradeCost;
+    cell._powerBtn = powerBtn;
     cell._cableLines = cables;
     cell.addEventListener("click", () => handleTileClick(index));
-    cell.addEventListener("contextmenu", (event) => handleTileContext(index, event));
+    powerBtn.addEventListener("click", (event) => {
+      event.stopPropagation();
+      event.preventDefault();
+      if (toggleBuildingPower(index)) {
+        pulseLatestLog();
+      }
+    });
+    upgradeBtn.addEventListener("click", (event) => {
+      event.stopPropagation();
+      event.preventDefault();
+      const tile = state.grid[index];
+      if (!tile || !tile.building) return;
+      if (tile.building === "Miner") {
+        if (upgradeMinerTurbo(index)) {
+          triggerRewardEffect(upgradeBtn);
+        }
+      } else if (tile.building === "Smelter") {
+        if (upgradeSmelterFurnace(index)) {
+          triggerRewardEffect(upgradeBtn);
+        }
+      } else if (tile.building === "AshCleaner") {
+        if (upgradeAshCleaner(index)) {
+          triggerRewardEffect(upgradeBtn);
+        }
+      }
+    });
     gridEl.appendChild(cell);
   });
   buildNeighborCache();
@@ -349,137 +401,6 @@ function isTilePaused(tile) {
   return isTileDisabled(tile) || !!tile.automationDisabled;
 }
 
-function updateContextMenu(index) {
-  if (!contextToggleBtn) return;
-  const tile = state.grid[index];
-  if (!tile || !tile.building) {
-    contextToggleBtn.textContent = "Power Toggle";
-    contextToggleBtn.disabled = true;
-    updateMinerContextMenu(null);
-    updateSmelterContextMenu(null);
-    updateAshContextMenu(null);
-    return;
-  }
-  updateMinerContextMenu(tile);
-  updateSmelterContextMenu(tile);
-  updateAshContextMenu(tile);
-  if (tile.automationDisabled) {
-    contextToggleBtn.textContent = "Auto Disabled";
-    contextToggleBtn.disabled = true;
-    return;
-  }
-  if (isTileDisabled(tile)) {
-    const remaining = getTileDisableRemainingMs(tile);
-    if (remaining > 0) {
-      contextToggleBtn.textContent = `Rebooting (${Math.ceil(remaining / 1000)}s)`;
-      contextToggleBtn.disabled = true;
-    } else {
-      contextToggleBtn.textContent = "Power On";
-      contextToggleBtn.disabled = false;
-    }
-    return;
-  }
-  contextToggleBtn.textContent = "Power Off";
-  contextToggleBtn.disabled = false;
-}
-
-function updateMinerContextMenu(tile) {
-  if (!contextMinerTurbo) return;
-  if (!tile || tile.building !== "Miner") {
-    contextMinerTurbo.style.display = "none";
-    if (contextMinerInfo) {
-      contextMinerInfo.textContent = "";
-      contextMinerInfo.style.display = "none";
-    }
-    if (contextMinerCost) {
-      contextMinerCost.textContent = "";
-      contextMinerCost.style.display = "none";
-    }
-    return;
-  }
-  const level = getMinerLevel(tile);
-  const speedPct = Math.round((getMinerSpeedMultiplier(tile) - 1) * 100);
-  const cost = getMinerTurboCost(tile);
-  const costText = Object.entries(cost).map(([res, amt]) => `${amt} ${res}`).join(", ");
-  contextMinerTurbo.style.display = "";
-  contextMinerTurbo.textContent = `Miner Turbo (L${level + 1})`;
-  contextMinerTurbo.disabled = !canAfford(cost);
-  if (contextMinerInfo) {
-    contextMinerInfo.style.display = "";
-    contextMinerInfo.textContent = `Level ${level} | Speed +${speedPct}% | Waste x${level}`;
-  }
-  if (contextMinerCost) {
-    contextMinerCost.style.display = "";
-    contextMinerCost.textContent = `Cost: ${costText}`;
-  }
-}
-
-function updateSmelterContextMenu(tile) {
-  if (!contextSmelterFurnace) return;
-  if (!tile || tile.building !== "Smelter") {
-    contextSmelterFurnace.style.display = "none";
-    if (contextSmelterInfo) {
-      contextSmelterInfo.textContent = "";
-      contextSmelterInfo.style.display = "none";
-    }
-    if (contextSmelterCost) {
-      contextSmelterCost.textContent = "";
-      contextSmelterCost.style.display = "none";
-    }
-    return;
-  }
-  const level = getSmelterLevel(tile);
-  const chancePct = Math.round(getSmelterExtraChance(tile) * 100);
-  const heatPct = Math.round((getSmelterHeatMultiplier(tile) - 1) * 100);
-  const interval = getSmelterExtraCycleInterval(tile);
-  const wastePerCycle = (SMELTER_WASTE_PER_CYCLE * level).toFixed(2);
-  const maxed = level >= SMELTER_MAX_LEVEL;
-  const cost = maxed ? null : getSmelterFurnaceCost(tile);
-  const costText = cost ? Object.entries(cost).map(([res, amt]) => `${amt} ${res}`).join(", ") : "--";
-  contextSmelterFurnace.style.display = "";
-  contextSmelterFurnace.textContent = maxed ? "Smelter Furnace (Max)" : `Smelter Furnace (L${level + 1})`;
-  contextSmelterFurnace.disabled = maxed || !canAfford(cost);
-  if (contextSmelterInfo) {
-    contextSmelterInfo.style.display = "";
-    contextSmelterInfo.textContent = `Level ${level} | Extra ${chancePct}%/${interval} cycles | Heat +${heatPct}% | Waste +${wastePerCycle}/cycle`;
-  }
-  if (contextSmelterCost) {
-    contextSmelterCost.style.display = "";
-    contextSmelterCost.textContent = `Cost: ${costText}`;
-  }
-}
-
-function updateAshContextMenu(tile) {
-  if (!contextAshUpgrade) return;
-  if (!tile || tile.building !== "AshCleaner") {
-    contextAshUpgrade.style.display = "none";
-    if (contextAshInfo) {
-      contextAshInfo.textContent = "";
-      contextAshInfo.style.display = "none";
-    }
-    if (contextAshCost) {
-      contextAshCost.textContent = "";
-      contextAshCost.style.display = "none";
-    }
-    return;
-  }
-  const level = getAshLevel(tile);
-  const speedPct = Math.round((getAshSpeedMultiplier(tile) - 1) * 100);
-  const cost = getAshUpgradeCost(tile);
-  const costText = Object.entries(cost).map(([res, amt]) => `${amt} ${res}`).join(", ");
-  contextAshUpgrade.style.display = "";
-  contextAshUpgrade.textContent = `Ash Cleaner Upgrade (L${level + 1})`;
-  contextAshUpgrade.disabled = !canAfford(cost);
-  if (contextAshInfo) {
-    contextAshInfo.style.display = "";
-    contextAshInfo.textContent = `Level ${level} | Speed +${speedPct}%`;
-  }
-  if (contextAshCost) {
-    contextAshCost.style.display = "";
-    contextAshCost.textContent = `Cost: ${costText}`;
-  }
-}
-
 function updateFanContextMenu() {
   if (!fanOverclockBtn) return;
   const totalUpgrades = getUpgradeLevel("fan-overclock");
@@ -533,33 +454,10 @@ function cloneAutomationRule(rule, source) {
   };
 }
 
-function applyDefaultAutomationRules(tile, buildingKey) {
-  if (!tile) return;
-  const defaults = (state.buildingRuleDefaults && state.buildingRuleDefaults[buildingKey]) || [];
-  tile.automationRules = [];
-  defaults.forEach(rule => {
-    const cloned = cloneAutomationRule(rule, `default:${buildingKey}`);
-    if (cloned) tile.automationRules.push(cloned);
-  });
-}
-
 function resetTileAutomation(tile) {
   if (!tile) return;
   tile.automationDisabled = false;
   tile.automationRules = [];
-}
-
-function handleTileContext(index, event) {
-  event.preventDefault();
-  const tile = state.grid[index];
-  if (!tile.building) return;
-  state.selectedTile = index;
-  hideFanContextMenu();
-  updateContextMenu(index);
-  showContextMenu(event.clientX, event.clientY, index);
-  if (typeof renderContextAutomation === "function" && isAutomationUnlocked()) {
-    renderContextAutomation(index);
-  }
 }
 
 function handleTileClick(index) {
@@ -607,7 +505,6 @@ function handleTileClick(index) {
   tile.smelterCycleCount = 0;
   tile.ashLevel = 1;
   resetTileAutomation(tile);
-  applyDefaultAutomationRules(tile, buildingKey);
   addLog("[BUILD]", `Built ${def.name}.`);
   triggerBuildEffect(index);
   pulseLatestLog();
@@ -1000,7 +897,7 @@ function updateHeatAndGlitch(dt, debuff) {
     if (tile.building === "Smelter") heatDelta += def.heat * (getSmelterHeatMultiplier(tile) - 1);
     if (tile.building === "AshCleaner") heatDelta += def.heat * (getAshHeatMultiplier(tile) - 1);
   });
-  heatDelta -= (cooling + fanBonus);
+  heatDelta -= (cooling + fanBonus + PASSIVE_COOLING);
   heatDelta *= debuff.heat;
   state.heat = Math.max(0, Math.min(100, state.heat + heatDelta * dt * 0.4));
   state.sabotage.counterIntel = counterCount;
@@ -1204,10 +1101,6 @@ function applyAutomation() {
     order += 1;
   };
   rules.forEach(rule => handleRule(rule, null));
-  state.grid.forEach((tile, index) => {
-    const localRules = tile.automationRules || [];
-    localRules.forEach(rule => handleRule(rule, index));
-  });
   state.grid.forEach((tile, index) => {
     if (!tile) return;
     const entry = powerState[index];
@@ -1475,7 +1368,6 @@ function autoBuild(target, options = {}) {
   state.grid[index].smelterCycleCount = 0;
   state.grid[index].ashLevel = 1;
   resetTileAutomation(state.grid[index]);
-  applyDefaultAutomationRules(state.grid[index], target);
   const logTag = options.logTag || "[RULE]";
   const logMessage = options.logMessage || `Auto-built ${def.name}.`;
   addLog(logTag, logMessage);
