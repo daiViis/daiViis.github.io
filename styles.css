@@ -579,6 +579,59 @@ header {
   font-size: var(--font-12);
   color: var(--warn);
 }
+.tile-actions {
+  position: absolute;
+  right: 6px;
+  bottom: 8px;
+  display: flex;
+  gap: 4px;
+  z-index: 2;
+}
+.tile-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 4px;
+  border-radius: 6px;
+  border: 1px solid rgba(148,163,184,0.35);
+  background: rgba(2,6,23,0.75);
+  color: var(--text);
+  font-size: var(--font-9);
+  cursor: pointer;
+  box-shadow: none;
+}
+.tile-action-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+.tile-action-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.tile-action-icon {
+  font-size: var(--font-10);
+  line-height: 1;
+}
+.tile-action-cost {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.tile-cost-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: var(--font-9);
+}
+.tile-action-btn .res-icon {
+  width: 12px;
+  height: 12px;
+  font-size: var(--font-8);
+}
+.tile-cost-max {
+  font-size: var(--font-9);
+  color: var(--muted);
+  letter-spacing: 0.3px;
+}
 .tile.disabled {
   border-color: rgba(148,163,184,0.35);
   opacity: 0.6;
@@ -592,7 +645,6 @@ header {
 .tile.disabled .progress .bar {
   background: linear-gradient(90deg, #475569, #64748b);
 }
-#contextMenu,
 #fanContextMenu,
 #storageContextMenu {
   position: fixed;
@@ -606,12 +658,10 @@ header {
   border-radius: 12px;
   box-shadow: 0 12px 28px rgba(15,23,42,0.5);
 }
-#contextMenu.active,
 #fanContextMenu.active,
 #storageContextMenu.active {
   display: flex;
 }
-#contextMenu .btn,
 #fanContextMenu .btn,
 #storageContextMenu .btn {
   font-size: var(--font-11);
