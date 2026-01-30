@@ -1,177 +1,221 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Factory 84</title>
+<title>Factory 84: Main Menu</title>
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-<video id="bgVideo" autoplay muted loop playsinline>
-  <source src="video/background_static.mp4" type="video/mp4" />
-</video>
-<div id="app">
-  <header>
-    <div class="header-left">
-      <div id="runTimer" class="run-timer">Time 00:00:00</div>
-      <div class="header-meta">
-        <div id="title">Factory 84</div>
-        <div class="wip-tag">WIP build - Win by minting 1000 Godcoins</div>
-        <div id="status">Reality is 97% stable.</div>
-      </div>
-    </div>
-    <div class="header-right">
-      <div id="headerStorage" class="header-storage">Storage 0/0</div>
-      <button class="btn secondary icon-btn" id="headerMenuToggle" type="button" aria-expanded="false" aria-controls="header-actions" title="Menu">
-        ☰
-      </button>
-    </div>
-    <div id="header-actions" class="header-actions">
-      <button class="btn secondary" id="saveBtn" title="Save to localStorage">Save</button>
-      <button class="btn secondary" id="prestigeBtn" title="Timeline Reboot">Timeline Reboot</button>
-      <label class="toggle" title="Reduce animations">
-        <input type="checkbox" id="reducedMotion" /> Reduced Motion
-      </label>
-      <label class="toggle" title="Colorblind-friendly palette">
-        <input type="checkbox" id="colorblind" /> Colorblind
-      </label>
-      <label class="toggle" title="UI text size">
-        <span>Text</span>
-        <select id="textSize">
-          <option value="small">Smaller</option>
-          <option value="normal" selected>Normal</option>
-          <option value="large">Bigger</option>
-        </select>
-      </label>
-      <label class="toggle" title="Screen shake on major events">
-        <input type="checkbox" id="shakeToggle" checked /> Shake
-      </label>
-      <label class="toggle" title="Fireworks on milestones">
-        <input type="checkbox" id="fireworksToggle" checked /> Fireworks
-      </label>
-      <label class="toggle" title="Toggle game audio">
-        <input type="checkbox" id="audioToggle" checked /> Sound
-      </label>
-      <label class="toggle audio-range" title="Sound volume">
-        <span>Vol</span>
-        <input type="range" id="audioVolume" min="0" max="100" value="60" />
-      </label>
-    </div>
-  </header>
-  <div id="resourceBar"></div>
-  <div id="statLine"></div>
-  <div id="main">
-    <section id="leftPanel" class="panel">
-      <div id="tabs"></div>
-      <div id="tab-contents">
-        <div id="tab-buildings" class="tab"></div>
-        <div id="tab-research" class="tab"></div>
-        <div id="tab-achievements" class="tab"></div>
-        <div id="tab-stats" class="tab"></div>
-      </div>
-    </section>
-    <section id="gridPanel" class="panel">
-      <div class="card">
-        <div>
-          <div><strong>Factory Grid</strong> <span class="small" id="gridStats"></span></div>
-          <div class="small">The Conveyor Gods demand tribute.</div>
-        </div>
-        <div class="stack-right">
-          <div class="small" id="heatDisplay">Heat: 0%</div>
-          <button class="btn secondary" id="blueprintBtn" title="Auto-place selected building" style="display:none;">Blueprint</button>
-        </div>
-      </div>
-      <div id="grid"></div>
-      <div id="supportBar" class="support-bar">
-        <div class="support-row">
-          <div class="support-item" id="fanCounter" title="Fans reduce heat without using grid space.">
-            <span class="icon">🌀</span>
-            <span class="label">Fans</span>
-            <span class="value">0</span>
+<div id="app" style="grid-template-rows: 1fr;">
+  <section class="panel menu-panel">
+    <div class="menu-layout">
+      <div class="menu-left">
+        <div id="title" style="font-size: 22px;">Factory 84</div>
+        <div class="small" style="margin-top: 6px;">The Infinite Production Spiral</div>
+        <div style="margin-top: 16px;">
+          <div class="card">
+            <div>
+              <div><strong>Main Menu</strong></div>
+              <div class="meta">You are the foreman of a factory that eats reality. Choose your timeline.</div>
+            </div>
           </div>
-          <div class="support-item" id="storageCounter" title="Storage capacity. Right-click for upgrades.">
-            <span class="icon">ST</span>
-            <span class="label">Storage</span>
-            <span class="value">0/0</span>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
+            <button class="btn" id="startNew">Start New Run</button>
+            <button class="btn secondary" id="continueRun">Continue</button>
+          </div>
+          <div class="small" style="margin-top:10px;">Tip: Storage caps end runs. Upgrade silos early.</div>
+          <div class="roadmap">
+            <div class="roadmap-header">
+              <div>
+                <div class="roadmap-title">Roadmap</div>
+                <div class="roadmap-subtitle">In the pipeline</div>
+              </div>
+              <div class="roadmap-badge">WIP</div>
+            </div>
+            <div class="roadmap-track-wrap">
+              <button class="roadmap-nav" type="button" data-roadmap-nav="left" aria-label="Scroll roadmap left">‹</button>
+              <div class="roadmap-track" id="roadmapTrack" aria-label="Roadmap timeline">
+              <div class="roadmap-item">
+                <div class="roadmap-node"></div>
+                <div class="roadmap-card">
+                  <div class="roadmap-name">Automation</div>
+                  <div class="roadmap-note">Factory rules and grid babysitters.</div>
+                </div>
+              </div>
+              <div class="roadmap-item">
+                <div class="roadmap-node"></div>
+                <div class="roadmap-card">
+                  <div class="roadmap-name">UI Polish</div>
+                  <div class="roadmap-note">Sharper panels, clearer stats, less clutter.</div>
+                </div>
+              </div>
+              <div class="roadmap-item">
+                <div class="roadmap-node"></div>
+                <div class="roadmap-card">
+                  <div class="roadmap-name">First Planet End Game</div>
+                  <div class="roadmap-note">Portal scale milestones and final boss.<br>
+                  - Improving Labs producing new material for upgrading buildings<br>
+                  - Firefighting after the destruction of a building by heat<br>
+                  - Removing Local Burned scrap on newly unlocked grid cells<br>
+                  - Local disasters (small chance to destroy players progress)<br>
+                  - Interactive grid (rotation, movement, zooming)</div>
+                </div>
+              </div>
+              <div class="roadmap-item">
+                <div class="roadmap-node"></div>
+                <div class="roadmap-card">
+                  <div class="roadmap-name">Continents War</div>
+                  <div class="roadmap-note">Faction influence across the surface.</div>
+                </div>
+              </div>
+              <div class="roadmap-item">
+                <div class="roadmap-node"></div>
+                <div class="roadmap-card">
+                  <div class="roadmap-name">Multiple Planets</div>
+                  <div class="roadmap-note">Chain worlds into a production empire.</div>
+                </div>
+              </div>
+              <div class="roadmap-item">
+                <div class="roadmap-node"></div>
+                <div class="roadmap-card">
+                  <div class="roadmap-name">Interplanetary Transport</div>
+                  <div class="roadmap-note">Railguns, gates, and logistics routes.</div>
+                </div>
+              </div>
+              </div>
+              <button class="roadmap-nav" type="button" data-roadmap-nav="right" aria-label="Scroll roadmap right">›</button>
+            </div>
           </div>
         </div>
-        <div class="support-row support-column">
-          <button class="support-item support-action big emergency" id="emergencyBtn" type="button" title="Emergency shutdown: powers off all buildings for 60s.">
-            <span class="support-row">
-              <span class="label">Emergency</span>
-            </span>
-            <span class="value">READY</span>
-          </button>
-          <button class="support-item support-action big buy-slot" id="buySlotBtn" type="button" title="Buy a grid slot">
-            <span class="support-row">
-              <span class="label">Buy Slot</span>
-            </span>
-            <span class="support-cost cost-row">
-              <span class="cost-item"><span class="res-icon res-Scrap">S</span><span class="res-amt">150</span></span>
-              <span class="cost-item"><span class="res-icon res-Gears">G</span><span class="res-amt">20</span></span>
-            </span>
-          </button>
+      </div>
+      <div class="menu-right">
+        <div class="card">
+          <div>
+            <div><strong>Patch Changes</strong></div>
+            <div class="meta">Select a file to read patch notes.</div>
+          </div>
+        </div>
+        <div class="patch-browser">
+          <div class="patch-files" id="patchFileList"></div>
+          <iframe class="patch-viewer" id="patchContent" title="Patch notes viewer"></iframe>
         </div>
       </div>
-      <div id="contractArea" class="contract-mini"></div>
-    </section>
-    <section id="rightPanel" class="panel">
-      <div class="card"><strong>Automation</strong><span class="small">Rules that babysit the grid.</span></div>
-      <div id="automationArea" class="automation-panel"></div>
-    </section>
-  </div>
+    </div>
+  </section>
 </div>
-<div id="floatingLayer"></div>
-<div id="fireworksLayer"></div>
-<div id="heatEdge"></div>
-<div id="fanContextMenu">
-  <button id="fanOverclock" class="btn secondary" type="button">Fan Overclock</button>
-  <div id="fanOverclockCost" class="small"></div>
-  <div id="fanOverclockDesc" class="small">Adds +10% cooling per fan.</div>
-  <div id="fanOverclockCount" class="small"></div>
-</div>
-<div id="storageContextMenu">
-  <button id="storageUpgradeBtn" class="btn secondary" type="button">Storage Upgrade</button>
-  <div id="storageUpgradeCost" class="small"></div>
-  <div id="storageUpgradeDesc" class="small"></div>
-  <div id="storageUpgradeLevel" class="small"></div>
-</div>
-<div id="gameOverOverlay">
-  <div id="gameOverCard">
-    <div class="gameover-title" id="gameOverTitle">Storage Collapse</div>
-    <div class="small" id="gameOverLine1">Your vaults ruptured. The factory drowns in its own output.</div>
-    <div class="small" id="gameOverLine2">Expand storage next run. Hoard smarter.</div>
-    <div class="gameover-actions">
-      <button class="btn" id="gameOverMenu">Main Menu</button>
-      <button class="btn secondary" id="gameOverRestart">Restart Run</button>
+<div id="audioConsentOverlay">
+  <div id="audioConsentCard">
+    <div><strong>Enable Main Menu Music?</strong></div>
+    <div class="small">Allow Factory 84 to play the main menu track.</div>
+    <div class="audio-consent-actions">
+      <button class="btn" id="audioConsentAllow">Allow Music</button>
+      <button class="btn secondary" id="audioConsentDecline">No Thanks</button>
     </div>
   </div>
 </div>
-<div id="winOverlay">
-  <div id="winCard">
-    <div class="gameover-title">Godcoins Ascendant</div>
-    <div class="small">1000 Godcoins minted. The portal recognizes your claim.</div>
-    <div class="gameover-actions">
-      <a class="btn secondary" id="winMenu" href="index.html">Back to Menu</a>
-    </div>
-  </div>
-</div>
-<div id="prestigeOverlay">
-  <div id="prestigeCard">
-    <div><strong>Timeline Reboot</strong></div>
-    <div class="small">Pick a Timeline Perk. You cannot unpick destiny.</div>
-    <div class="perk-options" id="perkOptions"></div>
-  </div>
-</div>
-<audio id="bgm" src="audio/01.mp3"></audio>
-<audio id="aicoreCue" src="audio/02.mp3"></audio>
-<audio id="upgradeCue" src="audio/upgrade.mp3"></audio>
-<script src="js/constants.js"></script>
-<script src="js/utils.js"></script>
-<script src="js/state.js"></script>
-<script src="js/dom.js"></script>
-<script src="js/systems.js"></script>
-<script src="js/render.js"></script>
-<script src="js/main.js"></script>
+<audio id="menuAudio" src="audio/mainmenu.mp3" loop></audio>
+<script>
+const saveKey = "hyperloop-hellfactory-save";
+const audioConsentKey = "hhf-audio-consent";
+const continueBtn = document.getElementById("continueRun");
+const startBtn = document.getElementById("startNew");
+const menuAudio = document.getElementById("menuAudio");
+const consentOverlay = document.getElementById("audioConsentOverlay");
+const consentAllow = document.getElementById("audioConsentAllow");
+const consentDecline = document.getElementById("audioConsentDecline");
+const roadmapTrack = document.getElementById("roadmapTrack");
+const roadmapNavButtons = document.querySelectorAll("[data-roadmap-nav]");
+const patchFileList = document.getElementById("patchFileList");
+const patchContent = document.getElementById("patchContent");
+const patchFiles = [
+  { name: "changes_001.md", title: "Changes 001", path: "Updates/changes_001.md" },
+  { name: "changes_002.md", title: "Changes 002", path: "Updates/changes_002.md" }
+];
+const hasSave = !!localStorage.getItem(saveKey);
+continueBtn.disabled = !hasSave;
+
+function tryPlayMenuAudio() {
+  if (!menuAudio) return;
+  const playPromise = menuAudio.play();
+  if (playPromise && playPromise.catch) {
+    playPromise.catch(() => {});
+  }
+}
+
+function applyMenuAudioConsent() {
+  const consent = localStorage.getItem(audioConsentKey);
+  if (!consent && consentOverlay) {
+    consentOverlay.classList.add("active");
+    return;
+  }
+  if (consent === "granted") {
+    tryPlayMenuAudio();
+  }
+}
+
+if (consentAllow) {
+  consentAllow.addEventListener("click", () => {
+    localStorage.setItem(audioConsentKey, "granted");
+    if (consentOverlay) consentOverlay.classList.remove("active");
+    tryPlayMenuAudio();
+  });
+}
+
+if (consentDecline) {
+  consentDecline.addEventListener("click", () => {
+    localStorage.setItem(audioConsentKey, "denied");
+    if (consentOverlay) consentOverlay.classList.remove("active");
+  });
+}
+
+startBtn.addEventListener("click", () => {
+  localStorage.removeItem(saveKey);
+  window.location.href = "intro.html";
+});
+continueBtn.addEventListener("click", () => {
+  window.location.href = "play.html";
+});
+
+applyMenuAudioConsent();
+
+function loadPatchFile(file) {
+  if (!file || !file.path) return;
+  if (patchContent) {
+    patchContent.src = file.path;
+  }
+}
+
+function renderPatchFileList() {
+  if (!patchFileList) return;
+  patchFileList.innerHTML = patchFiles.map((file, index) => `
+    <button class="btn secondary patch-file-btn" data-patch-index="${index}" type="button">${file.title}</button>
+  `).join("");
+  patchFileList.querySelectorAll("[data-patch-index]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      patchFileList.querySelectorAll(".patch-file-btn").forEach(el => el.classList.remove("active"));
+      btn.classList.add("active");
+      loadPatchFile(patchFiles[Number(btn.dataset.patchIndex)]);
+    });
+  });
+  const firstBtn = patchFileList.querySelector(".patch-file-btn");
+  if (firstBtn) firstBtn.click();
+}
+
+renderPatchFileList();
+
+if (roadmapTrack) {
+  const scrollByAmount = () => Math.max(260, Math.round(roadmapTrack.clientWidth * 0.7));
+  roadmapNavButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const dir = btn.dataset.roadmapNav === "left" ? -1 : 1;
+      roadmapTrack.scrollBy({ left: scrollByAmount() * dir, behavior: "smooth" });
+    });
+  });
+  roadmapTrack.addEventListener("wheel", event => {
+    event.preventDefault();
+  }, { passive: false });
+}
+</script>
 </body>
 </html>
