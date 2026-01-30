@@ -16,10 +16,6 @@ function syncAutomationPanels() {
   rightPanelEl.style.display = unlocked ? "" : "none";
   mainEl.classList.toggle("automation-locked", !unlocked);
   if (automationAreaEl) automationAreaEl.style.display = unlocked ? "" : "none";
-  if (contextAutomationEl) {
-    contextAutomationEl.style.display = unlocked ? "" : "none";
-    if (!unlocked) contextAutomationEl.innerHTML = "";
-  }
 }
 
 function updateGameOverCard() {
@@ -95,16 +91,16 @@ function renderStatus() {
     const used = getStorageUsedBn();
     storageCounterEl.querySelector(".value").textContent = `${bnToString(used)}/${state.storageCap}`;
   }
+  if (headerStorageEl) {
+    const used = getStorageUsedBn();
+    headerStorageEl.textContent = `Storage ${bnToString(used)}/${state.storageCap}`;
+  }
   if (heatEdgeEl) {
     const heat = Math.max(0, Math.min(100, state.heat));
     const intensity = heat < 50 ? 0 : Math.min(1, (heat - 50) / 50);
     heatEdgeEl.style.opacity = intensity.toFixed(2);
     heatEdgeEl.style.borderColor = `rgba(248,113,113,${0.3 + intensity * 0.5})`;
     heatEdgeEl.style.boxShadow = `0 0 ${24 + intensity * 30}px rgba(248,113,113,${0.25 + intensity * 0.5})`;
-  }
-  if (contextMenuEl && contextMenuEl.classList.contains("active")) {
-    const index = parseInt(contextMenuEl.dataset.index || "", 10);
-    if (Number.isFinite(index)) updateContextMenu(index);
   }
   if (fanContextMenuEl && fanContextMenuEl.classList.contains("active")) {
     updateFanContextMenu();
@@ -323,7 +319,7 @@ function getDisplayProgress(tile, now) {
 }
 
 function ensureTileElements(cell) {
-  if (cell._label && cell._heat && cell._progress && cell._bar && cell._transfer && cell._cableLines) return;
+  if (cell._label && cell._heat && cell._progress && cell._bar && cell._transfer && cell._cableLines && cell._actions) return;
   cell.innerHTML = "";
   const cables = {};
   ["up", "right", "down", "left"].forEach(dir => {
@@ -345,16 +341,112 @@ function ensureTileElements(cell) {
   progress.appendChild(bar);
   const transfer = document.createElement("div");
   transfer.className = "transfer";
+  const actions = document.createElement("div");
+  actions.className = "tile-actions";
+  const upgradeBtn = document.createElement("button");
+  upgradeBtn.className = "tile-action-btn tile-action-upgrade";
+  upgradeBtn.type = "button";
+  const upgradeIcon = document.createElement("span");
+  upgradeIcon.className = "tile-action-icon";
+  upgradeIcon.textContent = "⬆";
+  const upgradeCost = document.createElement("span");
+  upgradeCost.className = "tile-action-cost";
+  upgradeBtn.appendChild(upgradeIcon);
+  upgradeBtn.appendChild(upgradeCost);
+  const powerBtn = document.createElement("button");
+  powerBtn.className = "tile-action-btn tile-action-power";
+  powerBtn.type = "button";
+  const powerIcon = document.createElement("span");
+  powerIcon.className = "tile-action-icon";
+  powerIcon.textContent = "⏻";
+  powerBtn.appendChild(powerIcon);
+  actions.appendChild(upgradeBtn);
+  actions.appendChild(powerBtn);
   cell.appendChild(label);
   cell.appendChild(heat);
   cell.appendChild(progress);
   cell.appendChild(transfer);
+  cell.appendChild(actions);
   cell._label = label;
   cell._heat = heat;
   cell._progress = progress;
   cell._bar = bar;
   cell._transfer = transfer;
   cell._cableLines = cables;
+  cell._actions = actions;
+  cell._upgradeBtn = upgradeBtn;
+  cell._upgradeCost = upgradeCost;
+  cell._powerBtn = powerBtn;
+  powerBtn.addEventListener("click", (event) => {
+    event.stopPropagation();
+    event.preventDefault();
+    const index = parseInt(cell.dataset.index || "", 10);
+    if (!Number.isFinite(index)) return;
+    if (toggleBuildingPower(index)) {
+      pulseLatestLog();
+    }
+  });
+  upgradeBtn.addEventListener("click", (event) => {
+    event.stopPropagation();
+    event.preventDefault();
+    const index = parseInt(cell.dataset.index || "", 10);
+    if (!Number.isFinite(index)) return;
+    const tile = state.grid[index];
+    if (!tile || !tile.building) return;
+    if (tile.building === "Miner") {
+      if (upgradeMinerTurbo(index)) {
+        triggerRewardEffect(upgradeBtn);
+      }
+    } else if (tile.building === "Smelter") {
+      if (upgradeSmelterFurnace(index)) {
+        triggerRewardEffect(upgradeBtn);
+      }
+    } else if (tile.building === "AshCleaner") {
+      if (upgradeAshCleaner(index)) {
+        triggerRewardEffect(upgradeBtn);
+      }
+    }
+  });
+}
+
+function getTileUpgradeDetails(tile) {
+  if (!tile || !tile.building) return null;
+  if (tile.building === "Miner") {
+    const level = getMinerLevel(tile);
+    return {
+      label: `Miner Turbo L${level + 1}`,
+      cost: getMinerTurboCost(tile)
+    };
+  }
+  if (tile.building === "Smelter") {
+    const level = getSmelterLevel(tile);
+    if (level >= SMELTER_MAX_LEVEL) {
+      return {
+        label: "Smelter Furnace MAX",
+        cost: null,
+        maxed: true
+      };
+    }
+    return {
+      label: `Smelter Furnace L${level + 1}`,
+      cost: getSmelterFurnaceCost(tile)
+    };
+  }
+  if (tile.building === "AshCleaner") {
+    const level = getAshLevel(tile);
+    return {
+      label: `Ash Cleaner L${level + 1}`,
+      cost: getAshUpgradeCost(tile)
+    };
+  }
+  return null;
+}
+
+function formatCostItems(cost) {
+  if (!cost) return "";
+  return Object.entries(cost).map(([res, amt]) => {
+    return `<span class="tile-cost-item"><span class="res-icon res-${res}">${res[0] || ""}</span><span class="res-amt">${amt}</span></span>`;
+  }).join("");
 }
 
 function renderGrid() {
@@ -417,19 +509,27 @@ function renderGrid() {
       cell.classList.remove("portal");
       cell.classList.remove("cryo");
       cell.classList.remove("ash-cleaner");
+      cell.classList.toggle("dirty", !!tile.dirty);
       cell.style.setProperty("--tile-accent", "transparent");
-      if (label) label.textContent = "Empty";
+      if (label) label.textContent = tile.dirty ? "Dirty" : "Empty";
       if (heat) heat.textContent = "";
       if (progress) progress.style.display = "none";
       if (bar) bar.style.width = "0%";
       if (transfer) transfer.style.opacity = 0;
-      cell.title = "Empty tile. Click to build.";
+      if (cell._actions) cell._actions.style.display = "none";
+      if (tile.dirty) {
+        const burntAmount = tile.dirtyBurntScrap || 0;
+        cell.title = `Dirty tile. Clean for 500 Scrap before building.\nContains ${burntAmount} Burnt Scrap.`;
+      } else {
+        cell.title = "Empty tile. Click to build.";
+      }
       return;
     }
     const def = BUILDINGS[tile.building];
     const autoDisabled = !!tile.automationDisabled;
     const disabled = isTilePaused(tile);
     cell.classList.toggle("disabled", disabled);
+    cell.classList.remove("dirty");
     cell.classList.toggle("miner", tile.building === "Miner");
     cell.classList.toggle("smelter", tile.building === "Smelter");
     cell.classList.toggle("assembler", tile.building === "Assembler");
@@ -497,6 +597,50 @@ function renderGrid() {
       levelText +
       `\nStatus: ${statusText}` +
       `\nInventory: ${invText}`;
+    if (cell._actions) {
+      cell._actions.style.display = "";
+      const powerBtn = cell._powerBtn;
+      const upgradeBtn = cell._upgradeBtn;
+      const upgradeCost = cell._upgradeCost;
+      if (powerBtn) {
+        if (autoDisabled) {
+          powerBtn.disabled = true;
+          powerBtn.title = "Automation disabled";
+        } else if (isTileDisabled(tile)) {
+          const remaining = getTileDisableRemainingMs(tile);
+          if (remaining > 0) {
+            powerBtn.disabled = true;
+            powerBtn.title = `Rebooting (${Math.ceil(remaining / 1000)}s)`;
+          } else {
+            powerBtn.disabled = false;
+            powerBtn.title = "Power On";
+          }
+        } else {
+          powerBtn.disabled = false;
+          powerBtn.title = "Power Off";
+        }
+      }
+      if (upgradeBtn && upgradeCost) {
+        const upgrade = getTileUpgradeDetails(tile);
+        if (!upgrade) {
+          upgradeBtn.style.display = "none";
+          upgradeBtn.disabled = true;
+          upgradeBtn.title = "";
+          upgradeCost.innerHTML = "";
+        } else if (upgrade.maxed) {
+          upgradeBtn.style.display = "";
+          upgradeBtn.disabled = true;
+          upgradeBtn.title = "Upgrade maxed";
+          upgradeCost.innerHTML = `<span class="tile-cost-max">MAX</span>`;
+        } else {
+          upgradeBtn.style.display = "";
+          upgradeCost.innerHTML = formatCostItems(upgrade.cost);
+          upgradeBtn.disabled = !canAfford(upgrade.cost);
+          const costText = Object.entries(upgrade.cost || {}).map(([res, amt]) => `${amt} ${res}`).join(", ");
+          upgradeBtn.title = `${upgrade.label} (Cost: ${costText})`;
+        }
+      }
+    }
   });
 }
 
@@ -740,7 +884,21 @@ function renderBuildings(counts) {
       </div>
     </button>`;
   }).join("");
-  tabContents.buildings.innerHTML = `<div class="buildings-grid">${list}</div>`;
+  const autoPlaceChecked = state.settings.autoPlace ? "checked" : "";
+  tabContents.buildings.innerHTML = `
+    <div class="buildings-controls">
+      <label class="toggle building-toggle" title="Auto place on the first empty tile">
+        <input type="checkbox" id="autoPlaceToggle" ${autoPlaceChecked} /> Auto-place
+      </label>
+    </div>
+    <div class="buildings-grid">${list}</div>
+  `;
+  const autoPlaceToggle = tabContents.buildings.querySelector("#autoPlaceToggle");
+  if (autoPlaceToggle) {
+    autoPlaceToggle.addEventListener("change", (event) => {
+      state.settings.autoPlace = event.target.checked;
+    });
+  }
 }
 
 function renderResearch() {
@@ -931,11 +1089,9 @@ function renderContracts() {
 function renderAutomation() {
   if (!automationAreaEl) return;
   const rules = state.rules || [];
-  state.buildingRuleDefaults = state.buildingRuleDefaults || {};
   const maxed = state.maxRules && rules.length >= state.maxRules;
   const resourceOptions = buildResourceOptions("Scrap");
   const buildingOptions = buildBuildingOptions("Miner", { keys: ALL_BUILDING_KEYS });
-  const scopeBuildingOptions = buildBuildingOptions(GRID_BUILDING_KEYS[0] || "Miner", { keys: GRID_BUILDING_KEYS });
   const comparatorOptions = buildComparatorOptions(">");
   const leftTypeOptions = [
     { value: "resource-percent", label: "Resource % of storage" },
@@ -968,37 +1124,10 @@ function renderAutomation() {
       <button class="btn secondary" data-rule-remove="${rule.id}" data-rule-scope="global">Remove</button>
     </div>`;
   }).join("") || `<div class="small">No factory rules.</div>`;
-  const defaultGroups = Object.entries(state.buildingRuleDefaults)
-    .filter(([, list]) => Array.isArray(list) && list.length > 0)
-    .map(([buildingKey, list]) => {
-      const groupRows = list.map(rule => {
-        const formatted = formatAutomationRule(rule);
-        const nameText = formatted.name || "Rule";
-        const name = `<div class="rule-name">${nameText}</div>`;
-        return `<div class="automation-rule">
-          <div class="rule-main">
-            ${name}
-            <div class="rule-text">${formatted.text}</div>
-          </div>
-          <button class="btn secondary" data-rule-remove="${rule.id}" data-rule-scope="default" data-rule-building="${buildingKey}">Remove</button>
-        </div>`;
-      }).join("");
-      return `<div class="automation-group">
-        <div class="automation-group-title">${getBuildingLabel(buildingKey)}</div>
-        <div class="automation-list">${groupRows}</div>
-      </div>`;
-    }).join("") || `<div class="small">No building default rules.</div>`;
   automationAreaEl.innerHTML = `
     <div class="automation-form">
       <div class="automation-row">
         <input id="autoRuleName" type="text" placeholder="Rule name (optional)" />
-        <select id="autoScope">
-          <option value="global" selected>Factory rule</option>
-          <option value="default">Building default</option>
-        </select>
-        <span class="auto-field" data-scope-field="building">
-          <select id="autoScopeBuilding">${scopeBuildingOptions}</select>
-        </span>
       </div>
       <div class="automation-row">
         <span class="small">IF</span>
@@ -1034,15 +1163,8 @@ function renderAutomation() {
       <div class="automation-section-title">Factory Rules ${state.maxRules ? `(${rules.length}/${state.maxRules})` : `(${rules.length})`}</div>
       <div class="automation-list">${ruleRows}</div>
     </div>
-    <div class="automation-section">
-      <div class="automation-section-title">Building Defaults</div>
-      <div class="small">Applied when a new building of that type is placed.</div>
-      <div class="automation-defaults">${defaultGroups}</div>
-    </div>
   `;
   const addBtn = automationAreaEl.querySelector("#autoAdd");
-  const scopeEl = automationAreaEl.querySelector("#autoScope");
-  const scopeBuildingWrap = automationAreaEl.querySelector("[data-scope-field=\"building\"]");
   const leftTypeEl = automationAreaEl.querySelector("#autoLeftType");
   const rightTypeEl = automationAreaEl.querySelector("#autoRightType");
   const leftNumberWrap = automationAreaEl.querySelector("[data-left-field=\"number\"]");
@@ -1053,22 +1175,18 @@ function renderAutomation() {
   const actionTypeEl = automationAreaEl.querySelector("#autoActionType");
   const actionTargetEl = automationAreaEl.querySelector("#autoActionTarget");
   const syncActionTargets = () => {
-    const scope = scopeEl?.value || "global";
     const actionType = actionTypeEl?.value || "power-off";
-    const includeSelf = scope === "default";
     const includeAny = actionType !== "build";
     let selected = actionTargetEl?.value;
     const allowed = new Set();
-    if (includeSelf) allowed.add("self");
     if (includeAny) allowed.add("Any");
     GRID_BUILDING_KEYS.forEach(key => allowed.add(key));
     if (!allowed.has(selected)) {
-      selected = includeSelf ? "self" : (GRID_BUILDING_KEYS[0] || "Miner");
+      selected = GRID_BUILDING_KEYS[0] || "Miner";
     }
     if (actionTargetEl) {
       actionTargetEl.innerHTML = buildBuildingOptions(selected, {
         includeAny,
-        includeSelf,
         keys: GRID_BUILDING_KEYS
       });
     }
@@ -1081,19 +1199,16 @@ function renderAutomation() {
     if (leftBuildingWrap) leftBuildingWrap.style.display = (leftType === "building-count" || leftType === "building-unlock") ? "" : "none";
     if (rightNumberWrap) rightNumberWrap.style.display = rightType === "number" ? "" : "none";
     if (rightResourceWrap) rightResourceWrap.style.display = (rightType === "resource-percent" || rightType === "resource-value") ? "" : "none";
-    if (scopeBuildingWrap) scopeBuildingWrap.style.display = scopeEl?.value === "default" ? "" : "none";
-    if (addBtn) addBtn.disabled = !!maxed && scopeEl?.value === "global";
+    if (addBtn) addBtn.disabled = !!maxed;
     syncActionTargets();
   };
-  if (scopeEl) scopeEl.addEventListener("change", syncForm);
   if (leftTypeEl) leftTypeEl.addEventListener("change", syncForm);
   if (rightTypeEl) rightTypeEl.addEventListener("change", syncForm);
   if (actionTypeEl) actionTypeEl.addEventListener("change", syncForm);
   syncForm();
   if (addBtn) {
     addBtn.addEventListener("click", () => {
-      const scope = scopeEl?.value || "global";
-      if (scope === "global" && maxed) return;
+      if (maxed) return;
       const name = automationAreaEl.querySelector("#autoRuleName")?.value?.trim() || "";
       const leftType = leftTypeEl?.value || "resource-percent";
       const rightType = rightTypeEl?.value || "number";
@@ -1118,176 +1233,16 @@ function renderAutomation() {
         condition: { left: leftSpec, comparator, right: rightSpec },
         action: { type: actionType, target: actionTarget }
       };
-      if (scope === "default") {
-        const buildingKey = automationAreaEl.querySelector("#autoScopeBuilding")?.value || (GRID_BUILDING_KEYS[0] || "Miner");
-        state.buildingRuleDefaults = state.buildingRuleDefaults || {};
-        state.buildingRuleDefaults[buildingKey] = state.buildingRuleDefaults[buildingKey] || [];
-        state.buildingRuleDefaults[buildingKey].push(rule);
-      } else {
-        state.rules = state.rules || [];
-        state.rules.push(rule);
-      }
+      state.rules = state.rules || [];
+      state.rules.push(rule);
       renderCache.automation = "";
     });
   }
   automationAreaEl.querySelectorAll("button[data-rule-remove]").forEach(btn => {
     btn.addEventListener("click", () => {
       const id = btn.dataset.ruleRemove;
-      const scope = btn.dataset.ruleScope || "global";
-      if (scope === "default") {
-        const buildingKey = btn.dataset.ruleBuilding;
-        if (buildingKey && state.buildingRuleDefaults?.[buildingKey]) {
-          state.buildingRuleDefaults[buildingKey] = state.buildingRuleDefaults[buildingKey].filter(rule => rule.id !== id);
-          if (state.buildingRuleDefaults[buildingKey].length === 0) {
-            delete state.buildingRuleDefaults[buildingKey];
-          }
-        }
-      } else {
-        state.rules = (state.rules || []).filter(rule => rule.id !== id);
-      }
+      state.rules = (state.rules || []).filter(rule => rule.id !== id);
       renderCache.automation = "";
-    });
-  });
-}
-
-function renderContextAutomation(index) {
-  if (!contextAutomationEl) return;
-  if (!isAutomationUnlocked()) {
-    contextAutomationEl.innerHTML = "";
-    return;
-  }
-  const tile = state.grid[index];
-  if (!tile || !tile.building) {
-    contextAutomationEl.innerHTML = "";
-    return;
-  }
-  tile.automationRules = Array.isArray(tile.automationRules) ? tile.automationRules : [];
-  const rules = tile.automationRules;
-  const resourceOptions = buildResourceOptions("Scrap");
-  const buildingOptions = buildBuildingOptions("Miner", { keys: ALL_BUILDING_KEYS });
-  const comparatorOptions = buildComparatorOptions(">");
-  const leftTypeOptions = [
-    { value: "resource-percent", label: "Resource % of storage" },
-    { value: "resource-value", label: "Resource amount (exact)" },
-    { value: "number", label: "Number" },
-    { value: "building-count", label: "Building count (grid)" },
-    { value: "any-building", label: "Any building on grid" },
-    { value: "building-unlock", label: "Building unlocked" }
-  ].map(opt => `<option value="${opt.value}" ${opt.value === "resource-percent" ? "selected" : ""}>${opt.label}</option>`).join("");
-  const rightTypeOptions = [
-    { value: "number", label: "Number" },
-    { value: "resource-percent", label: "Resource % of storage" },
-    { value: "resource-value", label: "Resource amount (exact)" }
-  ].map(opt => `<option value="${opt.value}" ${opt.value === "number" ? "selected" : ""}>${opt.label}</option>`).join("");
-  const actionOptions = [
-    { value: "power-off", label: "Power off" },
-    { value: "power-on", label: "Power on" },
-    { value: "destroy", label: "Destroy" },
-    { value: "build", label: "Build" }
-  ].map(opt => `<option value="${opt.value}">${opt.label}</option>`).join("");
-  const ruleRows = rules.map(rule => {
-    const formatted = formatAutomationRule(rule);
-    const tag = formatted.source && String(formatted.source).startsWith("default:") ? `<span class="rule-tag">Default</span>` : "";
-    const nameText = formatted.name || "Rule";
-    const name = `<div class="rule-name">${nameText}${tag}</div>`;
-    return `<div class="automation-rule compact">
-      <div class="rule-main">
-        ${name}
-        <div class="rule-text">${formatted.text}</div>
-      </div>
-      <button class="btn secondary" data-ctx-rule-remove="${rule.id}">Remove</button>
-    </div>`;
-  }).join("") || `<div class="small">No automation rules.</div>`;
-  contextAutomationEl.innerHTML = `
-    <div class="context-automation-title">Automation</div>
-    <div class="automation-list">${ruleRows}</div>
-    <div class="automation-form compact">
-      <div class="automation-row">
-        <input id="ctxRuleName" type="text" placeholder="Rule name (optional)" />
-      </div>
-      <div class="automation-row">
-        <span class="small">IF</span>
-        <select id="ctxLeftType">${leftTypeOptions}</select>
-        <span class="auto-field" data-left-field="number">
-          <input id="ctxLeftNumber" type="number" value="0" step="0.1" />
-        </span>
-        <span class="auto-field" data-left-field="resource">
-          <select id="ctxLeftResource">${resourceOptions}</select>
-        </span>
-        <span class="auto-field" data-left-field="building">
-          <select id="ctxLeftBuilding">${buildingOptions}</select>
-        </span>
-        <select id="ctxComparator">${comparatorOptions}</select>
-        <select id="ctxRightType">${rightTypeOptions}</select>
-        <span class="auto-field" data-right-field="number">
-          <input id="ctxRightNumber" type="number" value="80" step="0.1" />
-        </span>
-        <span class="auto-field" data-right-field="resource">
-          <select id="ctxRightResource">${resourceOptions}</select>
-        </span>
-      </div>
-      <div class="automation-row">
-        <span class="small">THEN</span>
-        <select id="ctxActionType">${actionOptions}</select>
-        <button class="btn secondary" id="ctxAddRule">Add Rule</button>
-      </div>
-      <div class="small">Targets this building.</div>
-    </div>
-  `;
-  const leftTypeEl = contextAutomationEl.querySelector("#ctxLeftType");
-  const rightTypeEl = contextAutomationEl.querySelector("#ctxRightType");
-  const leftNumberWrap = contextAutomationEl.querySelector("[data-left-field=\"number\"]");
-  const leftResourceWrap = contextAutomationEl.querySelector("[data-left-field=\"resource\"]");
-  const leftBuildingWrap = contextAutomationEl.querySelector("[data-left-field=\"building\"]");
-  const rightNumberWrap = contextAutomationEl.querySelector("[data-right-field=\"number\"]");
-  const rightResourceWrap = contextAutomationEl.querySelector("[data-right-field=\"resource\"]");
-  const syncForm = () => {
-    const leftType = leftTypeEl?.value || "resource-percent";
-    const rightType = rightTypeEl?.value || "number";
-    if (leftNumberWrap) leftNumberWrap.style.display = leftType === "number" ? "" : "none";
-    if (leftResourceWrap) leftResourceWrap.style.display = (leftType === "resource-percent" || leftType === "resource-value") ? "" : "none";
-    if (leftBuildingWrap) leftBuildingWrap.style.display = (leftType === "building-count" || leftType === "building-unlock") ? "" : "none";
-    if (rightNumberWrap) rightNumberWrap.style.display = rightType === "number" ? "" : "none";
-    if (rightResourceWrap) rightResourceWrap.style.display = (rightType === "resource-percent" || rightType === "resource-value") ? "" : "none";
-  };
-  if (leftTypeEl) leftTypeEl.addEventListener("change", syncForm);
-  if (rightTypeEl) rightTypeEl.addEventListener("change", syncForm);
-  syncForm();
-  const addBtn = contextAutomationEl.querySelector("#ctxAddRule");
-  if (addBtn) {
-    addBtn.addEventListener("click", () => {
-      const name = contextAutomationEl.querySelector("#ctxRuleName")?.value?.trim() || "";
-      const leftType = leftTypeEl?.value || "resource-percent";
-      const rightType = rightTypeEl?.value || "number";
-      const comparator = contextAutomationEl.querySelector("#ctxComparator")?.value || ">";
-      const leftSpec = buildAutomationValueSpec(
-        leftType,
-        contextAutomationEl.querySelector("#ctxLeftNumber")?.value,
-        contextAutomationEl.querySelector("#ctxLeftResource")?.value,
-        contextAutomationEl.querySelector("#ctxLeftBuilding")?.value
-      );
-      const rightSpec = buildAutomationValueSpec(
-        rightType,
-        contextAutomationEl.querySelector("#ctxRightNumber")?.value,
-        contextAutomationEl.querySelector("#ctxRightResource")?.value,
-        null
-      );
-      const actionType = contextAutomationEl.querySelector("#ctxActionType")?.value || "power-off";
-      const rule = {
-        id: createAutomationRuleId(),
-        name,
-        condition: { left: leftSpec, comparator, right: rightSpec },
-        action: { type: actionType, target: "self" }
-      };
-      tile.automationRules.push(rule);
-      renderContextAutomation(index);
-    });
-  }
-  contextAutomationEl.querySelectorAll("button[data-ctx-rule-remove]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const id = btn.dataset.ctxRuleRemove;
-      tile.automationRules = tile.automationRules.filter(rule => rule.id !== id);
-      renderContextAutomation(index);
     });
   });
 }
@@ -1361,4 +1316,3 @@ function showPrestigeOverlay() {
   });
   prestigeOverlay.classList.add("active");
 }
-

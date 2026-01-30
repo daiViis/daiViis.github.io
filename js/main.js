@@ -180,6 +180,16 @@ if (audioVolume) {
     syncAudioSettings();
   });
 }
+if (headerMenuToggle && headerActionsEl) {
+  const setHeaderMenuOpen = (isOpen) => {
+    headerActionsEl.classList.toggle("open", isOpen);
+    headerMenuToggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+  };
+  headerMenuToggle.addEventListener("click", (event) => {
+    event.stopPropagation();
+    setHeaderMenuOpen(!headerActionsEl.classList.contains("open"));
+  });
+}
 blueprintBtn.addEventListener("click", () => autoBuild(state.selectedBuilding));
 buySlotBtn.addEventListener("click", () => buyGridSlot());
 if (emergencyBtn) {
@@ -190,8 +200,11 @@ if (emergencyBtn) {
   });
 }
 document.addEventListener("click", (event) => {
-  if (contextMenuEl && contextMenuEl.classList.contains("active")) {
-    if (!contextMenuEl.contains(event.target)) hideContextMenu();
+  if (headerActionsEl && headerActionsEl.classList.contains("open")) {
+    if (!headerActionsEl.contains(event.target) && !headerMenuToggle?.contains(event.target)) {
+      headerActionsEl.classList.remove("open");
+      if (headerMenuToggle) headerMenuToggle.setAttribute("aria-expanded", "false");
+    }
   }
   if (fanContextMenuEl && fanContextMenuEl.classList.contains("active")) {
     if (!fanContextMenuEl.contains(event.target)) hideFanContextMenu();
@@ -202,66 +215,15 @@ document.addEventListener("click", (event) => {
 });
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") {
-    hideContextMenu();
+    if (headerActionsEl) headerActionsEl.classList.remove("open");
+    if (headerMenuToggle) headerMenuToggle.setAttribute("aria-expanded", "false");
     hideFanContextMenu();
     hideStorageContextMenu();
   }
 });
-contextRemoveBtn.addEventListener("click", () => {
-  const index = parseInt(contextMenuEl.dataset.index || "", 10);
-  if (Number.isFinite(index)) {
-    removeBuilding(index);
-  }
-  hideContextMenu();
-});
-if (contextToggleBtn) {
-  contextToggleBtn.addEventListener("click", () => {
-    const index = parseInt(contextMenuEl.dataset.index || "", 10);
-    if (Number.isFinite(index)) {
-      if (toggleBuildingPower(index)) {
-        pulseLatestLog();
-      }
-    }
-    hideContextMenu();
-  });
-}
-if (contextMinerTurbo) {
-  contextMinerTurbo.addEventListener("click", () => {
-    const index = parseInt(contextMenuEl.dataset.index || "", 10);
-    if (Number.isFinite(index)) {
-      if (upgradeMinerTurbo(index)) {
-        triggerRewardEffect(contextMinerTurbo);
-      }
-    }
-    hideContextMenu();
-  });
-}
-if (contextSmelterFurnace) {
-  contextSmelterFurnace.addEventListener("click", () => {
-    const index = parseInt(contextMenuEl.dataset.index || "", 10);
-    if (Number.isFinite(index)) {
-      if (upgradeSmelterFurnace(index)) {
-        triggerRewardEffect(contextSmelterFurnace);
-      }
-    }
-    hideContextMenu();
-  });
-}
-if (contextAshUpgrade) {
-  contextAshUpgrade.addEventListener("click", () => {
-    const index = parseInt(contextMenuEl.dataset.index || "", 10);
-    if (Number.isFinite(index)) {
-      if (upgradeAshCleaner(index)) {
-        triggerRewardEffect(contextAshUpgrade);
-      }
-    }
-    hideContextMenu();
-  });
-}
 if (fanCounterEl) {
   fanCounterEl.addEventListener("contextmenu", (event) => {
     event.preventDefault();
-    hideContextMenu();
     hideStorageContextMenu();
     updateFanContextMenu();
     showFanContextMenu(event.clientX, event.clientY);
@@ -270,7 +232,6 @@ if (fanCounterEl) {
 if (storageCounterEl) {
   storageCounterEl.addEventListener("contextmenu", (event) => {
     event.preventDefault();
-    hideContextMenu();
     hideFanContextMenu();
     updateStorageContextMenu();
     showStorageContextMenu(event.clientX, event.clientY);
@@ -319,6 +280,13 @@ tabContents.buildings.addEventListener("pointerdown", (event) => {
   const def = BUILDINGS[key];
   if (def.global) {
     if (safeRun("buyGlobalSupport", () => buyGlobalSupport(key))) {
+      triggerRewardEffect(btn);
+    }
+    return;
+  }
+  if (state.settings.autoPlace) {
+    setSelectedBuilding(key);
+    if (safeRun("autoPlaceBuild", () => autoPlaceBuild(key))) {
       triggerRewardEffect(btn);
     }
     return;

@@ -20,6 +20,8 @@ function createTile() {
     smelterLevel: 1,
     smelterCycleCount: 0,
     ashLevel: 1,
+    dirty: false,
+    dirtyBurntScrap: 0,
     automationDisabled: false,
     automationRules: []
   };
@@ -253,6 +255,7 @@ function createDefaultState() {
     settings: {
       reducedMotion: false,
       colorblind: false,
+      autoPlace: false,
       shake: true,
       fireworks: true,
       audioEnabled: true,
@@ -302,6 +305,8 @@ function rehydrateState(loaded) {
     smelterLevel: Math.max(1, tile.smelterLevel || 1),
     smelterCycleCount: tile.smelterCycleCount || 0,
     ashLevel: Math.max(1, tile.ashLevel || 1),
+    dirty: !!tile.dirty,
+    dirtyBurntScrap: Math.max(0, Number(tile.dirtyBurntScrap) || 0),
     automationDisabled: false,
     automationRules: normalizeAutomationRules(tile.automationRules || [])
   }));
@@ -398,6 +403,8 @@ function createSavePayload() {
       smelterLevel: tile.smelterLevel || 1,
       smelterCycleCount: tile.smelterCycleCount || 0,
       ashLevel: tile.ashLevel || 1,
+      dirty: tile.dirty || false,
+      dirtyBurntScrap: tile.dirtyBurntScrap || 0,
       automationRules: tile.automationRules || []
     })),
     selectedBuilding: state.selectedBuilding,
