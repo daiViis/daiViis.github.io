@@ -6,8 +6,9 @@ Live site: https://daiviis.github.io/
 
 ## Structure
 
-- `index.html`: main site entry
-- `menu.html`: secondary page
+- `index.html`: main menu entry
+- `play.html`: game page
+- `intro.html`: timeline intro
 - `styles.css`: global styles
 - `js/`: client-side scripts
 - `images/`, `audio/`, `video/`: media assets

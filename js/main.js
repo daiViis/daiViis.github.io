@@ -259,7 +259,7 @@ gameOverMenuBtn.addEventListener("click", () => {
 });
 gameOverRestartBtn.addEventListener("click", () => {
   localStorage.removeItem(SAVE_KEY);
-  window.location.href = "index.html";
+  window.location.href = "play.html";
 });
 
 tabContents.stats.addEventListener("click", (event) => {
