@@ -723,45 +723,32 @@ main {
 
 @media (max-width: 720px) {
   .site-shell {
-    padding-bottom: 1.5rem;
+    padding-bottom: 1rem;
   }
 
   .hero {
-    grid-template-areas:
-      "copy"
-      "portrait";
-    gap: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
     min-height: auto;
     padding-top: 0.75rem;
     padding-bottom: 0;
-    align-items: start;
+    align-items: stretch;
   }
 
   .hero-backdrop {
-    inset: 1rem 0 auto 0;
-    opacity: 0.06;
-  }
-
-  .hero-backdrop span {
-    font-size: clamp(4rem, 23vw, 6.4rem);
-    letter-spacing: -0.06em;
-  }
-
-   .hero-backdrop span:first-child {
-    left: -0.02em;
-  }
-
-  .hero-backdrop span:last-child {
     display: none;
   }
 
   .hero-copy {
     gap: 0.8rem;
     padding-bottom: 0;
+    width: 100%;
+    align-self: stretch;
   }
 
   .eyebrow {
-    max-width: 16rem;
+    max-width: 15rem;
     font-size: 0.72rem;
     letter-spacing: 0.12em;
   }
@@ -776,18 +763,8 @@ main {
     line-height: 1.55;
   }
 
-  .portrait-stage {
-    width: min(100%, 18rem);
-    height: 20rem;
-  }
-
   .hero-portrait-wrap {
-    margin-top: -1.2rem;
-    align-self: start;
-  }
-
-  .portrait-image {
-    width: 112%;
+    display: none;
   }
 
   .button {
@@ -801,17 +778,16 @@ main {
     gap: 0.65rem;
   }
 
-  .vodafone-toggle,
-  .vodafone-toggle.is-open {
-    width: 100%;
-  }
-
   .vodafone-toggle {
     justify-content: flex-start;
     height: 3.45rem;
+    width: 3.45rem;
+    min-width: 3.45rem;
+    padding-right: 0.55rem;
   }
 
   .vodafone-toggle.is-open {
+    width: 100%;
     padding-right: 0.95rem;
   }
 
