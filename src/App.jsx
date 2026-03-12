@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 const profile = {
   name: 'David Cit',
@@ -16,9 +16,81 @@ const profile = {
 
 function App() {
   const [isVodafoneOpen, setIsVodafoneOpen] = useState(false)
+  const backgroundRef = useRef(null)
+
+  useEffect(() => {
+    const background = backgroundRef.current
+    if (!background) {
+      return undefined
+    }
+
+    const target = {
+      x: window.innerWidth * 0.5,
+      y: window.innerHeight * 0.45,
+    }
+    const current = { ...target }
+    let rafId = 0
+
+    const setBackgroundVars = () => {
+      const width = window.innerWidth || 1
+      const height = window.innerHeight || 1
+      const xNorm = Math.min(Math.max(current.x / width, 0), 1)
+      const yNorm = Math.min(Math.max(current.y / height, 0), 1)
+
+      background.style.setProperty('--mouse-x', `${current.x}px`)
+      background.style.setProperty('--mouse-y', `${current.y}px`)
+      background.style.setProperty('--mouse-x-n', xNorm.toFixed(4))
+      background.style.setProperty('--mouse-y-n', yNorm.toFixed(4))
+    }
+
+    const centerPointer = () => {
+      target.x = window.innerWidth * 0.5
+      target.y = window.innerHeight * 0.45
+    }
+
+    const animate = () => {
+      current.x += (target.x - current.x) * 0.08
+      current.y += (target.y - current.y) * 0.08
+      setBackgroundVars()
+      rafId = window.requestAnimationFrame(animate)
+    }
+
+    const handlePointerMove = (event) => {
+      target.x = event.clientX
+      target.y = event.clientY
+    }
+
+    const handlePointerLeave = () => {
+      centerPointer()
+    }
+
+    const handleResize = () => {
+      centerPointer()
+    }
+
+    setBackgroundVars()
+    rafId = window.requestAnimationFrame(animate)
+
+    window.addEventListener('pointermove', handlePointerMove, { passive: true })
+    window.addEventListener('pointerleave', handlePointerLeave)
+    window.addEventListener('blur', handlePointerLeave)
+    window.addEventListener('resize', handleResize)
+
+    return () => {
+      window.cancelAnimationFrame(rafId)
+      window.removeEventListener('pointermove', handlePointerMove)
+      window.removeEventListener('pointerleave', handlePointerLeave)
+      window.removeEventListener('blur', handlePointerLeave)
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [])
 
   return (
     <div className="site-shell">
+      <div className="site-background" aria-hidden="true" ref={backgroundRef}>
+        <span className="geo-grid" />
+        <span className="geo-cursor-glow" />
+      </div>
       <div className="site-noise" aria-hidden="true" />
 
       <main>

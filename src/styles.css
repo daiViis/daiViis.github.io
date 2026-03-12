@@ -2,10 +2,8 @@
   font-family: "Aptos", "Segoe UI Variable Text", "Segoe UI", sans-serif;
   color: #f3efe6;
   background:
-    radial-gradient(circle at top, rgba(201, 170, 113, 0.12), transparent 28%),
-    radial-gradient(circle at 78% 18%, rgba(202, 165, 95, 0.08), transparent 22%),
-    radial-gradient(circle at 50% 110%, rgba(255, 255, 255, 0.05), transparent 26%),
-    #060606;
+    radial-gradient(circle at 82% 10%, rgba(96, 156, 212, 0.14), transparent 30%),
+    linear-gradient(180deg, #06080f 0%, #04060c 50%, #03040a 100%);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -18,6 +16,7 @@
   --panel-strong: rgba(255, 255, 255, 0.08);
   --muted: rgba(243, 239, 230, 0.72);
   --accent: #d1a45f;
+  --app-cursor: url("/cursor-48.png") 6 6;
 }
 
 * {
@@ -28,6 +27,8 @@ html {
   scroll-behavior: smooth;
   overflow-x: hidden;
   overflow-y: auto;
+  scrollbar-width: none;
+  cursor: var(--app-cursor), auto;
 }
 
 body {
@@ -37,13 +38,27 @@ body {
   overflow-x: hidden;
   overflow-y: auto;
   background:
-    radial-gradient(circle at 15% 10%, rgba(196, 143, 57, 0.08), transparent 22%),
-    linear-gradient(180deg, #090909 0%, #060606 38%, #050505 100%);
+    radial-gradient(circle at 82% 10%, rgba(96, 156, 212, 0.16), transparent 30%),
+    linear-gradient(180deg, #06080f 0%, #04060c 50%, #03040a 100%);
+  scrollbar-width: none;
+  cursor: var(--app-cursor), auto;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  width: 0;
+  height: 0;
 }
 
 a {
   color: inherit;
   text-decoration: none;
+}
+
+a,
+button,
+[role="button"] {
+  cursor: var(--app-cursor), pointer;
 }
 
 button,
@@ -57,6 +72,8 @@ a {
 
 main {
   display: grid;
+  position: relative;
+  z-index: 2;
 }
 
 .site-shell {
@@ -66,9 +83,74 @@ main {
   padding: 0 var(--page-padding) 5rem;
 }
 
+.site-background {
+  --mouse-x: 50vw;
+  --mouse-y: 45vh;
+  --mouse-x-n: 0.5;
+  --mouse-y-n: 0.45;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at var(--mouse-x) var(--mouse-y), rgba(120, 208, 255, 0.16) 0%, rgba(120, 208, 255, 0.05) 20%, rgba(3, 8, 15, 0) 42%),
+    linear-gradient(180deg, #050811 0%, #04070f 55%, #03050b 100%);
+}
+
+.site-background::before,
+.site-background::after {
+  content: "";
+  position: absolute;
+  display: block;
+  pointer-events: none;
+}
+
+.site-background::before {
+  inset: 0;
+  background:
+    radial-gradient(circle at 80% 12%, rgba(126, 187, 255, 0.12), transparent 30%),
+    radial-gradient(circle at 20% 88%, rgba(83, 236, 201, 0.08), transparent 32%);
+  opacity: 0.55;
+}
+
+.site-background::after {
+  inset: -6%;
+  background: radial-gradient(circle at var(--mouse-x) var(--mouse-y), rgba(151, 221, 255, 0.1), transparent 48%);
+  opacity: 0.7;
+  transform: translate3d(calc((var(--mouse-x-n) - 0.5) * 12px), calc((var(--mouse-y-n) - 0.5) * 10px), 0);
+}
+
+.geo-grid,
+.geo-cursor-glow {
+  position: absolute;
+  display: block;
+}
+
+.geo-grid {
+  inset: 0;
+  background:
+    repeating-linear-gradient(0deg, rgba(136, 196, 255, 0.05) 0 1px, transparent 1px 56px),
+    repeating-linear-gradient(90deg, rgba(136, 196, 255, 0.05) 0 1px, transparent 1px 56px);
+  opacity: 0.16;
+  animation: geoGridDrift 28s linear infinite;
+}
+
+.geo-cursor-glow {
+  width: 26rem;
+  height: 26rem;
+  left: calc(var(--mouse-x) - 13rem);
+  top: calc(var(--mouse-y) - 13rem);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(166, 228, 255, 0.28) 0%, rgba(100, 186, 255, 0.1) 24%, rgba(100, 186, 255, 0) 68%);
+  opacity: 0.54;
+  animation: geoCursorPulse 8s ease-in-out infinite;
+}
+
 .site-noise {
   position: fixed;
   inset: 0;
+  z-index: 1;
   pointer-events: none;
   opacity: 0.08;
   background-image:
@@ -76,6 +158,29 @@ main {
     linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
   background-size: 44px 44px;
   mask-image: radial-gradient(circle at center, black, transparent 86%);
+}
+
+@keyframes geoGridDrift {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  100% {
+    transform: translate3d(56px, 0, 0);
+  }
+}
+
+@keyframes geoCursorPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.48;
+  }
+
+  50% {
+    transform: scale(1.04);
+    opacity: 0.62;
+  }
 }
 
 .hero {
@@ -236,7 +341,7 @@ main {
   border-radius: 999px;
   background: rgba(0, 0, 0, 0.92);
   color: #f3efe6;
-  cursor: pointer;
+  cursor: var(--app-cursor), pointer;
   transition:
     width 340ms cubic-bezier(0.22, 1, 0.36, 1),
     padding 300ms ease,
@@ -417,6 +522,7 @@ main {
   padding: 1.05rem 1.55rem;
   border-color: rgba(209, 164, 95, 0.65);
   background: linear-gradient(135deg, #f5f0e5 0%, #d1a45f 100%);
+  color: #090909;
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.08),
     0 18px 38px rgba(209, 164, 95, 0.25);
@@ -667,6 +773,323 @@ main {
   text-transform: uppercase;
 }
 
+.project-launch {
+  padding-top: 2.4rem;
+  padding-bottom: 3.4rem;
+  gap: 1.15rem;
+}
+
+.project-link-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 1.1rem;
+  background:
+    linear-gradient(130deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.03) 32%, rgba(255, 255, 255, 0.02)),
+    rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 20px 35px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  transition:
+    transform 220ms ease,
+    border-color 220ms ease,
+    box-shadow 220ms ease,
+    background-color 220ms ease;
+}
+
+.project-link-card::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(120deg, rgba(209, 164, 95, 0.33), rgba(131, 218, 255, 0.22), rgba(209, 164, 95, 0.24));
+  opacity: 0;
+  transition: opacity 240ms ease;
+  pointer-events: none;
+}
+
+.project-link-card:hover,
+.project-link-card:focus-visible {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.28);
+  box-shadow: 0 26px 42px rgba(0, 0, 0, 0.3);
+}
+
+.project-link-card:hover::before,
+.project-link-card:focus-visible::before {
+  opacity: 0.4;
+}
+
+.project-link-icon,
+.project-link-arrow {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.project-link-icon {
+  width: 3.05rem;
+  height: 3.05rem;
+  border-radius: 0.9rem;
+  overflow: hidden;
+  background:
+    linear-gradient(155deg, rgba(209, 164, 95, 0.26), rgba(255, 255, 255, 0.1)),
+    rgba(10, 12, 20, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #f3efe6;
+}
+
+.project-link-arrow svg {
+  width: 1.45rem;
+  height: 1.45rem;
+}
+
+.project-link-icon img,
+.tracker-icon img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  border-radius: inherit;
+}
+
+.project-link-content {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.project-link-title {
+  font-family: "Bahnschrift", "Aptos Display", sans-serif;
+  font-size: clamp(1.2rem, 2.1vw, 1.8rem);
+  line-height: 1;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+}
+
+.project-link-description {
+  max-width: 43ch;
+  color: rgba(243, 239, 230, 0.72);
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.project-link-arrow {
+  width: 2.45rem;
+  height: 2.45rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(243, 239, 230, 0.9);
+  background: rgba(255, 255, 255, 0.03);
+  transition:
+    transform 220ms ease,
+    border-color 220ms ease,
+    background-color 220ms ease;
+}
+
+.project-link-card:hover .project-link-arrow,
+.project-link-card:focus-visible .project-link-arrow {
+  transform: translateX(2px);
+  border-color: rgba(255, 255, 255, 0.34);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.site-footer {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem 1rem;
+  margin-top: 2.4rem;
+  padding: 1.1rem 0 0.2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.site-footer p {
+  margin: 0;
+  color: rgba(243, 239, 230, 0.65);
+  font-size: 0.84rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.site-footer-nav {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+
+.site-footer-nav a {
+  color: rgba(243, 239, 230, 0.8);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: color 180ms ease;
+}
+
+.site-footer-nav a:hover,
+.site-footer-nav a:focus-visible {
+  color: #fff;
+}
+
+.project-shell {
+  padding-top: clamp(1.1rem, 3.4vw, 2rem);
+}
+
+.project-page-main {
+  display: grid;
+  gap: 1.1rem;
+  min-height: calc(100vh - 10rem);
+  position: relative;
+  z-index: 2;
+}
+
+.project-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: fit-content;
+  color: rgba(243, 239, 230, 0.86);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: color 180ms ease, transform 180ms ease;
+}
+
+.project-back-link:hover,
+.project-back-link:focus-visible {
+  color: #fff;
+  transform: translateX(-2px);
+}
+
+.tracker-hero,
+.tracker-panel {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 1.35rem;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.03) 42%, rgba(255, 255, 255, 0.02)),
+    rgba(6, 8, 13, 0.58);
+  backdrop-filter: blur(16px);
+}
+
+.tracker-hero {
+  display: grid;
+  gap: 1.15rem;
+  padding: clamp(1.25rem, 2.8vw, 1.8rem);
+}
+
+.tracker-hero-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.tracker-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.2rem;
+  height: 3.2rem;
+  flex: 0 0 auto;
+  border-radius: 1rem;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background:
+    linear-gradient(150deg, rgba(209, 164, 95, 0.32), rgba(124, 211, 255, 0.24)),
+    rgba(8, 10, 16, 0.92);
+}
+
+.tracker-heading h1 {
+  margin: 0;
+  font-family: "Bahnschrift", "Aptos Display", sans-serif;
+  font-size: clamp(2.05rem, 5.5vw, 4rem);
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+}
+
+.tracker-summary {
+  margin: 0;
+  max-width: 66ch;
+  color: rgba(243, 239, 230, 0.85);
+  font-size: clamp(1rem, 2vw, 1.1rem);
+  line-height: 1.5;
+}
+
+.tracker-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.85rem 1rem;
+}
+
+.tracker-overwolf-note {
+  margin: 0;
+  color: rgba(243, 239, 230, 0.76);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.tracker-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+.tracker-panel {
+  display: grid;
+  align-content: start;
+  gap: 0.9rem;
+  padding: 1.1rem 1.2rem;
+}
+
+.tracker-panel h2 {
+  margin: 0;
+  font-family: "Bahnschrift", "Aptos Display", sans-serif;
+  font-size: clamp(1.25rem, 2.5vw, 1.8rem);
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.tracker-panel p {
+  margin: 0;
+  color: rgba(243, 239, 230, 0.77);
+  line-height: 1.55;
+}
+
+.tracker-panel ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.45rem;
+  color: rgba(243, 239, 230, 0.84);
+  line-height: 1.45;
+}
+
+.tracker-panel-glass {
+  background:
+    linear-gradient(142deg, rgba(124, 211, 255, 0.12), rgba(255, 255, 255, 0.03) 45%, rgba(209, 164, 95, 0.08)),
+    rgba(4, 7, 13, 0.62);
+}
+
+.tracker-panel-wide {
+  grid-column: 1 / -1;
+}
+
 @media (max-width: 1100px) {
   .hero {
     grid-template-columns: 1fr;
@@ -719,11 +1142,30 @@ main {
   .contact-cards {
     grid-template-columns: 1fr;
   }
+
+  .tracker-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 720px) {
   .site-shell {
-    padding-bottom: 1rem;
+    padding-bottom: 2rem;
+  }
+
+  .geo-grid {
+    opacity: 0.1;
+  }
+
+  .geo-cursor-glow {
+    width: 18rem;
+    height: 18rem;
+    left: calc(var(--mouse-x) - 9rem);
+    top: calc(var(--mouse-y) - 9rem);
+  }
+
+  .site-background::after {
+    opacity: 0.52;
   }
 
   .hero {
@@ -846,5 +1288,87 @@ main {
   .role-feature,
   .role-card {
     padding: 1rem;
+  }
+
+  .project-launch {
+    padding-top: 2rem;
+    padding-bottom: 2.6rem;
+  }
+
+  .project-link-card {
+    grid-template-columns: 1fr;
+    gap: 0.72rem;
+    padding: 0.92rem;
+  }
+
+  .project-link-icon {
+    width: 2.8rem;
+    height: 2.8rem;
+  }
+
+  .project-link-arrow {
+    width: 2.2rem;
+    height: 2.2rem;
+    justify-self: end;
+  }
+
+  .project-link-title {
+    font-size: 1.15rem;
+  }
+
+  .project-link-description {
+    font-size: 0.87rem;
+  }
+
+  .project-back-link {
+    font-size: 0.69rem;
+  }
+
+  .tracker-hero,
+  .tracker-panel {
+    border-radius: 1rem;
+  }
+
+  .tracker-hero-header {
+    gap: 0.75rem;
+  }
+
+  .tracker-icon {
+    width: 2.65rem;
+    height: 2.65rem;
+    border-radius: 0.8rem;
+  }
+
+  .tracker-summary,
+  .tracker-panel p,
+  .tracker-panel ul {
+    font-size: 0.94rem;
+  }
+
+  .tracker-actions {
+    width: 100%;
+  }
+
+  .tracker-actions .button {
+    min-width: 0;
+  }
+
+  .site-footer {
+    margin-top: 1.9rem;
+    padding-top: 0.95rem;
+    justify-content: flex-start;
+    gap: 0.65rem;
+  }
+
+  .site-footer p {
+    font-size: 0.72rem;
+  }
+
+  .site-footer-nav {
+    gap: 0.6rem;
+  }
+
+  .site-footer-nav a {
+    font-size: 0.68rem;
   }
 }

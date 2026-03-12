@@ -17,6 +17,10 @@
   </head>
   <body>
     <div class="site-shell">
+      <div class="site-background" aria-hidden="true">
+        <span class="geo-grid"></span>
+        <span class="geo-cursor-glow"></span>
+      </div>
       <div class="site-noise" aria-hidden="true"></div>
 
       <main>
@@ -197,7 +201,56 @@
             </div>
           </div>
         </section>
+
+        <section
+          class="section-grid project-launch"
+          aria-labelledby="featured-project-heading"
+        >
+          <div class="section-heading">
+            <p class="section-kicker">Featured Project</p>
+            <h2 id="featured-project-heading">Feign Deduction Tracker</h2>
+          </div>
+
+          <a class="project-link-card" href="/feign-tracker.html">
+            <span class="project-link-icon" aria-hidden="true">
+              <img src="/feign-overlay-icon.png" alt="" />
+            </span>
+            <span class="project-link-content">
+              <span class="project-link-title">Feign Deduction Tracker</span>
+              <span class="project-link-description">
+                Tactical companion app with deduction tools built for Feign on
+                Overwolf.
+              </span>
+            </span>
+            <span class="project-link-arrow" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M8 12h8M13 7l5 5-5 5"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </span>
+          </a>
+        </section>
       </main>
+
+      <footer class="site-footer">
+        <p>&copy; 2026 David Cit. All rights reserved.</p>
+        <nav class="site-footer-nav" aria-label="Footer">
+          <a href="/index.html">Home</a>
+          <a href="/feign-tracker.html">Feign Tracker</a>
+          <a
+            href="https://github.com/daiViis/"
+            target="_blank"
+            rel="noreferrer"
+          >
+            GitHub
+          </a>
+        </nav>
+      </footer>
     </div>
 
     <script type="module" src="/main.js"></script>
