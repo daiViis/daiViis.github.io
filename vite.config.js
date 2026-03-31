@@ -9,6 +9,7 @@ export default defineConfig({
       input: {
         main: 'index.html',
         feignTracker: 'feign-tracker.html',
+        codePulse: 'codepulse.html',
       },
     },
   },
