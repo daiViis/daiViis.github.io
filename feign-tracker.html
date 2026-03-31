@@ -6,7 +6,7 @@
     <title>Feign Deduction Tracker | David Cit</title>
     <meta
       name="description"
-      content="Project page for Feign Deduction Tracker, an Overwolf-supported companion app focused on clear deduction workflows and faster in-match decisions."
+      content="Source-grounded documentation for Feign Deduction Tracker, covering the Overwolf overlay architecture, panel workflow, deduction engine, manual data entry model, and implementation constraints."
     />
     <meta name="theme-color" content="#060606" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -26,75 +26,327 @@
           <span>Back to Homepage</span>
         </a>
 
-        <section class="tracker-hero" aria-labelledby="tracker-page-title">
-          <div class="tracker-hero-header">
-            <span class="tracker-icon" aria-hidden="true">
-              <img src="/feign-overlay-icon.png" alt="" />
-            </span>
-            <div class="tracker-heading">
-              <p class="section-kicker">Project Spotlight</p>
-              <h1 id="tracker-page-title">Feign Deduction Tracker</h1>
+        <section class="tracker-doc-shell" aria-labelledby="tracker-page-title">
+          <aside class="tracker-doc-sidebar" aria-label="Documentation navigation">
+            <div class="tracker-sidebar-block">
+              <p class="tracker-sidebar-label">Document</p>
+              <h2 class="tracker-sidebar-title">Feign Deduction Tracker</h2>
+              <p class="tracker-sidebar-text">
+                Documentation for the Overwolf overlay, its panel system,
+                deduction workflow, and implementation constraints.
+              </p>
             </div>
+            <div class="tracker-sidebar-block">
+              <p class="tracker-sidebar-label">Contents</p>
+              <nav class="tracker-doc-nav">
+                <a href="#overview">01 Overview</a>
+                <a href="#controller">02 Controller Bar</a>
+                <a href="#players">03 Player List</a>
+                <a href="#detail">04 Detail Panel</a>
+                <a href="#visit-map">05 Visit Map</a>
+                <a href="#roles">06 Roles In Play</a>
+                <a href="#workflow">07 Match Workflow</a>
+                <a href="#constraints">08 Constraints & Stack</a>
+              </nav>
+            </div>
+
+            <div class="tracker-sidebar-block tracker-sidebar-meta">
+              <p class="tracker-sidebar-label">Metadata</p>
+              <dl class="tracker-doc-meta">
+                <div>
+                  <dt>Project Type</dt>
+                  <dd>Overlay Application</dd>
+                </div>
+                <div>
+                  <dt>Platform</dt>
+                  <dd>Overwolf Ecosystem</dd>
+                </div>
+                <div>
+                  <dt>Match Size</dt>
+                  <dd>Up to 15 Players</dd>
+                </div>
+                <div>
+                  <dt>Data Entry</dt>
+                  <dd>Manual Claims + Night Actions</dd>
+                </div>
+                <div>
+                  <dt>Status</dt>
+                  <dd>Public Repository</dd>
+                </div>
+              </dl>
+            </div>
+          </aside>
+
+          <div class="tracker-doc-content">
+            <header class="tracker-hero">
+              <div class="tracker-hero-header">
+                <span class="tracker-icon" aria-hidden="true">
+                  <img src="/feign-overlay-icon.png" alt="" />
+                </span>
+                <div class="tracker-heading">
+                  <p class="section-kicker">Product Documentation</p>
+                  <h1 id="tracker-page-title">Feign Deduction Tracker Documentation</h1>
+                </div>
+              </div>
+
+              <div class="tracker-hero-meta">
+                <span>Built for the social deduction game Feign</span>
+                <span>Interactive Overwolf overlay companion</span>
+                <span>Manual input with visual deduction support</span>
+              </div>
+
+              <p class="tracker-summary">
+                Feign Deduction Tracker is an interactive Overwolf overlay for
+                Feign that turns live deduction into a fast visual workflow.
+                Instead of relying on memory or loose notes, players can track
+                claims, record night actions, inspect contradictions through a
+                visit map, and narrow remaining role possibilities through a
+                dedicated deduction panel while staying inside the flow of a
+                match.
+              </p>
+
+              <div class="tracker-actions">
+                <a
+                  class="button button-main-link"
+                  href="https://github.com/daiViis/Feign_Deduction_Tracker"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  View Repository
+                </a>
+                <a
+                  class="button button-secondary"
+                  href="https://github.com/daiViis/Feign_Deduction_Tracker/archive/refs/heads/main.zip"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Download Source ZIP
+                </a>
+              </div>
+
+              <p class="tracker-overwolf-note">
+                Overwolf companion behavior, modular windows, multi-monitor
+                support, and customizable hotkeys are part of the documented
+                product direction.
+              </p>
+            </header>
+
+            <section class="tracker-sections" aria-label="Project documentation">
+              <article class="tracker-panel" id="overview">
+                <div class="tracker-section-heading">
+                  <span>01</span>
+                  <h2>Overview</h2>
+                </div>
+                <p>
+                  The tracker is positioned as an analytical hub for Feign,
+                  not as a generic note-taking tool. Its job is to keep the
+                  state of deduction visible during a live game: who has
+                  claimed what, which players are suspicious, which actions
+                  were reported, and which roles still remain plausible.
+                </p>
+                <p>
+                  The overlay format matters to that goal. The application is
+                  designed to stay close to gameplay through Overwolf, using a
+                  clean native interface, modular windows, and lightweight
+                  interaction patterns that reduce cognitive overhead rather
+                  than adding more friction in a pressure-heavy match.
+                </p>
+                <ul>
+                  <li>Built specifically for Feign as an Overwolf overlay companion.</li>
+                  <li>Optimized for quick readability during active rounds.</li>
+                  <li>Supports multi-monitor setups and customizable hotkeys.</li>
+                  <li>Uses confidence-based role labeling and live suspect tracking.</li>
+                </ul>
+              </article>
+
+              <article class="tracker-panel tracker-panel-glass" id="controller">
+                <div class="tracker-section-heading">
+                  <span>02</span>
+                  <h2>Controller Bar</h2>
+                </div>
+                <p>
+                  The Controller Bar is the compact command center for the
+                  entire overlay. It sits at the top of the screen and gives
+                  the user global control over the match state and panel
+                  visibility without forcing navigation through deeper menus.
+                </p>
+                <p>
+                  This top-level layer is responsible for the actions that
+                  affect the whole tracker, especially when a round advances or
+                  when a completely new game starts. It keeps the workspace in
+                  sync with the current timeline phase rather than leaving each
+                  panel to be managed independently.
+                </p>
+                <ul>
+                  <li>Toggles the visibility of the overlay panels.</li>
+                  <li>Changes the current timeline phase, such as moving to Night 1.</li>
+                  <li>Resets the entire tracker when a new match begins.</li>
+                  <li>Keeps global match controls in a single compact surface.</li>
+                </ul>
+              </article>
+
+              <article class="tracker-panel" id="players">
+                <div class="tracker-section-heading">
+                  <span>03</span>
+                  <h2>Player List</h2>
+                </div>
+                <p>
+                  The Player List is the main lobby management panel. It is the
+                  stable roster view for the match and the place where players
+                  are registered, organized, and monitored as new information
+                  appears throughout the game.
+                </p>
+                <p>
+                  Instead of keeping role reads and survival state in free-form
+                  memory, the user maintains them directly on the roster. That
+                  gives every later panel a cleaner operating context and makes
+                  it easier to read the state of the table at a glance.
+                </p>
+                <ul>
+                  <li>Supports adding and tracking up to 15 players per match.</li>
+                  <li>Allows players to be arranged by seat order.</li>
+                  <li>Tracks life status, suspicion, and claims as the match unfolds.</li>
+                  <li>Explicitly uses the alignments Innocent, Killer, and Neutral.</li>
+                </ul>
+              </article>
+
+              <article class="tracker-panel" id="detail">
+                <div class="tracker-section-heading">
+                  <span>04</span>
+                  <h2>Detail Panel</h2>
+                </div>
+                <p>
+                  The Detail panel is the deep-dive view for an individual
+                  player. When a user selects someone from the Player List,
+                  this panel becomes the main input area for the actions and
+                  interactions that later drive the tracker's logic.
+                </p>
+                <p>
+                  The documentation is explicit that this data is entered
+                  manually. The application does not read the screen or detect
+                  gameplay events automatically. Instead, the player records
+                  night actions and received interactions directly so the rest
+                  of the overlay can reason over that information.
+                </p>
+                <ul>
+                  <li>Shows actions a selected player has taken.</li>
+                  <li>Shows actions a selected player has received from others.</li>
+                  <li>Acts as the main manual input area for night actions.</li>
+                  <li>Feeds the logic used by Visit Map and Roles in Play.</li>
+                </ul>
+              </article>
+
+              <article class="tracker-panel tracker-panel-wide" id="visit-map">
+                <div class="tracker-section-heading">
+                  <span>05</span>
+                  <h2>Visit Map</h2>
+                </div>
+                <p>
+                  Visit Map is the visual contradiction detector in the system.
+                  It parses the claims entered through the Detail panel and
+                  turns them into a directional map of interactions between
+                  players, giving the user a clearer view of where stories do
+                  or do not line up.
+                </p>
+                <p>
+                  The point is not decoration. The map exists to make complex
+                  chains of claimed visits easier to inspect in seconds, which
+                  is especially valuable when multiple players reference the
+                  same target or when the table conversation becomes too noisy
+                  to track mentally.
+                </p>
+                <ul>
+                  <li>Draws directional arrows between players based on entered claims.</li>
+                  <li>Makes conflicting visit claims easier to spot quickly.</li>
+                  <li>Highlights contradictions such as duplicate claimed targets.</li>
+                  <li>Transforms raw entries into a readable visual relationship map.</li>
+                </ul>
+              </article>
+
+              <article class="tracker-panel" id="roles">
+                <div class="tracker-section-heading">
+                  <span>06</span>
+                  <h2>Roles In Play</h2>
+                </div>
+                <p>
+                  Roles in Play functions as the tracker's automated deduction
+                  engine. As role claims and recorded actions accumulate, this
+                  panel narrows the possible set of remaining roles and helps
+                  distinguish truthful information from misleading claims.
+                </p>
+                <p>
+                  This is why the project should not be described as simple
+                  note-taking. The overlay combines manual inputs with a
+                  structured deduction layer that actively updates the space of
+                  plausible roles as the match develops.
+                </p>
+                <ul>
+                  <li>Tracks claimed roles dynamically as the game unfolds.</li>
+                  <li>Monitors confirmed roles remaining in the setup.</li>
+                  <li>Calculates possible roles still in play.</li>
+                  <li>Supports faster truth-versus-lie evaluation during discussion.</li>
+                </ul>
+              </article>
+
+              <article class="tracker-panel" id="workflow">
+                <div class="tracker-section-heading">
+                  <span>07</span>
+                  <h2>Match Workflow</h2>
+                </div>
+                <p>
+                  The intended workflow starts with match setup and then moves
+                  through repeated cycles of input, visualization, and role
+                  narrowing. Each panel has a narrow responsibility, but the
+                  panels are designed to reinforce one another rather than act
+                  as isolated widgets.
+                </p>
+                <p>
+                  A standard round begins by preparing the roster, advancing
+                  the timeline with the Controller Bar, recording claims and
+                  night actions, checking the Visit Map for contradictions, and
+                  consulting Roles in Play to see how the set of remaining
+                  possibilities has changed.
+                </p>
+                <ul>
+                  <li>Reset the tracker when a new game begins.</li>
+                  <li>Add the lobby to the Player List and arrange players by seat order.</li>
+                  <li>Advance timeline phases such as Night 1 from the Controller Bar.</li>
+                  <li>Manually input claims and night actions in the Detail panel.</li>
+                  <li>Use Visit Map and Roles in Play to inspect contradictions and remaining role possibilities.</li>
+                </ul>
+              </article>
+
+              <article class="tracker-panel tracker-panel-wide" id="constraints">
+                <div class="tracker-section-heading">
+                  <span>08</span>
+                  <h2>Constraints and Stack</h2>
+                </div>
+                <p>
+                  Several constraints in the source materially shape how the
+                  product should be documented. The tracker is built for the
+                  Overwolf ecosystem, it depends on manual data entry rather
+                  than automatic gameplay detection, and the roster model is
+                  bounded to matches of up to 15 players.
+                </p>
+                <p>
+                  The repository is published publicly as
+                  <strong>daiViis/Feign_Deduction_Tracker</strong>. The noted
+                  implementation stack centers on TypeScript with CSS,
+                  JavaScript, HTML, Vite, and a modular <code>manifest.json</code>
+                  structure. The source also indicates that there are no
+                  published releases, so the archive link above should be read
+                  as source download access rather than a versioned release
+                  channel.
+                </p>
+                <ul>
+                  <li>Platform target: Overwolf overlay environment.</li>
+                  <li>Input model: manual claims and night action entry.</li>
+                  <li>Roster constraint: maximum of 15 tracked players.</li>
+                  <li>Stack: TypeScript, CSS, JavaScript, HTML, Vite, modular manifest setup.</li>
+                </ul>
+              </article>
+            </section>
           </div>
-
-          <p class="tracker-summary">
-            Feign Deduction Tracker is a premium companion interface for Feign,
-            designed to keep role deductions clear, confidence levels visible,
-            and team communication faster during high-pressure rounds.
-          </p>
-
-          <div class="tracker-actions">
-            <a
-              class="button button-main-link"
-              href="https://github.com/daiViis/feign_deduction_tracker"
-              target="_blank"
-              rel="noreferrer"
-            >
-              View Repository on GitHub
-            </a>
-            <p class="tracker-overwolf-note">
-              Built with support for the Overwolf ecosystem.
-            </p>
-          </div>
-        </section>
-
-        <section class="tracker-grid" aria-label="Project details">
-          <article class="tracker-panel">
-            <h2>Core Experience</h2>
-            <p>
-              The app turns deduction tracking into a fast and visual workflow,
-              so players spend less time remembering notes and more time
-              deciding the next move.
-            </p>
-            <ul>
-              <li>Live suspect tracking with confidence-based role labeling.</li>
-              <li>Quick action controls optimized for in-match use.</li>
-              <li>Clean structure built for readability at a glance.</li>
-            </ul>
-          </article>
-
-          <article class="tracker-panel tracker-panel-glass">
-            <h2>Why Overwolf</h2>
-            <p>
-              Overwolf enables a seamless overlay context, helping players keep
-              strategy tools accessible while staying focused on the game
-              session.
-            </p>
-            <ul>
-              <li>Companion behavior designed around gameplay continuity.</li>
-              <li>Lightweight UI patterns to reduce cognitive overhead.</li>
-              <li>Consistent visual language aligned with this portfolio.</li>
-            </ul>
-          </article>
-
-          <article class="tracker-panel tracker-panel-wide">
-            <h2>Design Direction</h2>
-            <p>
-              This project follows a modern glassmorphism approach with layered
-              highlights, muted metallic tones, and strong typographic hierarchy
-              to deliver a polished, premium feel without sacrificing clarity.
-            </p>
-          </article>
         </section>
       </main>
 
