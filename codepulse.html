@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CodePulse | David Cit</title>
+    <meta
+      name="description"
+      content="Technical documentation for CodePulse, a desktop utility for Discord Rich Presence. Covers the Electron architecture, watcher core, heuristic phase derivation, and AI labeling integration."
+    />
+    <meta name="theme-color" content="#060606" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <div class="site-shell project-shell">
+      <div class="site-background" aria-hidden="true">
+        <span class="geo-grid"></span>
+        <span class="geo-cursor-glow"></span>
+      </div>
+      <div class="site-noise" aria-hidden="true"></div>
+
+      <main class="project-page-main">
+        <a class="project-back-link" href="/index.html">
+          <span aria-hidden="true">&larr;</span>
+          <span>Back to Homepage</span>
+        </a>
+
+        <section class="tracker-doc-shell" aria-labelledby="tracker-page-title">
+          <aside class="tracker-doc-sidebar" aria-label="Documentation navigation">
+            <div class="tracker-sidebar-block">
+              <p class="tracker-sidebar-label">Document</p>
+              <h2 class="tracker-sidebar-title">CodePulse</h2>
+              <p class="tracker-sidebar-text">
+                Documentation for the Discord Rich Presence utility, its watcher core,
+                intelligent phase derivation, and AI integration.
+              </p>
+            </div>
+            <div class="tracker-sidebar-block">
+              <p class="tracker-sidebar-label">Contents</p>
+              <nav class="tracker-doc-nav">
+                <a href="#overview">01 Overview</a>
+                <a href="#watcher">02 Watcher Core</a>
+                <a href="#derivation">03 Phase Derivation</a>
+                <a href="#ai">04 AI Labeling</a>
+                <a href="#codex">05 Codex Integration</a>
+                <a href="#ui">06 Desktop UI & Tray</a>
+                <a href="#flow">07 Control Flow</a>
+                <a href="#stack">08 Technical Stack</a>
+              </nav>
+            </div>
+
+            <div class="tracker-sidebar-block tracker-sidebar-meta">
+              <p class="tracker-sidebar-label">Metadata</p>
+              <dl class="tracker-doc-meta">
+                <div>
+                  <dt>Project Type</dt>
+                  <dd>Windows Desktop Utility</dd>
+                </div>
+                <div>
+                  <dt>Platform</dt>
+                  <dd>Discord Ecosystem</dd>
+                </div>
+                <div>
+                  <dt>Core Stack</dt>
+                  <dd>Electron + Node.js</dd>
+                </div>
+                <div>
+                  <dt>AI Refinement</dt>
+                  <dd>Optional OpenAI Layer</dd>
+                </div>
+                <div>
+                  <dt>Status</dt>
+                  <dd>Finished Project</dd>
+                </div>
+              </dl>
+            </div>
+          </aside>
+
+          <div class="tracker-doc-content">
+            <header class="tracker-hero">
+              <div class="tracker-hero-header">
+                <span class="tracker-icon" aria-hidden="true">
+                  <img src="/CodePulse.png" alt="" />
+                </span>
+                <div class="tracker-heading">
+                  <p class="section-kicker">Product Documentation</p>
+                  <h1 id="tracker-page-title">CodePulse Documentation</h1>
+                </div>
+              </div>
+
+              <div class="tracker-hero-meta">
+                <span>Intelligent Discord Rich Presence</span>
+                <span>Stand-alone Electron utility</span>
+                <span>AI-powered activity classification</span>
+              </div>
+
+              <p class="tracker-summary">
+                CodePulse is a standalone Windows desktop utility designed to keep a user's Discord Rich Presence aligned with their current coding activity. Unlike standard editor-specific plugins, CodePulse operates as a local desktop process that watches local workspace activity and resolves those signals into intelligent, human-readable status updates without requiring direct editor integration.
+              </p>
+
+              <div class="tracker-actions">
+                <a
+                  class="button button-main-link"
+                  href="https://github.com/daiViis/CodePulse"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  View Repository
+                </a>
+                <a
+                  class="button button-secondary"
+                  href="https://github.com/daiViis/CodePulse/archive/refs/heads/main.zip"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Download Source ZIP
+                </a>
+              </div>
+
+              <p class="tracker-overwolf-note">
+                Electron-based shell, tray persistence, frameless UI status window, and Discord IPC communication are core parts of the implementation.
+              </p>
+            </header>
+
+            <section class="tracker-sections" aria-label="Project documentation">
+              <article class="tracker-panel" id="overview">
+                <div class="tracker-section-heading">
+                  <span>01</span>
+                  <h2>Overview</h2>
+                </div>
+                <p>
+                  The application operates on a three-layer mental model: Detection, Decision, and Delivery. It monitors file activity across configured workspace roots, resolves these signals to identify the active project and current work phase, and publishes the resulting state to both Discord and a dedicated local desktop interface.
+                </p>
+                <p>
+                  This decoupled approach allows CodePulse to stay editor-agnostic. Whether you are working in VS Code, JetBrains, or a simple text editor, the utility provides a consistent presence layer based on the actual file system and git state of your project.
+                </p>
+                <ul>
+                  <li>Detection layer: Gathers local signals by watching file activity and runtime contexts.</li>
+                  <li>Decision layer: Resolves signals to pick the active project and derive an activity label.</li>
+                  <li>Delivery layer: Updates Discord Rich Presence and the local desktop UI with current state.</li>
+                  <li>Editor-agnostic: Operates independently of specific IDE or code editor plugins.</li>
+                </ul>
+              </article>
+
+              <article class="tracker-panel tracker-panel-glass" id="watcher">
+                <div class="tracker-section-heading">
+                  <span>02</span>
+                  <h2>Watcher Core</h2>
+                </div>
+                <p>
+                  The Watcher Core is the orchestration engine responsible for monitoring workspace roots and recording file activity. It uses recursive filesystem watchers to capture events and processes them through an absolute path resolution layer.
+                </p>
+                <p>
+                  To ensure efficiency and prevent UI flickering, the watcher utilizes a debounced refresh cycle. Bursts of file events—common during builds or multi-file edits—are collapsed into single updates, reducing system overhead and ensuring the published presence remains stable and accurate.
+                </p>
+                <ul>
+                  <li>Recursive filesystem watching for configured workspace roots.</li>
+                  <li>750ms debounced refresh cycle to handle high-frequency file events.</li>
+                  <li>Automatic noise filtering for common build and internal directories.</li>
+                  <li>Tracks ProjectActivity models with git root and branch awareness.</li>
+                </ul>
+              </article>
+
+              <article class="tracker-panel" id="derivation">
+                <div class="tracker-section-heading">
+                  <span>03</span>
+                  <h2>Phase Derivation</h2>
+                </div>
+                <p>
+                  CodePulse derives human-readable activity labels, or "phases," using a layered heuristic approach. It first checks for git branch rules, mapping prefixes like `bugfix` or `feature` to specific work types. If no branch matches, it analyzes recent file paths to categorize the work.
+                </p>
+                <p>
+                  This system allows the application to automatically distinguish between UI design (detecting .css or .tsx files), backend development (detecting API or service routes), and project documentation (detecting .md files), providing deep context to Discord friends and teammates.
+                </p>
+                <ul>
+                  <li>Branch Rules: Maps git branch names to phases (e.g., bugfix, refactor, testing).</li>
+                  <li>Path Rules: Maps directory and file extensions to categories (e.g., UI work, Backend).</li>
+                  <li>Fallback Logic: Defaults to "Editing [filename]" or a general "In Progress" label.</li>
+                  <li>Configurable templates for dynamic presence strings.</li>
+                </ul>
+              </article>
+
+              <article class="tracker-panel" id="ai">
+                <div class="tracker-section-heading">
+                  <span>04</span>
+                  <h2>AI Labeling</h2>
+                </div>
+                <p>
+                  For users wanting more precise activity descriptions, CodePulse includes an optional AI labeling layer. This integration uses a privacy-aware context summary rather than raw file contents to generate refined activity labels that reflect the actual intent of the work.
+                </p>
+                <p>
+                  The AI layer captures the project name, branch, and changed file groups, hashing this context to reuse cached labels and minimize API calls. A normalization step ensures returned labels are concise and adhere to safety rules before being published to Discord.
+                </p>
+                <ul>
+                  <li>Optional OpenAI integration (defaulting to gpt-5.4-mini).</li>
+                  <li>Privacy-aware: Sends sanitized context summaries, not raw code.</li>
+                  <li>Intelligent Caching: Uses SHA-1 context hashing to minimize throttled requests.</li>
+                  <li>Safety filtering to discard repetitive or invalid generated labels.</li>
+                </ul>
+              </article>
+
+              <article class="tracker-panel tracker-panel-wide" id="codex">
+                <div class="tracker-section-heading">
+                  <span>05</span>
+                  <h2>Codex Integration</h2>
+                </div>
+                <p>
+                  CodePulse features a unique native integration for the local Codex runtime. It can infer project context and user intent by parsing local process data and session artifacts stored in the `~/.codex` directory, such as recent prompts and session indexes.
+                </p>
+                <p>
+                  This allows the application to capture the specific goals the user has discussed with their local AI assistant, providing even deeper insight into the current coding session. It bridges the gap between file system activity and the conceptual tasks being performed.
+                </p>
+                <ul>
+                  <li>Bespoke support for local Codex runtime process detection.</li>
+                  <li>Parses session artifacts from ~/.codex/sessions for context.</li>
+                  <li>Extracts recent prompt text and session titles for presence detail.</li>
+                  <li>Provides a unified view of development and local AI-assisted work.</li>
+                </ul>
+              </article>
+
+              <article class="tracker-panel" id="ui">
+                <div class="tracker-section-heading">
+                  <span>06</span>
+                  <h2>Desktop UI & Tray</h2>
+                </div>
+                <p>
+                  Instead of a headless service, CodePulse provides a compact desktop UI built with Electron. The main window features a frameless design with a live status view, displaying the active project, derived phase, session timer, and the connection status for both Discord and the AI service.
+                </p>
+                <p>
+                  The utility is designed to stay out of the way, minimizing to the system tray for background operation. Users can access a tray menu to quickly check status, open the main window, or access settings for workspace and presence configuration.
+                </p>
+                <ul>
+                  <li>Frameless status window with live data updates.</li>
+                  <li>System tray integration for lightweight background operation.</li>
+                  <li>Persistent session timer showing elapsed time per project.</li>
+                  <li>Settings modal for workspace paths, templates, and AI configuration.</li>
+                </ul>
+              </article>
+
+              <article class="tracker-panel" id="flow">
+                <div class="tracker-section-heading">
+                  <span>07</span>
+                  <h2>Control Flow</h2>
+                </div>
+                <p>
+                  The runtime lifecycle is managed by an Electron shell that ensures a single-instance lock and handles configuration loading across multiple sources, including JSON settings and environment variables. On startup, the shell initializes the PresenceWatcherApp and begins publishing snapshots.
+                </p>
+                <p>
+                  Discord communication is handled via Windows named pipes, allowing direct IPC with the local Discord client. The application manages the handshake, suppresses duplicate payloads, and includes automatic reconnection logic to ensure a stable presence throughout long coding sessions.
+                </p>
+                <ul>
+                  <li>Single-instance locking and unified configuration management.</li>
+                  <li>Direct Discord IPC via Windows named pipes (\\\\?\\pipe\\discord-ipc-0).</li>
+                  <li>Automatic session resetting based on project or Codex context shifts.</li>
+                  <li>Builds and publishes WatcherSnapshot payloads for UI and Presence layers.</li>
+                </ul>
+              </article>
+
+              <article class="tracker-panel tracker-panel-wide" id="stack">
+                <div class="tracker-section-heading">
+                  <span>08</span>
+                  <h2>Technical Stack</h2>
+                </div>
+                <p>
+                  CodePulse is built on a modern JavaScript stack, utilizing Electron for the desktop environment and TypeScript for type-safe logic across the watcher and UI layers. The project uses Vite for development and is packaged as a portable Windows executable.
+                </p>
+                <p>
+                  The architecture splits logic between a main process (watcher orchestration and Discord IPC) and a renderer process (UI display), ensuring that the background watching activity remains isolated from the frontend interface for maximum performance.
+                </p>
+                <ul>
+                  <li>Framework: Electron with Node.js and TypeScript.</li>
+                  <li>Frontend: HTML/CSS/JS with Vite and a dedicated renderer shell.</li>
+                  <li>Communication: Discord IPC (Named Pipes) and Electron contextBridge.</li>
+                  <li>Packaging: Electron Builder for Windows portable executables.</li>
+                </ul>
+              </article>
+            </section>
+          </div>
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        <p>&copy; 2026 David Cit. All rights reserved.</p>
+        <nav class="site-footer-nav" aria-label="Footer">
+          <a href="/index.html">Home</a>
+          <a href="/feign-tracker.html">Feign Tracker</a>
+          <a href="/codepulse.html">CodePulse</a>
+          <a
+            href="https://github.com/daiViis/"
+            target="_blank"
+            rel="noreferrer"
+          >
+            GitHub
+          </a>
+        </nav>
+      </footer>
+    </div>
+
+    <script type="module" src="/main.js"></script>
+  </body>
+</html>
