@@ -810,6 +810,38 @@ main {
   line-height: 1.6;
 }
 
+.project-priority-visual {
+  position: relative;
+  flex: 0 0 45%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  perspective: 1500px;
+  pointer-events: none;
+}
+
+.project-priority-visual img {
+  width: 130%;
+  height: auto;
+  object-fit: contain;
+  border-radius: 1.25rem;
+  box-shadow: 
+    0 30px 60px -12px rgba(0, 0, 0, 0.6),
+    0 18px 36px -18px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+  transform: rotateY(-22deg) rotateX(8deg) rotateZ(-2deg) translateX(10%);
+  transition: transform 600ms cubic-bezier(0.23, 1, 0.32, 1), filter 600ms ease, opacity 600ms ease;
+  filter: saturate(0.8) contrast(1.1);
+  opacity: 0.35;
+}
+
+.project-link-card:hover .project-priority-visual img {
+  transform: rotateY(-10deg) rotateX(4deg) rotateZ(0) translateX(5%) scale(1.05);
+  filter: saturate(1.1) contrast(1.1);
+  opacity: 1;
+}
+
 .tag-vibe {
   display: inline-flex;
   align-items: center;
