@@ -1,0 +1,33 @@
+{
+  "projects": [
+    {
+      "id": "svj-finder",
+      "title": "SVJ Finder",
+      "description": "Intelligent analytical tool using advanced AI to extract, validate, and organize public data about Czech Homeowners' Associations into clear, actionable insights.",
+      "url": "https://daiviis.github.io/svj-finder.html",
+      "appUrl": "https://svj-finder-353144216640.us-west1.run.app/",
+      "image": "https://daiviis.github.io/svj-finder-background.png",
+      "tags": ["Vibe Coded"],
+      "priority": true
+    },
+    {
+      "id": "feign-tracker",
+      "title": "Feign Deduction Tracker",
+      "description": "Tactical companion app with deduction tools built for Feign on Overwolf.",
+      "url": "https://daiviis.github.io/feign-tracker.html",
+      "githubUrl": "https://github.com/daiViis/Feign_Deduction_Tracker",
+      "icon": "https://daiviis.github.io/feign-overlay-icon.png",
+      "tags": [],
+      "priority": false
+    },
+    {
+      "id": "codepulse",
+      "title": "CodePulse",
+      "description": "Intelligent Discord Rich Presence utility with AI-powered activity classification.",
+      "url": "https://daiviis.github.io/codepulse.html",
+      "icon": "https://daiviis.github.io/CodePulse.png",
+      "tags": [],
+      "priority": false
+    }
+  ]
+}
