@@ -1,6 +1,54 @@
 const siteBackground = document.querySelector('.site-background')
 const vodafoneToggle = document.querySelector('[data-vodafone-toggle]')
 
+// Custom Cursor Implementation
+const cursor = document.createElement('div')
+const cursorRing = document.createElement('div')
+cursor.className = 'custom-cursor'
+cursorRing.className = 'custom-cursor-ring'
+document.body.appendChild(cursor)
+document.body.appendChild(cursorRing)
+
+let mouseX = 0
+let mouseY = 0
+let ringX = 0
+let ringY = 0
+
+window.addEventListener('mousemove', (e) => {
+  mouseX = e.clientX
+  mouseY = e.clientY
+  cursor.style.left = `${mouseX}px`
+  cursor.style.top = `${mouseY}px`
+})
+
+const animateRing = () => {
+  ringX += (mouseX - ringX) * 0.15
+  ringY += (mouseY - ringY) * 0.15
+  cursorRing.style.left = `${ringX}px`
+  cursorRing.style.top = `${ringY}px`
+  requestAnimationFrame(animateRing)
+}
+animateRing()
+
+// Interaction effects
+const interactiveElements = document.querySelectorAll('a, button, [role="button"]')
+interactiveElements.forEach((el) => {
+  el.addEventListener('mouseenter', () => {
+    cursor.style.transform = 'translate(-50%, -50%) scale(1.5)'
+    cursor.style.background = '#fff'
+    cursorRing.style.width = '48px'
+    cursorRing.style.height = '48px'
+    cursorRing.style.borderColor = 'rgba(255, 255, 255, 0.5)'
+  })
+  el.addEventListener('mouseleave', () => {
+    cursor.style.transform = 'translate(-50%, -50%) scale(1)'
+    cursor.style.background = 'var(--accent)'
+    cursorRing.style.width = '32px'
+    cursorRing.style.height = '32px'
+    cursorRing.style.borderColor = 'rgba(209, 164, 95, 0.3)'
+  })
+})
+
 if (siteBackground) {
   const target = {
     x: window.innerWidth * 0.5,
@@ -69,8 +117,8 @@ if (vodafoneToggle) {
     vodafoneToggle.setAttribute(
       'aria-label',
       isOpen
-        ? 'Collapse Vodafone partner label'
-        : 'Show Vodafone partner label'
+        ? 'Collapse VODAFONE PARTNER label'
+        : 'Show VODAFONE PARTNER label'
     )
   })
 }
