@@ -10,6 +10,7 @@ export default defineConfig({
         main: 'index.html',
         feignTracker: 'feign-tracker.html',
         codePulse: 'codepulse.html',
+        svjFinder: 'svj-finder.html',
       },
     },
   },

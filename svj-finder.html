@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SVJ Finder | David Cit</title>
+    <meta
+      name="description"
+      content="Technical documentation for SVJ Finder, an AI-powered analytical tool for extracting and validating data about Czech Homeowners' Associations (SVJ)."
+    />
+    <meta name="theme-color" content="#060606" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <div class="site-shell project-shell">
+      <div class="site-background" aria-hidden="true">
+        <span class="geo-grid"></span>
+        <span class="geo-cursor-glow"></span>
+      </div>
+      <div class="site-noise" aria-hidden="true"></div>
+
+      <main class="project-page-main">
+        <a class="project-back-link" href="/index.html">
+          <span aria-hidden="true">&larr;</span>
+          <span>Back to Homepage</span>
+        </a>
+
+        <section class="tracker-doc-shell" aria-labelledby="tracker-page-title">
+          <aside class="tracker-doc-sidebar" aria-label="Documentation navigation">
+            <div class="tracker-sidebar-block">
+              <p class="tracker-sidebar-label">Document</p>
+              <h2 class="tracker-sidebar-title">SVJ Finder</h2>
+              <p class="tracker-sidebar-text">
+                Documentation for the AI-driven data engine, multi-level validation 
+                architecture, and privacy-first security model.
+              </p>
+            </div>
+            <div class="tracker-sidebar-block">
+              <p class="tracker-sidebar-label">Contents</p>
+              <nav class="tracker-doc-nav">
+                <a href="#overview">01 Overview</a>
+                <a href="#cognitive">02 Cognitive Layer</a>
+                <a href="#data-flow">03 Data Flow</a>
+                <a href="#validation">04 Data Validation</a>
+                <a href="#security">05 Security & Privacy</a>
+                <a href="#stack">06 Technical Stack</a>
+                <a href="#roadmap">07 Future Roadmap</a>
+              </nav>
+            </div>
+
+            <div class="tracker-sidebar-block tracker-sidebar-meta">
+              <p class="tracker-sidebar-label">Metadata</p>
+              <dl class="tracker-doc-meta">
+                <div>
+                  <dt>Project Type</dt>
+                  <dd>Analytical Tool / Web App</dd>
+                </div>
+                <div>
+                  <dt>Core Engine</dt>
+                  <dd>Gemini 1.5 Flash AI</dd>
+                </div>
+                <div>
+                  <dt>Data Sources</dt>
+                  <dd>Justice.cz, ARES, Kurzy.cz</dd>
+                </div>
+                <div>
+                  <dt>Security</dt>
+                  <dd>Privacy by Design / AES-256</dd>
+                </div>
+                <div>
+                  <dt>Status</dt>
+                  <dd>Production / Vibe Coded</dd>
+                </div>
+              </dl>
+            </div>
+          </aside>
+
+          <div class="tracker-doc-content">
+            <header class="tracker-hero">
+              <div class="tracker-hero-header">
+                <div class="tracker-heading">
+                  <p class="section-kicker">Product Documentation</p>
+                  <h1 id="tracker-page-title">SVJ Finder Documentation</h1>
+                </div>
+              </div>
+
+              <div class="tracker-hero-meta">
+                <span>Intelligent SVJ Analytics</span>
+                <span>Production Web Application</span>
+                <span>Privacy-First Architecture</span>
+                <span class="tag-vibe">Vibe Coded</span>
+              </div>
+
+              <p class="tracker-summary">
+                SVJ Finder is an intelligent analytical tool that uses advanced AI to effortlessly extract, validate, and organize fragmented public data about Czech Homeowners' Associations (SVJ) into clear, actionable insights. Developed to solve the critical issue of fragmented housing management data, it transforms unstructured registry records into a digitally processed, high-validity format.
+              </p>
+
+              <div class="tracker-actions">
+                <a
+                  class="button button-main-link"
+                  href="https://svj-finder-353144216640.us-west1.run.app/"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Launch Application
+                </a>
+              </div>
+
+              <p class="tracker-overwolf-note">
+                Real-time parsing, cognitive semantic analysis, and multi-level cross-checking are the foundational pillars of the SVJ Finder engine.
+              </p>
+            </header>
+
+            <section class="tracker-sections" aria-label="Project documentation">
+              <article class="tracker-panel" id="overview">
+                <div class="tracker-section-heading">
+                  <span>01</span>
+                  <h2>Overview</h2>
+                </div>
+                <p>
+                  SVJ Finder was developed as a direct response to the lack of transparency in Czech housing management data. While information about Homeowners' Associations is legally public, the manual process of querying various registries like Justice.cz is tedious and technically complex for regular users.
+                </p>
+                <p>
+                  The system goes beyond simple data aggregation. It employs advanced cognitive analysis to interpret complex legal relationships and accurately identify key individuals within an SVJ, providing a streamlined experience that saves time and reduces friction for property owners and managers.
+                </p>
+                <ul>
+                  <li>Solves data fragmentation in the Czech housing sector.</li>
+                  <li>Transforms unstructured legal records into structured data.</li>
+                  <li>Increases accessibility to public information through AI.</li>
+                  <li>Prioritizes actionable insights over raw data dumps.</li>
+                </ul>
+              </article>
+
+              <article class="tracker-panel tracker-panel-glass" id="cognitive">
+                <div class="tracker-section-heading">
+                  <span>02</span>
+                  <h2>Cognitive Layer</h2>
+                </div>
+                <p>
+                  At the heart of SVJ Finder is the Cognitive Layer, powered by the Gemini 1.5 Flash model. This layer is responsible for the semantic extraction of data from varied and often messy public records, ensuring that the system understands the context of the information it retrieves.
+                </p>
+                <p>
+                  The AI model performs entity recognition and validates logical ties between different data points. This allows the application to handle variations in record formats and legal terminology that would break traditional rule-based scrapers.
+                </p>
+                <ul>
+                  <li>Powered by Gemini 1.5 Flash for high-speed semantic analysis.</li>
+                  <li>Performs advanced entity recognition on legal documents.</li>
+                  <li>Interprets complex legal relationships within committee structures.</li>
+                  <li>Enables logical validation of extracted data points.</li>
+                </ul>
+              </article>
+
+              <article class="tracker-panel" id="data-flow">
+                <div class="tracker-section-heading">
+                  <span>03</span>
+                  <h2>Data Flow</h2>
+                </div>
+                <p>
+                  The application follows a high-level, real-time parsing data flow. It starts with a user's address query, which is first geocoded to ensure precise location targeting. The system then queries multiple primary data sources simultaneously to gather raw information.
+                </p>
+                <p>
+                  Once gathered, the raw data is passed to the AI Analyzer for processing into a structured JSON format. This result is then presented to the user as verified contact and committee information, completing the cycle from unstructured query to verified insight.
+                </p>
+                <ul>
+                  <li>Input: User address or IČO query.</li>
+                  <li>Geo-coding: Precise location resolution via MapBox/Google Maps.</li>
+                  <li>Search Engine: Multi-threaded queries to Justice.cz, ARES, and Kurzy.cz.</li>
+                  <li>AI Analysis: Contextual transformation into structured data.</li>
+                </ul>
+              </article>
+
+              <article class="tracker-panel" id="validation">
+                <div class="tracker-section-heading">
+                  <span>04</span>
+                  <h2>Data Validation</h2>
+                </div>
+                <p>
+                  Data validity is the primary technical priority for SVJ Finder. To eliminate the risk of AI "hallucinations," the system implements a multi-level validation architecture that cross-checks every piece of information against official records.
+                </p>
+                <p>
+                  This includes verifying IČO numbers against physical addresses, validating the functional terms of committee members, and automatically detecting inactive subjects or those in liquidation. This rigorous process ensures that the output accurately reflects the current legal status.
+                </p>
+                <ul>
+                  <li>Multi-level validation to eliminate AI hallucinations.</li>
+                  <li>Cross-checking of IČO numbers against geocoded addresses.</li>
+                  <li>Verification of committee member functional terms.</li>
+                  <li>Automatic detection and highlighting of inactive or liquidated subjects.</li>
+                </ul>
+              </article>
+
+              <article class="tracker-panel tracker-panel-wide" id="security">
+                <div class="tracker-section-heading">
+                  <span>05</span>
+                  <h2>Security and Privacy</h2>
+                </div>
+                <p>
+                  SVJ Finder is engineered with a "Privacy by Design" philosophy. Although the data processed is public by nature, the system ensures that user queries and interaction history are protected by industry-standard security protocols.
+                </p>
+                <p>
+                  All communication is secured via TLS 1.3, and data stored in the cloud is encrypted at rest using AES-256. Access control is managed through a robust authentication layer with strict rules to prevent unauthorized data access or leaking of user activity patterns.
+                </p>
+                <ul>
+                  <li>TLS 1.3 encryption for all data in transit.</li>
+                  <li>AES-256 encryption at rest for database records.</li>
+                  <li>Robust access control via Firebase Auth and Firestore Rules.</li>
+                  <li>Minimal data retention policy to enhance user privacy.</li>
+                </ul>
+              </article>
+
+              <article class="tracker-panel" id="stack">
+                <div class="tracker-section-heading">
+                  <span>06</span>
+                  <h2>Technical Stack</h2>
+                </div>
+                <p>
+                  The application utilizes a modern, performance-oriented tech stack designed for scalability and rapid development. The frontend is built with React 18 and Vite, following a strict component-based architecture for maximum reusability.
+                </p>
+                <p>
+                  TypeScript ensures type safety across the entire codebase, while Tailwind CSS provides a highly maintainable and responsive styling layer. The backend infrastructure leverages the Firebase ecosystem for real-time data handling and secure authentication.
+                </p>
+                <ul>
+                  <li>Frontend: React 18, Vite, TypeScript.</li>
+                  <li>Styling: Tailwind CSS with custom design tokens.</li>
+                  <li>AI Engine: Gemini 1.5 Flash API.</li>
+                  <li>Infrastructure: Firestore, Firebase Auth, Google Cloud Run.</li>
+                </ul>
+              </article>
+
+              <article class="tracker-panel tracker-panel-wide" id="roadmap">
+                <div class="tracker-section-heading">
+                  <span>07</span>
+                  <h2>Future Roadmap</h2>
+                </div>
+                <p>
+                  The SVJ Finder development plan includes expanding data depth and platform availability. Upcoming milestones focus on integrating deeper property records and providing native mobile experiences for users on the go.
+                </p>
+                <p>
+                  Future versions will introduce direct API access for professional property management companies, allowing them to automate their validation workflows and integrate SVJ Finder's intelligent engine into their existing internal tools.
+                </p>
+                <ul>
+                  <li>Q2 2026: Direct integration with the Cadastre for ownership verification.</li>
+                  <li>Q3 2026: Native iOS and Android applications with push notifications.</li>
+                  <li>Q4 2026: Professional API for property management and real estate firms.</li>
+                </ul>
+              </article>
+            </section>
+          </div>
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        <p>&copy; 2026 David Cit. All rights reserved.</p>
+        <nav class="site-footer-nav" aria-label="Footer">
+          <a href="/index.html">Home</a>
+          <a href="/svj-finder.html">SVJ Finder</a>
+          <a href="/feign-tracker.html">Feign Tracker</a>
+          <a href="/codepulse.html">CodePulse</a>
+          <a
+            href="https://github.com/daiViis/"
+            target="_blank"
+            rel="noreferrer"
+          >
+            GitHub
+          </a>
+        </nav>
+      </footer>
+    </div>
+
+    <script type="module" src="/main.js"></script>
+  </body>
+</html>
