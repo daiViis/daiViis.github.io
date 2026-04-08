@@ -1,0 +1,6 @@
+bin/
+.vercel/
+.env
+.env.*
+!.env.example
+assets/js/local-env-config.local.js

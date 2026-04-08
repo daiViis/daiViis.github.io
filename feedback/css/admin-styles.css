@@ -1,0 +1,350 @@
+/* Admin Panel Shared Styles */
+body { 
+    font-family: 'Oxygen', sans-serif; 
+}
+
+.loading { 
+    animation: pulse 2s infinite; 
+}
+
+/* Enhanced table interactions */
+.table-row:hover { 
+    background-color: #f3f4f6;
+    transform: translateX(2px);
+    box-shadow: -2px 0 0 #000;
+}
+
+.table-row { 
+    transition: all 0.15s ease;
+}
+
+.section-header { 
+    border-left: 4px solid #000; 
+}
+
+/* Stats cards with hover lift */
+.stats-card { 
+    border-left: 2px solid #e5e7eb;
+    transition: all 0.2s ease;
+}
+
+.stats-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border-left-width: 3px;
+}
+
+/* Enhanced button interactions */
+.btn-primary { 
+    box-shadow: 2px 2px 0 #000;
+    transition: all 0.1s ease;
+}
+
+.btn-primary:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0 #000;
+}
+
+.btn-primary:active {
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0 #000;
+}
+
+.btn-secondary { 
+    box-shadow: 1px 1px 0 #666;
+    transition: all 0.1s ease;
+}
+
+.btn-secondary:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 2px 2px 0 #666;
+}
+
+.btn-secondary:active {
+    transform: translate(1px, 1px);
+    box-shadow: 0px 0px 0 #666;
+}
+
+/* Modal animations */
+.modal-content { 
+    box-shadow: 4px 4px 0 #000;
+    animation: modalSlideIn 0.2s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -60%);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+}
+
+.active-section { 
+    background-color: #fafafa; 
+}
+
+/* Form field focus animations */
+input:focus, select:focus, textarea:focus {
+    transform: scale(1.01);
+    transition: all 0.15s ease;
+}
+
+/* Enhanced loading state */
+.loading {
+    position: relative;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #000, transparent);
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* Checkbox and radio interactions */
+input[type="checkbox"], input[type="radio"] {
+    transition: all 0.1s ease;
+}
+
+input[type="checkbox"]:checked, input[type="radio"]:checked {
+    transform: scale(1.1);
+}
+
+/* Success/error feedback animations */
+@keyframes success-pulse {
+    0% { background-color: #10b981; }
+    50% { background-color: #059669; }
+    100% { background-color: #10b981; }
+}
+
+@keyframes error-shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-2px); }
+    75% { transform: translateX(2px); }
+}
+
+/* Notes word wrapping for long URLs */
+.break-words {
+    word-wrap: break-word;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+}
+
+.word-break-all {
+    word-break: break-all;
+}
+
+/* Link styling in notes */
+.note-link {
+    word-break: break-all;
+    overflow-wrap: break-word;
+    display: inline;
+}
+
+/* Enhanced note interactions */
+.group:hover .group-hover\:opacity-100 {
+    opacity: 1 !important;
+    transition: opacity 0.2s ease;
+}
+
+.note-delete-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    transition: all 0.1s ease;
+}
+
+.note-delete-btn:hover {
+    transform: scale(1.2);
+    color: #dc2626;
+}
+
+/* Subtle focus rings */
+button:focus, input:focus, select:focus, textarea:focus {
+    outline: 2px solid #000;
+    outline-offset: 2px;
+}
+
+/* Micro bounce for important actions */
+@keyframes micro-bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-2px); }
+}
+
+.btn-primary:focus {
+    animation: micro-bounce 0.3s ease;
+}
+
+/* Mobile-first responsive design */
+@media (max-width: 640px) {
+    /* Mobile stats cards */
+    .stats-card {
+        padding: 12px;
+        text-align: center;
+    }
+    
+    .stats-card .text-2xl {
+        font-size: 1.5rem;
+    }
+    
+    /* Mobile table improvements */
+    .table-row:hover {
+        transform: none; /* Disable hover animations on mobile */
+        box-shadow: none;
+    }
+    
+    /* Mobile buttons */
+    .btn-primary, .btn-secondary {
+        padding: 12px 16px;
+        font-size: 14px;
+        min-height: 44px; /* Touch target size */
+    }
+    
+    /* Mobile form inputs */
+    input, select, textarea {
+        padding: 12px;
+        font-size: 16px; /* Prevent zoom on iOS */
+        min-height: 44px;
+    }
+    
+    /* Mobile modal adjustments */
+    .modal-content {
+        margin: 16px;
+        max-height: calc(100vh - 32px);
+    }
+    
+    /* Mobile section headers */
+    .section-header {
+        padding-left: 16px;
+        font-size: 18px;
+    }
+    
+    /* Mobile filter sections */
+    .active-section {
+        padding: 16px;
+    }
+    
+    /* Hide complex hover effects on mobile */
+    .stats-card:hover {
+        transform: none;
+        box-shadow: none;
+    }
+    
+    .btn-primary:hover, .btn-secondary:hover {
+        transform: none;
+        box-shadow: 2px 2px 0 #000;
+    }
+}
+
+/* Tablet adjustments */
+@media (min-width: 641px) and (max-width: 1024px) {
+    /* Tablet-specific adjustments */
+    .stats-card {
+        padding: 14px;
+    }
+    
+    .modal-content {
+        margin: 24px;
+    }
+    
+    /* Maintain some hover effects on tablets */
+    .btn-primary:hover {
+        transform: translate(-1px, -1px);
+        box-shadow: 3px 3px 0 #000;
+    }
+}
+
+/* Desktop enhancements */
+@media (min-width: 1025px) {
+    /* Full hover effects on desktop */
+    .table-row:hover {
+        background-color: #f3f4f6;
+        transform: translateX(2px);
+        box-shadow: -2px 0 0 #000;
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+}
+
+/* High DPI screens */
+@media (-webkit-min-device-pixel-ratio: 2) {
+    /* Ensure crisp borders on retina displays */
+    .border, .border-2, .border-4 {
+        border-width: 0.5px;
+    }
+    
+    .border-2 {
+        border-width: 1px;
+    }
+    
+    .border-4 {
+        border-width: 2px;
+    }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+    /* Mobile touch devices */
+    button, .btn-primary, .btn-secondary, input[type="checkbox"], input[type="radio"] {
+        min-width: 44px;
+        min-height: 44px;
+    }
+    
+    /* Increase spacing for easier touch interaction */
+    .table-row td {
+        padding: 16px 12px;
+    }
+    
+    /* Larger close buttons on modals */
+    .modal-content button:contains('×'), .modal-content button:contains('&times;') {
+        font-size: 24px;
+        min-width: 44px;
+        min-height: 44px;
+    }
+    
+    /* Remove hover states for touch devices */
+    *:hover {
+        background-color: inherit !important;
+        transform: none !important;
+        box-shadow: inherit !important;
+    }
+}
+
+/* Print styles */
+@media print {
+    .btn-primary, .btn-secondary, button {
+        display: none !important;
+    }
+    
+    .modal-content, #loginContainer {
+        display: none !important;
+    }
+    
+    .table-row:hover {
+        background-color: transparent !important;
+        transform: none !important;
+        box-shadow: none !important;
+    }
+    
+    .border-2, .border-4 {
+        border-width: 1px !important;
+    }
+}

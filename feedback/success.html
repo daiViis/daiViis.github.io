@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thank You - Feedback Submitted | David - Digital Transformation Consultant</title>
+    
+    <!-- Favicons -->
+    <link rel="icon" type="image/x-icon" href="../assets/icon/web-icon.ico">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oxygen:wght@300;400;700&family=Oxygen+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['Oxygen', 'system-ui', '-apple-system', 'sans-serif'],
+                        'mono': ['Oxygen Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Custom Styles -->
+    <style>
+        body {
+            font-family: 'Oxygen', sans-serif;
+        }
+        
+        .success-animation {
+            animation: successPulse 0.6s ease-out;
+        }
+        
+        @keyframes successPulse {
+            0% {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        .star-display {
+            animation: starShine 1s ease-out 0.5s;
+            animation-fill-mode: both;
+        }
+        
+        @keyframes starShine {
+            0% {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gradient-to-br from-blue-50 to-green-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-4xl mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <a href="../" class="text-2xl font-bold text-gray-900 hover:text-blue-600 transition-colors">
+                    David
+                </a>
+                <a href="../" class="text-gray-600 hover:text-gray-900 transition-colors">
+                    ← Back to main site
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-3xl mx-auto px-6 py-16">
+        <!-- Success Icon and Message -->
+        <div class="text-center success-animation">
+            <!-- Large checkmark icon -->
+            <div class="mx-auto w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-8">
+                <svg class="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                </svg>
+            </div>
+            
+            <!-- Thank you message -->
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+                Thank You!
+            </h1>
+            <p class="text-xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
+                Your feedback has been successfully submitted and is incredibly valuable to us. 
+                We appreciate you taking the time to share your experience.
+            </p>
+        </div>
+
+        <!-- Feedback Summary Card -->
+        <div class="bg-white rounded-xl shadow-lg p-8 mb-8 star-display">
+            <div class="text-center">
+                <h2 class="text-2xl font-semibold text-gray-900 mb-4">
+                    Your Feedback Summary
+                </h2>
+                <div class="flex justify-center items-center space-x-1 mb-4" id="rating-stars">
+                    <!-- Stars will be populated by JavaScript -->
+                </div>
+                <p id="rating-text" class="text-lg text-gray-600 mb-6">
+                    <!-- Rating text will be populated by JavaScript -->
+                </p>
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <p class="text-blue-800 font-medium">
+                        🎯 Your feedback helps us improve our services and deliver better results for future clients.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- What Happens Next -->
+        <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+            <h2 class="text-2xl font-semibold text-gray-900 mb-6 text-center">
+                What Happens Next?
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="text-center">
+                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-blue-600 font-bold text-xl">1</span>
+                    </div>
+                    <h3 class="font-semibold text-gray-900 mb-2">Review & Analysis</h3>
+                    <p class="text-gray-600 text-sm">
+                        We'll carefully review your feedback and identify areas for improvement.
+                    </p>
+                </div>
+                <div class="text-center">
+                    <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-green-600 font-bold text-xl">2</span>
+                    </div>
+                    <h3 class="font-semibold text-gray-900 mb-2">Service Enhancement</h3>
+                    <p class="text-gray-600 text-sm">
+                        Your insights will help us enhance our development process and client experience.
+                    </p>
+                </div>
+                <div class="text-center">
+                    <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-purple-600 font-bold text-xl">3</span>
+                    </div>
+                    <h3 class="font-semibold text-gray-900 mb-2">Future Improvements</h3>
+                    <p class="text-gray-600 text-sm">
+                        We'll implement changes to deliver even better results for all our clients.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Resources -->
+        <div class="bg-gradient-to-r from-gray-900 to-blue-900 text-white rounded-xl shadow-lg p-8 mb-8">
+            <div class="text-center">
+                <h2 class="text-2xl font-semibold mb-4">
+                    Stay Connected
+                </h2>
+                <p class="text-blue-100 mb-6">
+                    Follow our latest projects and insights
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <a href="../#contact" class="bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-lg transition-all duration-200 transform hover:scale-105 flex items-center justify-center">
+                        <span class="mr-2">📧</span>
+                        Contact Us Again
+                    </a>
+                    <a href="../#portfolio" class="bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-lg transition-all duration-200 transform hover:scale-105 flex items-center justify-center">
+                        <span class="mr-2">🚀</span>
+                        View Our Work
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Call to Action -->
+        <div class="text-center">
+            <div class="bg-white rounded-xl shadow-lg p-8">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">
+                    Know Someone Who Needs Our Services?
+                </h2>
+                <p class="text-gray-600 mb-6">
+                    If you were satisfied with our work, we'd appreciate a referral. 
+                    Your recommendation means the world to us!
+                </p>
+                <div class="space-y-4 md:space-y-0 md:space-x-4 md:flex md:justify-center">
+                    <a href="mailto:?subject=Great Web Development Services&body=I wanted to share this excellent web development service I recently used: [Include main site URL]" 
+                       class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-105">
+                        📤 Refer via Email
+                    </a>
+                    <a href="../" 
+                       class="inline-block bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-105">
+                        🏠 Return to Homepage
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Note -->
+        <div class="text-center mt-12 text-gray-500 text-sm">
+            <p>Thank you again for choosing our services and taking the time to provide feedback.</p>
+            <p class="mt-2">Your input helps us serve you and future clients better!</p>
+        </div>
+    </main>
+
+    <!-- JavaScript for dynamic content -->
+    <script>
+        // Display feedback summary if available
+        document.addEventListener('DOMContentLoaded', function() {
+            displayFeedbackSummary();
+            
+            // Optional: Auto-redirect to homepage after 60 seconds
+            setTimeout(() => {
+                showAutoRedirectOption();
+            }, 60000);
+        });
+
+        function displayFeedbackSummary() {
+            try {
+                // Try to get the most recent feedback from localStorage
+                const feedbackHistory = JSON.parse(localStorage.getItem('feedback_history') || '[]');
+                
+                if (feedbackHistory.length > 0) {
+                    const latestFeedback = feedbackHistory[feedbackHistory.length - 1];
+                    const rating = parseFloat(latestFeedback.average_rating) || 4.5;
+                    
+                    displayStars(rating);
+                    displayRatingText(rating);
+                } else {
+                    // Fallback display
+                    displayStars(4.5);
+                    displayRatingText(4.5);
+                }
+            } catch (error) {
+                console.error('Error displaying feedback summary:', error);
+                // Fallback display
+                displayStars(4.5);
+                displayRatingText(4.5);
+            }
+        }
+
+        function displayStars(rating) {
+            const starsContainer = document.getElementById('rating-stars');
+            const fullStars = Math.floor(rating);
+            const hasHalfStar = rating % 1 >= 0.5;
+            
+            let starsHTML = '';
+            
+            // Full stars
+            for (let i = 0; i < fullStars; i++) {
+                starsHTML += '<span class="text-yellow-400 text-2xl">★</span>';
+            }
+            
+            // Half star
+            if (hasHalfStar) {
+                starsHTML += '<span class="text-yellow-400 text-2xl">★</span>';
+            }
+            
+            // Empty stars
+            const remainingStars = 5 - Math.ceil(rating);
+            for (let i = 0; i < remainingStars; i++) {
+                starsHTML += '<span class="text-gray-300 text-2xl">★</span>';
+            }
+            
+            starsContainer.innerHTML = starsHTML;
+        }
+
+        function displayRatingText(rating) {
+            const textElement = document.getElementById('rating-text');
+            const ratingTexts = {
+                5: 'Excellent experience!',
+                4: 'Great experience!',
+                3: 'Good experience!',
+                2: 'Fair experience',
+                1: 'We\'ll work to improve'
+            };
+            
+            const roundedRating = Math.round(rating);
+            textElement.textContent = `${rating.toFixed(1)}/5 - ${ratingTexts[roundedRating] || 'Thank you for your feedback!'}`;
+        }
+
+        function showAutoRedirectOption() {
+            const notification = document.createElement('div');
+            notification.className = 'fixed bottom-4 right-4 bg-blue-600 text-white p-4 rounded-lg shadow-lg z-50';
+            notification.innerHTML = `
+                <div class="flex items-center space-x-3">
+                    <span>Return to homepage?</span>
+                    <button onclick="window.location.href='../'" class="bg-white text-blue-600 px-3 py-1 rounded text-sm font-semibold">Yes</button>
+                    <button onclick="this.parentElement.parentElement.remove()" class="text-blue-200 hover:text-white">×</button>
+                </div>
+            `;
+            document.body.appendChild(notification);
+        }
+    </script>
+</body>
+</html>

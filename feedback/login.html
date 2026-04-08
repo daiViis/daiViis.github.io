@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - David Cit</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oxygen:wght@300;400;700&family=Oxygen+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['Oxygen', 'system-ui', '-apple-system', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Supabase -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    
+    <!-- Database Configuration -->
+    <script src="database-config.js"></script>
+    
+    <!-- API Helper for secure proxy mode -->
+    <script src="../assets/js/env-loader.js"></script>
+    <script src="../assets/js/api-config.js"></script>
+
+    <!-- Admin Styles -->
+    <link rel="stylesheet" href="css/admin-styles.css">
+    
+    <!-- Shared Admin Authentication -->
+    <script src="js/admin-auth.js"></script>
+</head>
+
+<body class="bg-white min-h-screen">
+    <div class="min-h-screen flex items-center justify-center">
+        <div class="w-full max-w-sm">
+            <div class="text-center mb-8">
+                <h1 class="text-2xl font-light text-black mb-2">Admin Login</h1>
+                <p class="text-gray-500 text-sm">Access dashboard, analytics, and customer management</p>
+            </div>
+            
+            <form id="loginForm" class="space-y-4">
+                <input id="email" name="email" type="email" required 
+                       class="w-full px-4 py-3 border border-black bg-white text-black placeholder-gray-400 focus:outline-none focus:border-gray-400" 
+                       placeholder="Email">
+                <input id="password" name="password" type="password" required 
+                       class="w-full px-4 py-3 border border-black bg-white text-black placeholder-gray-400 focus:outline-none focus:border-gray-400" 
+                       placeholder="Password">
+                <div id="loginError" class="hidden text-black text-sm text-center bg-red-50 border border-red-200 p-3 rounded"></div>
+                <button type="submit" id="loginBtn" 
+                        class="w-full py-3 bg-black text-white hover:bg-gray-800 transition-colors disabled:opacity-50">
+                    <span id="loginBtnText">Sign in</span>
+                    <span id="loginLoader" class="hidden ml-2">...</span>
+                </button>
+            </form>
+            
+            <div class="mt-6 pt-6 border-t border-gray-200">
+                <div class="text-center">
+                    <div class="text-xs text-gray-400 mb-2">Quick Access</div>
+                    <div class="flex justify-center space-x-4 text-xs">
+                        <span class="text-gray-500">Dashboard</span>
+                        <span class="text-gray-400">•</span>
+                        <span class="text-gray-500">Analytics</span>
+                        <span class="text-gray-400">•</span>
+                        <span class="text-gray-500">Customers</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🔐 Login page loaded');
+            
+            try {
+                // Initialize AdminAuth
+                if (window.AdminAuth) {
+                    await window.AdminAuth.initialize();
+                    
+                    // Check if already authenticated
+                    if (window.AdminAuth.isAuthenticated) {
+                        console.log('✅ User already authenticated, redirecting...');
+                        redirectToDestination();
+                        return;
+                    }
+                }
+                
+                setupLoginListeners();
+                
+            } catch (error) {
+                console.error('❌ Initialization error:', error);
+                showLoginError('Failed to initialize login system');
+            }
+        });
+
+        function setupLoginListeners() {
+            const loginForm = document.getElementById('loginForm');
+            if (loginForm) {
+                loginForm.addEventListener('submit', handleLogin);
+            }
+        }
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            
+            if (!email || !password) {
+                showLoginError('Please enter both email and password');
+                return;
+            }
+
+            setLoginLoading(true);
+            hideLoginError();
+
+            try {
+                console.log('🔐 Using AdminAuth.login()...');
+                
+                // Use the shared AdminAuth system
+                const user = await window.AdminAuth.login(email, password);
+                console.log('✅ Login successful:', user.email);
+                
+                // Redirect to intended destination
+                redirectToDestination();
+                
+            } catch (error) {
+                console.error('❌ Login error:', error);
+                showLoginError(error.message || 'Login failed. Please try again.');
+            } finally {
+                setLoginLoading(false);
+            }
+        }
+
+        function redirectToDestination() {
+            // Get the return URL from query params
+            const urlParams = new URLSearchParams(window.location.search);
+            const returnTo = urlParams.get('returnTo');
+            
+            // Default destinations in order of preference
+            const defaultDestinations = [
+                'admin-dashboard.html',
+                'analytics.html', 
+                'customers.html'
+            ];
+            
+            let destination = returnTo;
+            
+            // Validate return URL is within our admin area
+            if (returnTo) {
+                const allowedPages = ['admin-dashboard.html', 'analytics.html', 'customers.html'];
+                const isValidReturn = allowedPages.some(page => returnTo.includes(page));
+                if (!isValidReturn) {
+                    destination = null;
+                }
+            }
+            
+            // Use first available default if no valid return URL
+            if (!destination) {
+                destination = defaultDestinations[0];
+            }
+            
+            console.log('📍 Redirecting to:', destination);
+            window.location.href = destination;
+        }
+
+        function showLoginError(message) {
+            const errorEl = document.getElementById('loginError');
+            errorEl.textContent = message;
+            errorEl.classList.remove('hidden');
+            errorEl.style.animation = 'error-shake 0.4s ease';
+            
+            setTimeout(() => {
+                errorEl.style.animation = '';
+            }, 400);
+        }
+
+        function hideLoginError() {
+            document.getElementById('loginError').classList.add('hidden');
+        }
+
+        function setLoginLoading(loading) {
+            const btn = document.getElementById('loginBtn');
+            const btnText = document.getElementById('loginBtnText');
+            const loader = document.getElementById('loginLoader');
+            
+            if (loading) {
+                btn.disabled = true;
+                btnText.textContent = 'Signing in...';
+                loader.classList.remove('hidden');
+            } else {
+                btn.disabled = false;
+                btnText.textContent = 'Sign in';
+                loader.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>

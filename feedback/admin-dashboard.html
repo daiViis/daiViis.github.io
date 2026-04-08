@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback Admin Dashboard</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oxygen:wght@300;400;700&family=Oxygen+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['Oxygen', 'system-ui', '-apple-system', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Supabase -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    
+    <!-- Database Configuration -->
+    <script src="database-config.js"></script>
+    
+    <!-- API Helper for secure proxy mode -->
+    <script src="../assets/js/env-loader.js"></script>
+    <script src="../assets/js/api-config.js"></script>
+
+    <!-- Admin Styles -->
+    <link rel="stylesheet" href="css/admin-styles.css">
+    
+    <!-- Shared Navbar -->
+    <script src="js/shared-navbar.js"></script>
+    
+    <!-- Shared Admin Authentication -->
+    <script src="js/admin-auth.js"></script>
+</head>
+
+<body class="bg-white min-h-screen">
+    <div id="dashboardContainer" class="max-w-6xl mx-auto px-4 py-6">
+        <!-- Navbar will be injected here by shared-navbar.js -->
+
+        <div id="linkGeneratorModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white border-2 border-black max-w-md w-full mx-4 sm:mx-6">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-lg font-light text-black">Create Feedback Link</h3>
+                        <button id="closeModalBtn" class="text-black hover:text-gray-600">×</button>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm text-black mb-2">Client Name</label>
+                            <input type="text" id="clientName" placeholder="Client name" class="w-full px-3 py-2 border border-black bg-white focus:outline-none focus:border-gray-400">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm text-black mb-2">Project Name</label>
+                            <input type="text" id="projectName" placeholder="Project name" class="w-full px-3 py-2 border border-black bg-white focus:outline-none focus:border-gray-400">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm text-black mb-2">Generated Link</label>
+                            <div class="flex flex-col sm:flex-row gap-2">
+                                <input type="text" id="generatedLink" readonly class="flex-1 px-3 py-2 bg-gray-50 border border-black text-sm" placeholder="Link will appear here...">
+                                <button id="copyLinkBtn" class="px-3 py-2 bg-black text-white hover:bg-gray-800 disabled:opacity-50 whitespace-nowrap" disabled>Copy</button>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col sm:flex-row justify-end gap-2 pt-4">
+                            <button id="cancelModalBtn" class="px-4 py-2 text-black hover:bg-gray-100">Cancel</button>
+                            <button id="generateBtn" class="px-4 py-2 bg-black text-white hover:bg-gray-800 disabled:opacity-50">Generate</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mb-6">
+            <div class="border border-black p-4 stats-card bg-white">
+                <div class="text-2xl font-light text-black" id="totalSubmissions">--</div>
+                <div class="text-xs uppercase tracking-wide text-gray-500">Total</div>
+            </div>
+            <div class="border border-black p-4 stats-card bg-white">
+                <div class="text-2xl font-light text-black" id="averageRating">--</div>
+                <div class="text-xs uppercase tracking-wide text-gray-500">Average</div>
+            </div>
+            <div class="border border-black p-4 stats-card bg-white">
+                <div class="text-2xl font-light text-black" id="shareableCount">--</div>
+                <div class="text-xs uppercase tracking-wide text-gray-500">Shareable</div>
+            </div>
+            <div class="border border-black p-4 stats-card bg-white">
+                <div class="text-2xl font-light text-black" id="thisMonthCount">--</div>
+                <div class="text-xs uppercase tracking-wide text-gray-500">This Month</div>
+            </div>
+            <div class="border border-black p-4 stats-card bg-white">
+                <div class="text-2xl font-light text-black" id="thisWeekCount">--</div>
+                <div class="text-xs uppercase tracking-wide text-gray-500">This Week</div>
+            </div>
+            <div class="border border-black p-4 stats-card bg-white">
+                <div class="text-2xl font-light text-black" id="todayCount">--</div>
+                <div class="text-xs uppercase tracking-wide text-gray-500">Today</div>
+            </div>
+        </div>
+
+        <div class="border-2 border-gray-300 p-4 mb-6 active-section">
+            <div class="space-y-3">
+                <div class="flex flex-wrap gap-2 sm:gap-4">
+                    <select id="ratingFilter" class="border-2 border-gray-400 px-3 py-2 bg-white focus:border-black focus:outline-none">
+                        <option value="">All Ratings</option>
+                        <option value="5">5 Stars</option>
+                        <option value="4">4+ Stars</option>
+                        <option value="3">3+ Stars</option>
+                    </select>
+                    <select id="shareFilter" class="border-2 border-gray-400 px-3 py-2 bg-white focus:border-black focus:outline-none">
+                        <option value="">All</option>
+                        <option value="true">Shareable</option>
+                        <option value="false">Private</option>
+                    </select>
+                    <select id="timeFilter" class="border-2 border-gray-400 px-3 py-2 bg-white focus:border-black focus:outline-none">
+                        <option value="">All Time</option>
+                        <option value="7">Last 7 Days</option>
+                        <option value="30">Last 30 Days</option>
+                        <option value="custom">Custom Range</option>
+                    </select>
+                </div>
+                <div id="dateRangeContainer" class="hidden flex flex-wrap gap-2 sm:gap-4 items-center">
+                    <div class="flex items-center space-x-2">
+                        <label class="text-sm text-black">From:</label>
+                        <input type="date" id="fromDate" class="border-2 border-gray-400 px-3 py-2 bg-white focus:border-black focus:outline-none">
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <label class="text-sm text-black">To:</label>
+                        <input type="date" id="toDate" class="border-2 border-gray-400 px-3 py-2 bg-white focus:border-black focus:outline-none">
+                    </div>
+                    <button id="applyDateRange" class="bg-black text-white px-4 py-2 hover:bg-gray-800 btn-primary text-sm">Apply</button>
+                    <button id="clearDateRange" class="border border-gray-400 text-black px-3 py-2 hover:bg-gray-100 btn-secondary text-sm">Clear</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="border-2 border-black overflow-hidden">
+            <div class="p-4 border-b-2 border-black section-header pl-6">
+                <h2 class="text-lg font-light text-black">Feedback</h2>
+            </div>
+            
+            <div id="loadingState" class="p-8 text-center">
+                <div class="text-black">Loading...</div>
+            </div>
+
+            <div id="errorState" class="p-8 text-center hidden">
+                <div class="text-black mb-4">Failed to load feedback data</div>
+                <div class="text-gray-600 text-sm" id="errorMessage"></div>
+                <button id="retryBtn" class="mt-4 bg-black text-white px-4 py-2 hover:bg-gray-800">Retry</button>
+            </div>
+
+            <div id="tableContainer" class="hidden overflow-x-auto">
+                <table class="w-full min-w-[600px]">
+                    <thead class="border-b border-black">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-sm text-black">Date</th>
+                            <th class="px-4 py-3 text-left text-sm text-black">Customer</th>
+                            <th class="px-4 py-3 text-left text-sm text-black">Rating</th>
+                            <th class="px-4 py-3 text-left text-sm text-black">Shareable</th>
+                            <th class="px-4 py-3 text-left text-sm text-black">Comments</th>
+                        </tr>
+                    </thead>
+                    <tbody id="feedbackTableBody" class="divide-y divide-gray-200">
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="emptyState" class="p-8 text-center hidden">
+                <div class="text-gray-600">No feedback submissions found</div>
+            </div>
+        </div>
+
+        <!-- Rating Analytics -->
+        <div class="mt-6 border-2 border-gray-400">
+            <div class="p-4 border-b-2 border-gray-400 section-header pl-6">
+                <h2 class="text-lg font-light text-black">Rating Analytics</h2>
+            </div>
+            <div class="p-4">
+                <div class="grid grid-cols-2 gap-6">
+                    <!-- Rating Distribution -->
+                    <div>
+                        <h3 class="text-sm font-light text-black mb-3">Rating Distribution</h3>
+                        <div id="ratingDistribution" class="space-y-2">
+                            <!-- Chart will be populated here -->
+                        </div>
+                    </div>
+                    <!-- Rating Trend -->
+                    <div>
+                        <h3 class="text-sm font-light text-black mb-3">Monthly Average</h3>
+                        <div id="ratingTrend" class="h-32 border border-gray-300 bg-gray-50 flex items-end justify-around p-2">
+                            <!-- Simple bar chart will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-6 border-2 border-black">
+            <div class="p-4 border-b-2 border-black section-header pl-6">
+                <h2 class="text-lg font-light text-black">Testimonials</h2>
+            </div>
+            <div id="testimonialsContainer" class="p-4">
+            </div>
+        </div>
+    </div>  <!-- End dashboardContainer -->
+
+    <!-- Feedback Details Modal -->
+    <div id="feedbackDetailsModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white border-2 border-black max-w-2xl w-full mx-4 sm:mx-6 max-h-screen overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-lg font-light text-black">Feedback Details</h3>
+                    <button id="closeFeedbackModal" class="text-black hover:text-gray-600">×</button>
+                </div>
+                
+                <div id="feedbackDetailsContent" class="space-y-4">
+                    <!-- Content will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dashboard variables
+        let allFeedback = [];
+        let filteredFeedback = [];
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🚀 DOMContentLoaded - Starting initialization...');
+            
+            try {
+                // Initialize AdminAuth
+                if (window.AdminAuth) {
+                    console.log('✅ AdminAuth found');
+                    await window.AdminAuth.initialize();
+                    
+                    // Check authentication - redirect to login if not authenticated
+                    if (!window.AdminAuth.requireAuth()) {
+                        return; // Redirect will happen in requireAuth()
+                    }
+                    
+                    console.log('✅ User authenticated, showing dashboard');
+                    await showDashboard();
+                } else {
+                    console.error('❌ AdminAuth not found! Check if admin-auth.js is loaded.');
+                    window.location.href = 'login.html';
+                }
+            } catch (error) {
+                console.error('❌ Initialization error:', error);
+                window.location.href = 'login.html';
+            }
+        });
+
+
+        async function showDashboard() {
+            console.log('🏠 Initializing dashboard...');
+            isAuthenticated = true;
+            
+            // Initialize shared navbar
+            initializeNavbar('feedback', 'Feedback Dashboard');
+            
+            await loadFeedbackData();
+            setupEventListeners();
+        }
+
+
+
+
+        async function loadFeedbackData() {
+            try {
+                document.getElementById('loadingState').classList.remove('hidden');
+                document.getElementById('errorState').classList.add('hidden');
+                document.getElementById('tableContainer').classList.add('hidden');
+                document.getElementById('emptyState').classList.add('hidden');
+
+                let data, error;
+                
+                // Check if we're using proxy mode
+                const useProxyMode = window.AdminAuth?.useProxyMode || 
+                                   (window.DATABASE_CONFIG && 
+                                    (window.DATABASE_CONFIG.supabaseUrl === 'SECURE_PROXY_ENDPOINT' || 
+                                     window.DATABASE_CONFIG.supabaseKey === 'SECURE_PROXY_ENDPOINT'));
+                
+                if (useProxyMode) {
+                    // Use secure proxy endpoint
+                    try {
+                        const response = await window.ApiHelper.callDatabase(
+                            'select',
+                            'feedback_submissions',
+                            null,
+                            null,
+                            '*'
+                        );
+                        data = response;
+                        error = null;
+                    } catch (err) {
+                        data = null;
+                        error = err;
+                    }
+                } else {
+                    // Use direct Supabase client (local development)
+                    // Initialize supabase client if not already done
+                    if (!supabaseClient) {
+                        const isLocalDevelopment = window.location.protocol === 'file:' || 
+                                                 window.location.hostname === 'localhost' || 
+                                                 window.location.hostname === '127.0.0.1' || 
+                                                 window.location.hostname === '';
+
+                        if (isLocalDevelopment) {
+                            if (window.API_CONFIG) {
+                                await window.API_CONFIG.initialize();
+                            }
+                            const directConfig = window.API_CONFIG ? window.API_CONFIG.getDirectAPIConfig() : null;
+                            if (!directConfig?.supabaseUrl || !directConfig?.supabaseKey) {
+                                throw new Error('Local direct database mode requires credentials supplied outside the repository.');
+                            }
+                            supabaseClient = window.supabase.createClient(
+                                directConfig.supabaseUrl,
+                                directConfig.supabaseKey
+                            );
+                        } else if (window.DATABASE_CONFIG) {
+                            supabaseClient = window.supabase.createClient(
+                                window.DATABASE_CONFIG.supabaseUrl,
+                                window.DATABASE_CONFIG.supabaseKey
+                            );
+                        }
+                    }
+                    
+                    const result = await supabaseClient
+                        .from('feedback_submissions')
+                        .select('*')
+                        .order('created_at', { ascending: false });
+                    data = result.data;
+                    error = result.error;
+                }
+
+                if (error) throw error;
+
+                allFeedback = data || [];
+                filteredFeedback = [...allFeedback];
+
+                updateStats();
+                updateTable();
+                updateTestimonials();
+                updateRatingAnalytics();
+
+                document.getElementById('loadingState').classList.add('hidden');
+                
+                if (allFeedback.length === 0) {
+                    document.getElementById('emptyState').classList.remove('hidden');
+                } else {
+                    document.getElementById('tableContainer').classList.remove('hidden');
+                }
+
+            } catch (error) {
+                console.error('Error loading feedback:', error);
+                showError(error.message);
+            }
+        }
+
+        function updateStats() {
+            const total = allFeedback.length;
+            const avgRating = total > 0 ? 
+                (allFeedback.reduce((sum, f) => sum + parseFloat(f.average_rating), 0) / total).toFixed(1) : 
+                '0.0';
+            const shareable = allFeedback.filter(f => f.share_permission).length;
+            
+            const now = new Date();
+            
+            const thisMonth = allFeedback.filter(f => {
+                const date = new Date(f.created_at);
+                return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+            }).length;
+            
+            const thisWeek = allFeedback.filter(f => {
+                const date = new Date(f.created_at);
+                const weekStart = new Date(now);
+                weekStart.setDate(now.getDate() - now.getDay()); // Start of current week (Sunday)
+                weekStart.setHours(0, 0, 0, 0);
+                const weekEnd = new Date(weekStart);
+                weekEnd.setDate(weekStart.getDate() + 6); // End of current week (Saturday)
+                weekEnd.setHours(23, 59, 59, 999);
+                return date >= weekStart && date <= weekEnd;
+            }).length;
+            
+            const today = allFeedback.filter(f => {
+                const date = new Date(f.created_at);
+                return date.toDateString() === now.toDateString();
+            }).length;
+
+            document.getElementById('totalSubmissions').textContent = total;
+            document.getElementById('averageRating').textContent = avgRating;
+            document.getElementById('shareableCount').textContent = shareable;
+            document.getElementById('thisMonthCount').textContent = thisMonth;
+            document.getElementById('thisWeekCount').textContent = thisWeek;
+            document.getElementById('todayCount').textContent = today;
+        }
+
+        function updateTable() {
+            const tbody = document.getElementById('feedbackTableBody');
+            tbody.innerHTML = '';
+
+            filteredFeedback.forEach(feedback => {
+                const row = createFeedbackRow(feedback);
+                tbody.appendChild(row);
+            });
+        }
+
+        function createFeedbackRow(feedback) {
+            const row = document.createElement('tr');
+            row.className = 'table-row cursor-pointer border-b border-gray-200';
+            row.dataset.feedbackId = feedback.id;
+
+            const date = new Date(feedback.created_at).toLocaleDateString();
+            
+            row.innerHTML = `
+                <td class="px-4 py-3 text-sm text-black">${date}</td>
+                <td class="px-4 py-3 text-sm">
+                    <div class="text-black">${feedback.customer_name || 'Anonymous'}</div>
+                    <div class="text-xs text-gray-600">${feedback.customer_ref || ''}</div>
+                </td>
+                <td class="px-4 py-3 text-sm text-black">${feedback.average_rating}/5</td>
+                <td class="px-4 py-3 text-sm text-black">${feedback.share_permission ? 'Yes' : 'No'}</td>
+                <td class="px-4 py-3 text-sm text-black">
+                    <div class="max-w-xs truncate" title="${feedback.comments || ''}">
+                        ${feedback.comments || 'No comments'}
+                    </div>
+                </td>
+            `;
+
+            row.addEventListener('click', () => showFeedbackDetails(feedback));
+
+            return row;
+        }
+
+        function updateTestimonials() {
+            const container = document.getElementById('testimonialsContainer');
+            const testimonials = allFeedback
+                .filter(f => f.share_permission && f.average_rating >= 4 && f.comments)
+                .slice(0, 6);
+
+            if (testimonials.length === 0) {
+                container.innerHTML = '<div class="text-gray-600 text-center">No shareable testimonials yet</div>';
+                return;
+            }
+
+            container.innerHTML = testimonials.map(t => `
+                <div class="border-b border-gray-200 pb-4 mb-4 last:border-b-0">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="text-black">${t.customer_name || 'Anonymous'}</div>
+                        <div class="text-sm text-gray-600">${t.average_rating}/5</div>
+                    </div>
+                    <div class="text-gray-700">"${t.comments}"</div>
+                    <div class="text-xs text-gray-400 mt-2">
+                        ${new Date(t.created_at).toLocaleDateString()}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function setupEventListeners() {
+            document.getElementById('refreshBtn').addEventListener('click', loadFeedbackData);
+            document.getElementById('exportBtn').addEventListener('click', exportToCsv);
+            document.getElementById('retryBtn').addEventListener('click', loadFeedbackData);
+
+            // Authentication listeners
+            document.getElementById('logoutBtn').addEventListener('click', () => window.AdminAuth.logout());
+
+            // Link generator listeners
+            document.getElementById('createLinkBtn').addEventListener('click', openLinkGenerator);
+            document.getElementById('closeModalBtn').addEventListener('click', closeLinkGenerator);
+            document.getElementById('cancelModalBtn').addEventListener('click', closeLinkGenerator);
+            document.getElementById('generateBtn').addEventListener('click', generateFeedbackLink);
+            document.getElementById('copyLinkBtn').addEventListener('click', copyLinkToClipboard);
+            document.getElementById('clientName').addEventListener('input', onInputChange);
+            document.getElementById('projectName').addEventListener('input', onInputChange);
+
+            // Close modal on outside click
+            document.getElementById('linkGeneratorModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeLinkGenerator();
+                }
+            });
+
+            // Feedback details modal listeners
+            document.getElementById('closeFeedbackModal').addEventListener('click', closeFeedbackDetails);
+            document.getElementById('feedbackDetailsModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeFeedbackDetails();
+                }
+            });
+
+            // Filter listeners
+            ['ratingFilter', 'shareFilter', 'timeFilter'].forEach(id => {
+                document.getElementById(id).addEventListener('change', applyFilters);
+            });
+
+            // Date range listeners
+            document.getElementById('timeFilter').addEventListener('change', handleTimeFilterChange);
+            document.getElementById('applyDateRange').addEventListener('click', applyDateRangeFilter);
+            document.getElementById('clearDateRange').addEventListener('click', clearDateRangeFilter);
+            document.getElementById('fromDate').addEventListener('change', validateDateRange);
+            document.getElementById('toDate').addEventListener('change', validateDateRange);
+        }
+
+        // Link Generator Functions
+        function openLinkGenerator() {
+            document.getElementById('linkGeneratorModal').classList.remove('hidden');
+            document.getElementById('clientName').focus();
+        }
+
+        function closeLinkGenerator() {
+            document.getElementById('linkGeneratorModal').classList.add('hidden');
+            resetLinkGenerator();
+        }
+
+        function resetLinkGenerator() {
+            document.getElementById('clientName').value = '';
+            document.getElementById('projectName').value = '';
+            document.getElementById('generatedLink').value = '';
+            document.getElementById('copyLinkBtn').disabled = true;
+            document.getElementById('generateBtn').disabled = false;
+        }
+
+        function onInputChange() {
+            const clientName = document.getElementById('clientName').value.trim();
+            const projectName = document.getElementById('projectName').value.trim();
+            document.getElementById('generateBtn').disabled = clientName.length === 0 || projectName.length === 0;
+            
+            // Clear generated link when inputs change
+            document.getElementById('generatedLink').value = '';
+            document.getElementById('copyLinkBtn').disabled = true;
+        }
+
+        function generateFeedbackLink() {
+            const clientName = document.getElementById('clientName').value.trim();
+            const projectName = document.getElementById('projectName').value.trim();
+            
+            if (!clientName || !projectName) {
+                alert('Please enter both client name and project name');
+                return;
+            }
+
+            // Create customer ref from inputs
+            const cleanClientName = clientName.replace(/[^a-zA-Z0-9_-]/g, '_');
+            const cleanProjectName = projectName.replace(/[^a-zA-Z0-9_-]/g, '_');
+            const customerRef = `${cleanClientName}_${cleanProjectName}`.toUpperCase();
+            
+            // Generate the feedback link (pointing to index.html in feedback folder)
+            const baseUrl = window.location.origin + window.location.pathname.replace('admin-dashboard.html', '');
+            const feedbackLink = `${baseUrl}index.html?name=${encodeURIComponent(clientName)}&project=${encodeURIComponent(projectName)}&customer=${encodeURIComponent(customerRef)}`;
+            
+            // Display the generated link
+            document.getElementById('generatedLink').value = feedbackLink;
+            document.getElementById('copyLinkBtn').disabled = false;
+            
+            // Show success feedback
+            const generateBtn = document.getElementById('generateBtn');
+            const originalText = generateBtn.textContent;
+            generateBtn.textContent = '✅ Generated!';
+            generateBtn.disabled = true;
+            
+            setTimeout(() => {
+                generateBtn.textContent = originalText;
+                generateBtn.disabled = false;
+            }, 2000);
+
+            // Store generated link for tracking
+            storeGeneratedLink(customerRef, feedbackLink);
+        }
+
+        function copyLinkToClipboard() {
+            const linkInput = document.getElementById('generatedLink');
+            
+            try {
+                linkInput.select();
+                linkInput.setSelectionRange(0, 99999); // For mobile devices
+                
+                // Modern clipboard API
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(linkInput.value).then(() => {
+                        showCopySuccess();
+                    }).catch(() => {
+                        // Fallback for clipboard API failure
+                        document.execCommand('copy');
+                        showCopySuccess();
+                    });
+                } else {
+                    // Fallback for older browsers
+                    document.execCommand('copy');
+                    showCopySuccess();
+                }
+            } catch (error) {
+                console.error('Copy failed:', error);
+                alert('Copy failed. Please manually select and copy the link.');
+            }
+        }
+
+        function showCopySuccess() {
+            const copyBtn = document.getElementById('copyLinkBtn');
+            const originalText = copyBtn.textContent;
+            
+            copyBtn.textContent = '✅ Copied!';
+            copyBtn.classList.add('bg-green-600');
+            copyBtn.classList.remove('bg-gray-600');
+            copyBtn.style.animation = 'success-pulse 0.5s ease';
+            
+            setTimeout(() => {
+                copyBtn.textContent = originalText;
+                copyBtn.classList.remove('bg-green-600');
+                copyBtn.classList.add('bg-gray-600');
+                copyBtn.style.animation = '';
+            }, 2000);
+        }
+
+        function storeGeneratedLink(reference, link) {
+            try {
+                const generatedLinks = JSON.parse(localStorage.getItem('generated_feedback_links') || '[]');
+                
+                // Add new link (avoid duplicates)
+                const existingIndex = generatedLinks.findIndex(item => item.reference === reference);
+                const linkData = {
+                    reference: reference,
+                    link: link,
+                    created: new Date().toISOString(),
+                    used: false
+                };
+                
+                if (existingIndex >= 0) {
+                    generatedLinks[existingIndex] = linkData;
+                } else {
+                    generatedLinks.push(linkData);
+                }
+                
+                // Keep only last 50 generated links
+                if (generatedLinks.length > 50) {
+                    generatedLinks.splice(0, generatedLinks.length - 50);
+                }
+                
+                localStorage.setItem('generated_feedback_links', JSON.stringify(generatedLinks));
+            } catch (error) {
+                console.error('Failed to store generated link:', error);
+            }
+        }
+
+        function applyFilters() {
+            const ratingFilter = document.getElementById('ratingFilter').value;
+            const shareFilter = document.getElementById('shareFilter').value;
+            const timeFilter = document.getElementById('timeFilter').value;
+            const fromDate = document.getElementById('fromDate').value;
+            const toDate = document.getElementById('toDate').value;
+
+            filteredFeedback = allFeedback.filter(feedback => {
+                // Rating filter
+                if (ratingFilter && feedback.average_rating < parseFloat(ratingFilter)) {
+                    return false;
+                }
+
+                // Share filter
+                if (shareFilter !== '') {
+                    const isShareable = shareFilter === 'true';
+                    if (feedback.share_permission !== isShareable) {
+                        return false;
+                    }
+                }
+
+                // Time filter
+                if (timeFilter && timeFilter !== 'custom') {
+                    const daysAgo = parseInt(timeFilter);
+                    const cutoff = new Date();
+                    cutoff.setDate(cutoff.getDate() - daysAgo);
+                    if (new Date(feedback.created_at) < cutoff) {
+                        return false;
+                    }
+                }
+
+                // Custom date range filter
+                if (timeFilter === 'custom' && (fromDate || toDate)) {
+                    const feedbackDate = new Date(feedback.created_at);
+                    
+                    if (fromDate) {
+                        const from = new Date(fromDate);
+                        if (feedbackDate < from) {
+                            return false;
+                        }
+                    }
+                    
+                    if (toDate) {
+                        const to = new Date(toDate);
+                        to.setHours(23, 59, 59, 999); // End of day
+                        if (feedbackDate > to) {
+                            return false;
+                        }
+                    }
+                }
+
+                return true;
+            });
+
+            updateTable();
+            updateRatingAnalytics();
+        }
+
+        function exportToCsv() {
+            const headers = [
+                'Date', 'Customer Name', 'Website', 'Reference', 
+                'Process Rating', 'Product Rating', 'Recommendation Rating', 
+                'Overall Rating', 'Average Rating', 'Comments', 
+                'Share Permission', 'Submission Date', 'Page URL'
+            ];
+
+            const rows = filteredFeedback.map(f => [
+                new Date(f.created_at).toISOString(),
+                f.customer_name || '',
+                f.customer_website || '',
+                f.customer_ref || '',
+                f.process_rating,
+                f.product_rating,
+                f.recommendation_rating,
+                f.overall_rating,
+                f.average_rating,
+                f.comments || '',
+                f.share_permission ? 'Yes' : 'No',
+                f.submission_date || '',
+                f.page_url || ''
+            ]);
+
+            const csv = [headers, ...rows]
+                .map(row => row.map(field => `"${field}"`).join(','))
+                .join('\n');
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `feedback-export-${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        function showError(message) {
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('tableContainer').classList.add('hidden');
+            document.getElementById('emptyState').classList.add('hidden');
+            document.getElementById('errorState').classList.remove('hidden');
+            document.getElementById('errorMessage').textContent = message;
+        }
+
+        // Feedback Details Modal Functions
+        function showFeedbackDetails(feedback) {
+            const modal = document.getElementById('feedbackDetailsModal');
+            const content = document.getElementById('feedbackDetailsContent');
+            
+            const date = new Date(feedback.created_at).toLocaleDateString();
+            const time = new Date(feedback.created_at).toLocaleTimeString();
+            
+            content.innerHTML = `
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <div class="text-sm text-gray-600">Customer</div>
+                        <div class="text-black font-light">${feedback.customer_name || 'Anonymous'}</div>
+                    </div>
+                    <div>
+                        <div class="text-sm text-gray-600">Reference</div>
+                        <div class="text-black font-light">${feedback.customer_ref || 'N/A'}</div>
+                    </div>
+                    <div>
+                        <div class="text-sm text-gray-600">Website</div>
+                        <div class="text-black font-light">${feedback.customer_website || 'N/A'}</div>
+                    </div>
+                    <div>
+                        <div class="text-sm text-gray-600">Date</div>
+                        <div class="text-black font-light">${date} ${time}</div>
+                    </div>
+                </div>
+                
+                <div class="border-t border-gray-200 pt-4">
+                    <div class="text-sm text-gray-600 mb-2">Ratings</div>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+                        <div>
+                            <div class="text-lg text-black">${feedback.process_rating}/5</div>
+                            <div class="text-xs text-gray-600">Process</div>
+                        </div>
+                        <div>
+                            <div class="text-lg text-black">${feedback.product_rating}/5</div>
+                            <div class="text-xs text-gray-600">Product</div>
+                        </div>
+                        <div>
+                            <div class="text-lg text-black">${feedback.recommendation_rating}/5</div>
+                            <div class="text-xs text-gray-600">Recommend</div>
+                        </div>
+                        <div>
+                            <div class="text-lg text-black">${feedback.average_rating}/5</div>
+                            <div class="text-xs text-gray-600">Average</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="border-t border-gray-200 pt-4">
+                    <div class="text-sm text-gray-600 mb-2">Comments</div>
+                    <div class="text-black bg-gray-50 p-3 border">
+                        ${feedback.comments || 'No comments provided'}
+                    </div>
+                </div>
+                
+                <div class="border-t border-gray-200 pt-4">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <div class="text-sm text-gray-600">Share Permission</div>
+                            <div class="text-black font-light">${feedback.share_permission ? 'Yes - Can be shared' : 'No - Private'}</div>
+                        </div>
+                        ${feedback.page_url ? `
+                        <div>
+                            <div class="text-sm text-gray-600">Source Page</div>
+                            <div class="text-black font-light text-xs">${feedback.page_url}</div>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+            
+            modal.classList.remove('hidden');
+        }
+        
+        function closeFeedbackDetails() {
+            document.getElementById('feedbackDetailsModal').classList.add('hidden');
+        }
+
+        function updateRatingAnalytics() {
+            updateRatingDistribution();
+            updateRatingTrend();
+        }
+
+        function updateRatingDistribution() {
+            const distribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+            
+            allFeedback.forEach(feedback => {
+                const rating = Math.round(feedback.average_rating);
+                distribution[rating]++;
+            });
+
+            const total = allFeedback.length || 1;
+            const container = document.getElementById('ratingDistribution');
+            
+            container.innerHTML = Object.keys(distribution).reverse().map(rating => {
+                const count = distribution[rating];
+                const percentage = (count / total * 100);
+                const width = Math.max(percentage, 2); // Minimum 2% width for visibility
+                
+                return `
+                    <div class="flex items-center space-x-2">
+                        <div class="text-sm w-8 text-black">${rating}★</div>
+                        <div class="flex-1 bg-gray-200 h-4">
+                            <div class="bg-black h-4" style="width: ${width}%"></div>
+                        </div>
+                        <div class="text-xs w-12 text-gray-600">${count} (${percentage.toFixed(0)}%)</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateRatingTrend() {
+            // Get last 6 months of data
+            const months = [];
+            const monthlyRatings = {};
+            
+            for (let i = 5; i >= 0; i--) {
+                const date = new Date();
+                date.setMonth(date.getMonth() - i);
+                const key = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0');
+                months.push({ key, name: date.toLocaleDateString('en', { month: 'short' }) });
+                monthlyRatings[key] = [];
+            }
+
+            // Group feedback by month
+            allFeedback.forEach(feedback => {
+                const date = new Date(feedback.created_at);
+                const key = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0');
+                if (monthlyRatings[key] !== undefined) {
+                    monthlyRatings[key].push(feedback.average_rating);
+                }
+            });
+
+            // Calculate averages and create bars
+            const container = document.getElementById('ratingTrend');
+            const maxRating = 5;
+            
+            container.innerHTML = months.map(month => {
+                const ratings = monthlyRatings[month.key];
+                const avgRating = ratings.length > 0 ? 
+                    ratings.reduce((sum, r) => sum + r, 0) / ratings.length : 0;
+                const maxHeight = 80; // Max 80px to fit in 128px container
+                const heightPx = avgRating > 0 ? Math.max((avgRating / maxRating) * maxHeight, 4) : 0;
+                
+                return `
+                    <div class="flex flex-col items-center flex-1">
+                        <div class="w-6 bg-black mb-1" style="height: ${heightPx}px;"></div>
+                        <div class="text-xs text-gray-600">${month.name}</div>
+                        <div class="text-xs text-black font-light">${avgRating > 0 ? avgRating.toFixed(1) : '-'}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Date Range Filter Functions
+        function handleTimeFilterChange() {
+            const timeFilter = document.getElementById('timeFilter').value;
+            const dateRangeContainer = document.getElementById('dateRangeContainer');
+            
+            if (timeFilter === 'custom') {
+                dateRangeContainer.classList.remove('hidden');
+            } else {
+                dateRangeContainer.classList.add('hidden');
+                document.getElementById('fromDate').value = '';
+                document.getElementById('toDate').value = '';
+                applyFilters();
+            }
+        }
+
+        function applyDateRangeFilter() {
+            const fromDate = document.getElementById('fromDate').value;
+            const toDate = document.getElementById('toDate').value;
+            
+            if (!fromDate && !toDate) {
+                alert('Please select at least one date');
+                return;
+            }
+            
+            if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
+                alert('From date must be before To date');
+                return;
+            }
+            
+            applyFilters();
+        }
+
+        function clearDateRangeFilter() {
+            document.getElementById('fromDate').value = '';
+            document.getElementById('toDate').value = '';
+            document.getElementById('timeFilter').value = '';
+            document.getElementById('dateRangeContainer').classList.add('hidden');
+            applyFilters();
+        }
+
+        function validateDateRange() {
+            const fromDate = document.getElementById('fromDate').value;
+            const toDate = document.getElementById('toDate').value;
+            
+            if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
+                document.getElementById('toDate').style.borderColor = '#ef4444';
+            } else {
+                document.getElementById('toDate').style.borderColor = '';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics Dashboard - David Cit</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oxygen:wght@300;400;700&family=Oxygen+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['Oxygen', 'system-ui', '-apple-system', 'sans-serif'],
+                    },
+                    screens: {
+                        'xs': '475px',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Admin Styles -->
+    <link rel="stylesheet" href="css/admin-styles.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Supabase -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    
+    <!-- Database Configuration -->
+    <script src="database-config.js"></script>
+    
+    <!-- API Helper for secure proxy mode -->
+    <script src="../assets/js/env-loader.js"></script>
+    <script src="../assets/js/api-config.js"></script>
+    
+    <!-- Analytics Service -->
+    <script src="analytics-service.js"></script>
+    
+    <!-- Chatbot Analytics -->
+    <script src="../assets/js/chatbot-analytics.js"></script>
+    
+    <!-- Shared Admin Authentication -->
+    <script src="js/admin-auth.js"></script>
+    
+    <!-- Shared Navbar -->
+    <script src="js/shared-navbar.js"></script>
+</head>
+
+<body class="bg-white min-h-screen">
+    <!-- Main Dashboard -->
+    <div id="dashboardContainer" class="max-w-6xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
+        <!-- Navbar will be injected here by shared-navbar.js -->
+        
+        <!-- Loading State -->
+        <div id="loadingState" class="fixed inset-0 bg-white bg-opacity-90 flex items-center justify-center z-50 hidden">
+            <div class="text-center">
+                <div class="loading w-16 h-16 border-4 border-gray-300 border-t-black rounded-full mx-auto mb-4"></div>
+                <p class="text-gray-600">Loading analytics data...</p>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main id="mainContent">
+            <div class="max-w-6xl mx-auto">
+            
+            <!-- Controls -->
+            <div class="border-2 border-gray-300 p-4 mb-6 active-section">
+                <div class="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-4">
+                    <div class="w-full sm:w-auto">
+                        <label class="block text-sm text-gray-600 mb-2">Date Range</label>
+                        <select id="dateRange" class="w-full sm:w-auto border-2 border-gray-400 px-3 py-2 bg-white focus:border-black focus:outline-none">
+                            <option value="1">Last 24 hours</option>
+                            <option value="7">Last 7 days</option>
+                            <option value="14">Last 14 days</option>
+                            <option value="30" selected>Last 30 days</option>
+                            <option value="60">Last 60 days</option>
+                            <option value="90">Last 90 days</option>
+                            <option value="180">Last 6 months</option>
+                            <option value="365">Last year</option>
+                            <option value="custom">Custom range</option>
+                        </select>
+                    </div>
+                    <div class="w-full sm:w-auto">
+                        <label class="block text-sm text-gray-600 mb-2">Page Filter</label>
+                        <select id="pageFilter" class="w-full sm:w-auto border-2 border-gray-400 px-3 py-2 bg-white focus:border-black focus:outline-none">
+                            <option value="">All Pages</option>
+                            <option value="/index.html">Home</option>
+                            <option value="/pages/conversion-research.html">Conversion Research</option>
+                            <option value="/pages/privacy-policy.html">Privacy Policy</option>
+                            <option value="/pages/terms-of-service.html">Terms of Service</option>
+                        </select>
+                    </div>
+                    <div class="w-full sm:w-auto sm:flex sm:items-end">
+                        <button id="refreshBtn" class="w-full sm:w-auto bg-black text-white px-4 py-2 hover:bg-gray-800 btn-primary">
+                            Refresh Data
+                        </button>
+                    </div>
+                </div>
+                <!-- Custom Date Range (Hidden by default) -->
+                <div id="customDateRange" class="hidden w-full mt-4 pt-4 border-t border-gray-300">
+                    <div class="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-2 space-y-1 sm:space-y-0">
+                            <label class="text-sm text-gray-600 sm:whitespace-nowrap">From:</label>
+                            <input type="date" id="fromDate" class="border-2 border-gray-400 px-3 py-2 bg-white focus:border-black focus:outline-none">
+                        </div>
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-2 space-y-1 sm:space-y-0">
+                            <label class="text-sm text-gray-600 sm:whitespace-nowrap">To:</label>
+                            <input type="date" id="toDate" class="border-2 border-gray-400 px-3 py-2 bg-white focus:border-black focus:outline-none">
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-2 sm:gap-2">
+                            <button id="applyDateRange" class="bg-black text-white px-4 py-2 hover:bg-gray-800 btn-primary text-sm">Apply</button>
+                            <button id="clearDateRange" class="border border-gray-400 text-black px-3 py-2 hover:bg-gray-100 btn-secondary text-sm">Clear</button>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+
+            <!-- Key Statistics -->
+            <div class="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mb-6">
+                <div class="border border-black p-4 stats-card bg-white">
+                    <div class="text-2xl font-light text-black" id="totalViews">--</div>
+                    <div class="text-xs uppercase tracking-wide text-gray-500">Total Views</div>
+                </div>
+                
+                <div class="border border-black p-4 stats-card bg-white">
+                    <div class="text-2xl font-light text-black" id="uniqueVisitors">--</div>
+                    <div class="text-xs uppercase tracking-wide text-gray-500">Unique Visitors</div>
+                </div>
+                
+                <div class="border border-black p-4 stats-card bg-white">
+                    <div class="text-2xl font-light text-black" id="avgSessionDuration">--</div>
+                    <div class="text-xs uppercase tracking-wide text-gray-500">Avg. Session</div>
+                </div>
+                
+                <div class="border border-black p-4 stats-card bg-white">
+                    <div class="text-2xl font-light text-black" id="bounceRate">--</div>
+                    <div class="text-xs uppercase tracking-wide text-gray-500">Bounce Rate</div>
+                </div>
+                
+                <div class="border border-black p-4 stats-card bg-white">
+                    <div class="text-2xl font-light text-black" id="todayViews">--</div>
+                    <div class="text-xs uppercase tracking-wide text-gray-500">Today</div>
+                </div>
+                
+                <div class="border border-black p-4 stats-card bg-white">
+                    <div class="text-2xl font-light text-black" id="thisWeekViews">--</div>
+                    <div class="text-xs uppercase tracking-wide text-gray-500">This Week</div>
+                </div>
+            </div>
+
+            <!-- Charts Row 1 -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 mb-6 lg:mb-8">
+                <!-- Page Views Over Time -->
+                <div class="border-2 border-black overflow-hidden">
+                    <div class="p-4 border-b-2 border-black section-header pl-6">
+                        <h2 class="text-lg font-light text-black">Page Views Over Time</h2>
+                    </div>
+                    <div class="p-4 sm:p-6">
+                        <div class="relative h-48 sm:h-64">
+                            <canvas id="viewsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top Pages -->
+                <div class="border-2 border-gray-400">
+                    <div class="p-4 border-b-2 border-gray-400 section-header pl-6">
+                        <h2 class="text-lg font-light text-black">Top Pages</h2>
+                    </div>
+                    <div class="p-4 sm:p-6">
+                        <div class="relative h-48 sm:h-64">
+                            <canvas id="pagesChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row 2 -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 mb-6 lg:mb-8">
+                <!-- Traffic Sources -->
+                <div class="border-2 border-black overflow-hidden">
+                    <div class="p-4 border-b-2 border-black section-header pl-6">
+                        <h2 class="text-lg font-light text-black">Traffic Sources</h2>
+                    </div>
+                    <div class="p-4 sm:p-6">
+                        <div class="relative h-48 sm:h-64">
+                            <canvas id="sourcesChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Device Breakdown -->
+                <div class="border-2 border-gray-400">
+                    <div class="p-4 border-b-2 border-gray-400 section-header pl-6">
+                        <h2 class="text-lg font-light text-black">Device Types</h2>
+                    </div>
+                    <div class="p-4 sm:p-6">
+                        <div class="relative h-48 sm:h-64">
+                            <canvas id="devicesChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Visitor Flow -->
+            <div class="border-2 border-black mb-6">
+                <div class="p-4 border-b-2 border-black section-header pl-6">
+                    <h2 class="text-lg font-light text-black">Popular Visitor Paths</h2>
+                </div>
+                <div class="p-4">
+                    <div id="visitorFlow" class="space-y-3">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chatbot Analytics -->
+            <div class="border-2 border-black mb-6">
+                <div class="p-4 border-b-2 border-black section-header pl-6">
+                    <h2 class="text-lg font-light text-black">Chatbot Analytics</h2>
+                </div>
+                <div class="p-4 sm:p-6">
+                    <!-- Chatbot Key Statistics -->
+                    <div class="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3 sm:gap-4 mb-6">
+                        <div class="border border-black p-4 stats-card bg-white">
+                            <div class="text-2xl font-light text-black" id="totalChatSessions">--</div>
+                            <div class="text-xs uppercase tracking-wide text-gray-500">Chat Sessions</div>
+                        </div>
+                        <div class="border border-black p-4 stats-card bg-white">
+                            <div class="text-2xl font-light text-black" id="chatUsagePercentage">--</div>
+                            <div class="text-xs uppercase tracking-wide text-gray-500">Users Used Chat</div>
+                        </div>
+                        <div class="border border-black p-4 stats-card bg-white">
+                            <div class="text-2xl font-light text-black" id="totalChatMessages">--</div>
+                            <div class="text-xs uppercase tracking-wide text-gray-500">Total Messages</div>
+                        </div>
+                        <div class="border border-black p-4 stats-card bg-white">
+                            <div class="text-2xl font-light text-black" id="avgChatDuration">--</div>
+                            <div class="text-xs uppercase tracking-wide text-gray-500">Avg Duration</div>
+                        </div>
+                        <div class="border border-black p-4 stats-card bg-white">
+                            <div class="text-2xl font-light text-black" id="uniqueChatUsers">--</div>
+                            <div class="text-xs uppercase tracking-wide text-gray-500">Unique Users</div>
+                        </div>
+                        <div class="border border-red-500 p-4 stats-card bg-red-50">
+                            <div class="text-2xl font-light text-red-600" id="totalChatErrors">--</div>
+                            <div class="text-xs uppercase tracking-wide text-gray-500">Total Errors</div>
+                        </div>
+                        <div class="border border-red-500 p-4 stats-card bg-red-50">
+                            <div class="text-2xl font-light text-red-600" id="chatErrorRate">--</div>
+                            <div class="text-xs uppercase tracking-wide text-gray-500">Error Rate</div>
+                        </div>
+                    </div>
+
+                    <!-- Chatbot Charts Row -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 mb-6 lg:mb-8">
+                        <!-- Chat Sessions Over Time -->
+                        <div class="border-2 border-gray-400">
+                            <div class="p-4 border-b-2 border-gray-400 section-header pl-6">
+                                <h3 class="text-lg font-light text-black">Chat Sessions Over Time</h3>
+                            </div>
+                            <div class="p-4 sm:p-6">
+                                <div class="relative h-48 sm:h-64">
+                                    <canvas id="chatSessionsChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Message Types Breakdown -->
+                        <div class="border-2 border-black overflow-hidden">
+                            <div class="p-4 border-b-2 border-black section-header pl-6">
+                                <h3 class="text-lg font-light text-black">Message Types</h3>
+                            </div>
+                            <div class="p-4 sm:p-6">
+                                <div class="relative h-48 sm:h-64">
+                                    <canvas id="messageTypesChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Popular Topics and Error Types Row -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 mb-6 lg:mb-8">
+                        <!-- Popular Topics -->
+                        <div class="border-2 border-gray-400">
+                            <div class="p-4 border-b-2 border-gray-400 section-header pl-6">
+                                <h3 class="text-lg font-light text-black">Popular Conversation Topics</h3>
+                            </div>
+                            <div class="p-4">
+                                <div id="chatTopics" class="space-y-3">
+                                    <!-- Will be populated by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Error Types Breakdown -->
+                        <div class="border-2 border-red-400">
+                            <div class="p-4 border-b-2 border-red-400 section-header pl-6">
+                                <h3 class="text-lg font-light text-black">Error Types Breakdown</h3>
+                            </div>
+                            <div class="p-4">
+                                <div id="chatErrorTypes" class="space-y-3">
+                                    <!-- Will be populated by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Status -->
+            <div class="border-2 border-gray-400">
+                <div class="p-4 border-b-2 border-gray-400 section-header pl-6">
+                    <h2 class="text-lg font-light text-black">System Status</h2>
+                </div>
+                <div class="p-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div class="border border-black p-4 stats-card bg-white text-center">
+                            <div class="text-2xl font-light text-green-600 mb-1" id="systemStatus">●</div>
+                            <div class="text-xs uppercase tracking-wide text-gray-500">Analytics Active</div>
+                        </div>
+                        <div class="border border-black p-4 stats-card bg-white text-center">
+                            <div class="text-2xl font-light text-black mb-1" id="lastUpdate">--</div>
+                            <div class="text-xs uppercase tracking-wide text-gray-500">Last Updated</div>
+                        </div>
+                        <div class="border border-black p-4 stats-card bg-white text-center">
+                            <div class="text-2xl font-light text-black mb-1" id="dataPoints">--</div>
+                            <div class="text-xs uppercase tracking-wide text-gray-500">Data Points</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        </main>
+    </div>
+
+    <!-- Traffic Source Details Popup -->
+    <div id="sourcePopup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white border-2 border-black max-w-sm w-full mx-4 rounded-lg">
+            <div class="p-4 border-b border-gray-200">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-light text-black">Traffic Source Details</h3>
+                    <button id="closeSourcePopup" class="text-black hover:text-gray-600 text-xl">&times;</button>
+                </div>
+            </div>
+            <div class="p-4">
+                <div class="space-y-3">
+                    <div>
+                        <span class="text-sm text-gray-600">Source:</span>
+                        <div id="sourceTitle" class="font-medium text-black break-words"></div>
+                    </div>
+                    <div>
+                        <span class="text-sm text-gray-600">Visits:</span>
+                        <div id="sourceCount" class="font-bold text-black text-lg"></div>
+                    </div>
+                    <div>
+                        <span class="text-sm text-gray-600">Percentage:</span>
+                        <div id="sourcePercentage" class="font-medium text-black"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page Views Details Popup -->
+    <div id="viewsPopup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white border-2 border-black max-w-sm w-full mx-4 rounded-lg">
+            <div class="p-4 border-b border-gray-200">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-light text-black">Page Views Details</h3>
+                    <button id="closeViewsPopup" class="text-black hover:text-gray-600 text-xl">&times;</button>
+                </div>
+            </div>
+            <div class="p-4">
+                <div class="space-y-3">
+                    <div>
+                        <span class="text-sm text-gray-600">Date:</span>
+                        <div id="viewsDate" class="font-medium text-black"></div>
+                    </div>
+                    <div>
+                        <span class="text-sm text-gray-600">Page Views:</span>
+                        <div id="viewsCount" class="font-bold text-black text-lg"></div>
+                    </div>
+                    <div>
+                        <span class="text-sm text-gray-600">Day of Week:</span>
+                        <div id="viewsDayOfWeek" class="font-medium text-black"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Pages Details Popup -->
+    <div id="pagesPopup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white border-2 border-black max-w-sm w-full mx-4 rounded-lg">
+            <div class="p-4 border-b border-gray-200">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-light text-black">Page Details</h3>
+                    <button id="closePagesPopup" class="text-black hover:text-gray-600 text-xl">&times;</button>
+                </div>
+            </div>
+            <div class="p-4">
+                <div class="space-y-3">
+                    <div>
+                        <span class="text-sm text-gray-600">Page Title:</span>
+                        <div id="pageTitle" class="font-medium text-black break-words"></div>
+                    </div>
+                    <div>
+                        <span class="text-sm text-gray-600">Views:</span>
+                        <div id="pageViews" class="font-bold text-black text-lg"></div>
+                    </div>
+                    <div>
+                        <span class="text-sm text-gray-600">Page URL:</span>
+                        <div id="pageUrl" class="font-medium text-black break-all text-sm"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Device Types Details Popup -->
+    <div id="devicePopup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white border-2 border-black max-w-sm w-full mx-4 rounded-lg">
+            <div class="p-4 border-b border-gray-200">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-light text-black">Device Details</h3>
+                    <button id="closeDevicePopup" class="text-black hover:text-gray-600 text-xl">&times;</button>
+                </div>
+            </div>
+            <div class="p-4">
+                <div class="space-y-3">
+                    <div>
+                        <span class="text-sm text-gray-600">Device Type:</span>
+                        <div id="deviceType" class="font-medium text-black"></div>
+                    </div>
+                    <div>
+                        <span class="text-sm text-gray-600">Users:</span>
+                        <div id="deviceCount" class="font-bold text-black text-lg"></div>
+                    </div>
+                    <div>
+                        <span class="text-sm text-gray-600">Percentage:</span>
+                        <div id="devicePercentage" class="font-medium text-black"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Topic Details Popup -->
+    <div id="topicPopup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white border-2 border-black max-w-sm w-full mx-4 rounded-lg">
+            <div class="p-4 border-b border-gray-200">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-light text-black">Conversation Topic Details</h3>
+                    <button id="closeTopicPopup" class="text-black hover:text-gray-600 text-xl">&times;</button>
+                </div>
+            </div>
+            <div class="p-4">
+                <div class="space-y-3">
+                    <div>
+                        <span class="text-sm text-gray-600">Topic:</span>
+                        <div id="topicName" class="font-medium text-black break-words"></div>
+                    </div>
+                    <div>
+                        <span class="text-sm text-gray-600">Conversations Started:</span>
+                        <div id="topicCount" class="font-bold text-black text-lg"></div>
+                    </div>
+                    <div>
+                        <span class="text-sm text-gray-600">Popularity Rank:</span>
+                        <div id="topicRank" class="font-medium text-black"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Type Details Popup -->
+    <div id="errorTypePopup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white border-2 border-red-500 max-w-sm w-full mx-4 rounded-lg">
+            <div class="p-4 border-b border-red-200 bg-red-50">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-light text-black">Error Type Details</h3>
+                    <button id="closeErrorTypePopup" class="text-black hover:text-gray-600 text-xl">&times;</button>
+                </div>
+            </div>
+            <div class="p-4">
+                <div class="space-y-3">
+                    <div>
+                        <span class="text-sm text-gray-600">Error Type:</span>
+                        <div id="errorTypeName" class="font-medium text-red-700 break-words"></div>
+                    </div>
+                    <div>
+                        <span class="text-sm text-gray-600">Occurrences:</span>
+                        <div id="errorTypeCount" class="font-bold text-red-600 text-lg"></div>
+                    </div>
+                    <div>
+                        <span class="text-sm text-gray-600">Frequency Rank:</span>
+                        <div id="errorTypeRank" class="font-medium text-red-700"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Visitor Path Details Popup -->
+    <div id="pathPopup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white border-2 border-black max-w-sm w-full mx-4 rounded-lg">
+            <div class="p-4 border-b border-gray-200">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-light text-black">Visitor Path Details</h3>
+                    <button id="closePathPopup" class="text-black hover:text-gray-600 text-xl">&times;</button>
+                </div>
+            </div>
+            <div class="p-4">
+                <div class="space-y-3">
+                    <div>
+                        <span class="text-sm text-gray-600">Full Path:</span>
+                        <div id="pathUrl" class="font-medium text-black break-all text-sm bg-gray-50 p-2 rounded"></div>
+                    </div>
+                    <div>
+                        <span class="text-sm text-gray-600">Visits:</span>
+                        <div id="pathCount" class="font-bold text-black text-lg"></div>
+                    </div>
+                    <div>
+                        <span class="text-sm text-gray-600">Popularity Rank:</span>
+                        <div id="pathRank" class="font-medium text-black"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics Dashboard Script -->
+    <script>
+
+        function showDashboard() {
+            console.log('🏠 Initializing analytics dashboard...');
+            
+            // Initialize shared navbar
+            initializeNavbar('analytics', 'Analytics Dashboard');
+            
+            // Initialize analytics dashboard
+            window.analyticsInstance = new AnalyticsDashboard();
+        }
+
+    </script>
+
+    <script>
+        class AnalyticsDashboard {
+            constructor() {
+                this.analyticsService = null;
+                this.charts = {};
+                this.currentData = null;
+                
+                this.init();
+            }
+
+            async init() {
+                try {
+                    // Initialize analytics service
+                    this.analyticsService = new AnalyticsService(window.DATABASE_CONFIG);
+                    await this.analyticsService.initialize();
+                    
+                    // Setup event listeners
+                    this.setupEventListeners();
+                    
+                    // Load initial data
+                    await this.loadAnalytics();
+                    
+                    // Hide loading state
+                    document.getElementById('loadingState').style.display = 'none';
+                    document.getElementById('mainContent').style.display = 'block';
+                    
+                } catch (error) {
+                    console.error('Dashboard initialization failed:', error);
+                    
+                    // Check if this is the proxy mode error
+                    if (error.message.includes('requires direct database access')) {
+                        this.showProxyModeError();
+                    } else {
+                        this.showError('Failed to initialize analytics dashboard');
+                    }
+                }
+            }
+
+            setupEventListeners() {
+                document.getElementById('dateRange').addEventListener('change', () => this.handleDateRangeChange());
+                document.getElementById('pageFilter').addEventListener('change', () => this.loadAnalytics());
+                document.getElementById('refreshBtn').addEventListener('click', () => this.loadAnalytics(true));
+                
+                // Custom date range listeners
+                document.getElementById('applyDateRange').addEventListener('click', () => this.applyCustomDateRange());
+                document.getElementById('clearDateRange').addEventListener('click', () => this.clearCustomDateRange());
+                document.getElementById('fromDate').addEventListener('change', () => this.validateDateRange());
+                document.getElementById('toDate').addEventListener('change', () => this.validateDateRange());
+            }
+
+            async loadAnalytics(forceRefresh = false) {
+                try {
+                    const dateRangeSelect = document.getElementById('dateRange');
+                    const pageFilter = document.getElementById('pageFilter').value;
+                    
+                    let startDate, endDate;
+                    
+                    if (dateRangeSelect.value === 'custom') {
+                        const fromDate = document.getElementById('fromDate').value;
+                        const toDate = document.getElementById('toDate').value;
+                        
+                        if (!fromDate && !toDate) {
+                            this.showError('Please select a date range');
+                            return;
+                        }
+                        
+                        startDate = fromDate ? new Date(fromDate).toISOString() : null;
+                        endDate = toDate ? new Date(toDate + 'T23:59:59').toISOString() : null;
+                    } else {
+                        const days = parseInt(dateRangeSelect.value);
+                        startDate = new Date(Date.now() - (days * 24 * 60 * 60 * 1000)).toISOString();
+                        endDate = new Date().toISOString();
+                    }
+                    
+                    const options = {
+                        startDate,
+                        endDate,
+                        pageUrl: pageFilter || null
+                    };
+
+                    if (forceRefresh) {
+                        // Clear cache by creating new service instance
+                        this.analyticsService = new AnalyticsService(window.DATABASE_CONFIG);
+                        await this.analyticsService.initialize();
+                    }
+
+                    this.currentData = await this.analyticsService.getAnalytics(options);
+                    this.updateDashboard();
+                    
+                } catch (error) {
+                    console.error('Failed to load analytics:', error);
+                    this.showError('Failed to load analytics data');
+                }
+            }
+
+            updateDashboard() {
+                this.updateStats();
+                this.updateCharts();
+                this.updateVisitorFlow();
+                this.updateChatbotAnalytics();
+                this.updateSystemStatus();
+            }
+
+            updateStats() {
+                const stats = this.currentData.stats;
+                
+                document.getElementById('totalViews').textContent = stats.totalViews.toLocaleString();
+                document.getElementById('uniqueVisitors').textContent = stats.uniqueVisitors.toLocaleString();
+                document.getElementById('avgSessionDuration').textContent = Math.round(stats.avgSessionDuration / 60) + 'm';
+                document.getElementById('bounceRate').textContent = stats.bounceRate + '%';
+                
+                // Calculate additional stats
+                const today = this.calculateTodayViews();
+                const thisWeek = this.calculateThisWeekViews();
+                
+                document.getElementById('todayViews').textContent = today.toLocaleString();
+                document.getElementById('thisWeekViews').textContent = thisWeek.toLocaleString();
+            }
+
+            updateCharts() {
+                this.createViewsChart();
+                this.createPagesChart();
+                this.createSourcesChart();
+                this.createDevicesChart();
+            }
+
+            createViewsChart() {
+                const ctx = document.getElementById('viewsChart').getContext('2d');
+                
+                if (this.charts.views) {
+                    this.charts.views.destroy();
+                }
+
+                const data = this.currentData.viewsOverTime;
+                
+                this.charts.views = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.map(d => new Date(d.date).toLocaleDateString()),
+                        datasets: [{
+                            label: 'Page Views',
+                            data: data.map(d => d.views),
+                            borderColor: '#000',
+                            backgroundColor: 'rgba(0, 0, 0, 0.1)',
+                            tension: 0.1,
+                            fill: true,
+                            pointBackgroundColor: '#000',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointRadius: 4,
+                            pointHoverRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    title: function(context) {
+                                        const index = context[0].dataIndex;
+                                        const date = new Date(data[index].date);
+                                        return date.toLocaleDateString('en-US', { 
+                                            weekday: 'long', 
+                                            year: 'numeric', 
+                                            month: 'long', 
+                                            day: 'numeric' 
+                                        });
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        },
+                        onClick: (event, elements) => {
+                            if (elements.length > 0) {
+                                const elementIndex = elements[0].index;
+                                const viewData = data[elementIndex];
+                                const date = new Date(viewData.date);
+                                const dayOfWeek = date.toLocaleDateString('en-US', { weekday: 'long' });
+                                const formattedDate = date.toLocaleDateString('en-US', { 
+                                    year: 'numeric', 
+                                    month: 'long', 
+                                    day: 'numeric' 
+                                });
+                                this.showViewsPopup(formattedDate, viewData.views, dayOfWeek);
+                            }
+                        }
+                    }
+                });
+                
+                // Setup popup close handler
+                this.setupViewsPopup();
+            }
+
+            createPagesChart() {
+                const ctx = document.getElementById('pagesChart').getContext('2d');
+                
+                if (this.charts.pages) {
+                    this.charts.pages.destroy();
+                }
+
+                const data = this.currentData.topPages.slice(0, 5);
+                
+                // Helper function to truncate long titles
+                const truncateTitle = (title, maxLength = 20) => {
+                    if (title.length <= maxLength) return title;
+                    return title.substring(0, maxLength - 3) + '...';
+                };
+                
+                this.charts.pages = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.map(d => truncateTitle(d.title)),
+                        datasets: [{
+                            label: 'Views',
+                            data: data.map(d => d.views),
+                            backgroundColor: ['#000', '#374151', '#6B7280', '#9CA3AF', '#D1D5DB']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    title: function(context) {
+                                        // Show full title in tooltip
+                                        const index = context[0].dataIndex;
+                                        return data[index].title;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                ticks: {
+                                    maxRotation: 45,
+                                    minRotation: 0,
+                                    font: {
+                                        size: window.innerWidth < 640 ? 10 : 12
+                                    }
+                                }
+                            },
+                            y: {
+                                beginAtZero: true
+                            }
+                        },
+                        onClick: (event, elements) => {
+                            if (elements.length > 0) {
+                                const elementIndex = elements[0].index;
+                                const pageData = data[elementIndex];
+                                this.showPagesPopup(pageData.title, pageData.views, pageData.url || `Page ${elementIndex + 1}`);
+                            }
+                        }
+                    }
+                });
+                
+                // Setup popup close handler
+                this.setupPagesPopup();
+            }
+
+            createSourcesChart() {
+                const ctx = document.getElementById('sourcesChart').getContext('2d');
+                
+                if (this.charts.sources) {
+                    this.charts.sources.destroy();
+                }
+
+                const data = this.currentData.trafficSources.slice(0, 6);
+                const totalCount = data.reduce((sum, d) => sum + d.count, 0);
+                
+                // Helper function to truncate source names for display
+                const truncateSource = (source, maxLength = 15) => {
+                    if (source.length <= maxLength) return source;
+                    return source.substring(0, maxLength - 3) + '...';
+                };
+                
+                this.charts.sources = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: data.map(d => truncateSource(d.source)),
+                        datasets: [{
+                            data: data.map(d => d.count),
+                            backgroundColor: [
+                                '#000000',
+                                '#374151',
+                                '#6B7280',
+                                '#9CA3AF',
+                                '#D1D5DB',
+                                '#F3F4F6'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    font: {
+                                        size: window.innerWidth < 640 ? 10 : 12
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    title: function(context) {
+                                        const index = context[0].dataIndex;
+                                        return data[index].source;
+                                    },
+                                    label: function(context) {
+                                        const value = context.parsed;
+                                        const percentage = ((value / totalCount) * 100).toFixed(1);
+                                        return `Visits: ${value.toLocaleString()} (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        },
+                        onClick: (event, elements) => {
+                            if (elements.length > 0) {
+                                const elementIndex = elements[0].index;
+                                const sourceData = data[elementIndex];
+                                const percentage = ((sourceData.count / totalCount) * 100).toFixed(1);
+                                this.showSourcePopup(sourceData.source, sourceData.count, percentage);
+                            }
+                        }
+                    }
+                });
+                
+                // Setup popup close handler
+                this.setupSourcePopup();
+            }
+
+            showSourcePopup(source, count, percentage) {
+                document.getElementById('sourceTitle').textContent = source;
+                document.getElementById('sourceCount').textContent = count.toLocaleString();
+                document.getElementById('sourcePercentage').textContent = `${percentage}% of total traffic`;
+                document.getElementById('sourcePopup').classList.remove('hidden');
+                
+                // Prevent body scroll when popup is open
+                document.body.style.overflow = 'hidden';
+            }
+
+            hideSourcePopup() {
+                document.getElementById('sourcePopup').classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+
+            setupSourcePopup() {
+                const closeBtn = document.getElementById('closeSourcePopup');
+                const popup = document.getElementById('sourcePopup');
+                
+                // Close button click
+                closeBtn.addEventListener('click', () => this.hideSourcePopup());
+                
+                // Click outside popup to close
+                popup.addEventListener('click', (e) => {
+                    if (e.target === popup) {
+                        this.hideSourcePopup();
+                    }
+                });
+                
+                // Escape key to close
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && !popup.classList.contains('hidden')) {
+                        this.hideSourcePopup();
+                    }
+                });
+            }
+
+            // Page Views popup handlers
+            showViewsPopup(date, views, dayOfWeek) {
+                document.getElementById('viewsDate').textContent = date;
+                document.getElementById('viewsCount').textContent = views.toLocaleString();
+                document.getElementById('viewsDayOfWeek').textContent = dayOfWeek;
+                document.getElementById('viewsPopup').classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+
+            hideViewsPopup() {
+                document.getElementById('viewsPopup').classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+
+            setupViewsPopup() {
+                const closeBtn = document.getElementById('closeViewsPopup');
+                const popup = document.getElementById('viewsPopup');
+                
+                closeBtn.addEventListener('click', () => this.hideViewsPopup());
+                popup.addEventListener('click', (e) => {
+                    if (e.target === popup) this.hideViewsPopup();
+                });
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && !popup.classList.contains('hidden')) {
+                        this.hideViewsPopup();
+                    }
+                });
+            }
+
+            // Top Pages popup handlers
+            showPagesPopup(title, views, url) {
+                document.getElementById('pageTitle').textContent = title;
+                document.getElementById('pageViews').textContent = views.toLocaleString();
+                document.getElementById('pageUrl').textContent = url;
+                document.getElementById('pagesPopup').classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+
+            hidePagesPopup() {
+                document.getElementById('pagesPopup').classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+
+            setupPagesPopup() {
+                const closeBtn = document.getElementById('closePagesPopup');
+                const popup = document.getElementById('pagesPopup');
+                
+                closeBtn.addEventListener('click', () => this.hidePagesPopup());
+                popup.addEventListener('click', (e) => {
+                    if (e.target === popup) this.hidePagesPopup();
+                });
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && !popup.classList.contains('hidden')) {
+                        this.hidePagesPopup();
+                    }
+                });
+            }
+
+            // Device popup handlers
+            showDevicePopup(deviceType, count, percentage) {
+                document.getElementById('deviceType').textContent = deviceType;
+                document.getElementById('deviceCount').textContent = count.toLocaleString();
+                document.getElementById('devicePercentage').textContent = `${percentage}% of total users`;
+                document.getElementById('devicePopup').classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+
+            hideDevicePopup() {
+                document.getElementById('devicePopup').classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+
+            setupDevicePopup() {
+                const closeBtn = document.getElementById('closeDevicePopup');
+                const popup = document.getElementById('devicePopup');
+                
+                closeBtn.addEventListener('click', () => this.hideDevicePopup());
+                popup.addEventListener('click', (e) => {
+                    if (e.target === popup) this.hideDevicePopup();
+                });
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && !popup.classList.contains('hidden')) {
+                        this.hideDevicePopup();
+                    }
+                });
+            }
+
+            // Visitor Path popup handlers
+            showPathPopup(path, count, rank) {
+                document.getElementById('pathUrl').textContent = path;
+                document.getElementById('pathCount').textContent = count.toLocaleString();
+                document.getElementById('pathRank').textContent = `#${rank} most popular`;
+                document.getElementById('pathPopup').classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+
+            hidePathPopup() {
+                document.getElementById('pathPopup').classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+
+            setupPathPopup() {
+                const closeBtn = document.getElementById('closePathPopup');
+                const popup = document.getElementById('pathPopup');
+                
+                closeBtn.addEventListener('click', () => this.hidePathPopup());
+                popup.addEventListener('click', (e) => {
+                    if (e.target === popup) this.hidePathPopup();
+                });
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && !popup.classList.contains('hidden')) {
+                        this.hidePathPopup();
+                    }
+                });
+            }
+
+            createDevicesChart() {
+                const ctx = document.getElementById('devicesChart').getContext('2d');
+                
+                if (this.charts.devices) {
+                    this.charts.devices.destroy();
+                }
+
+                const devices = this.currentData.deviceBreakdown.devices;
+                const deviceData = [
+                    { type: 'Desktop', count: devices.desktop },
+                    { type: 'Mobile', count: devices.mobile },
+                    { type: 'Tablet', count: devices.tablet }
+                ];
+                const totalDevices = devices.desktop + devices.mobile + devices.tablet;
+                
+                this.charts.devices = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['Desktop', 'Mobile', 'Tablet'],
+                        datasets: [{
+                            data: [devices.desktop, devices.mobile, devices.tablet],
+                            backgroundColor: ['#000000', '#6B7280', '#D1D5DB']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    font: {
+                                        size: window.innerWidth < 640 ? 10 : 12
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const value = context.parsed;
+                                        const percentage = ((value / totalDevices) * 100).toFixed(1);
+                                        return `${context.label}: ${value.toLocaleString()} (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        },
+                        onClick: (event, elements) => {
+                            if (elements.length > 0) {
+                                const elementIndex = elements[0].index;
+                                const device = deviceData[elementIndex];
+                                const percentage = ((device.count / totalDevices) * 100).toFixed(1);
+                                this.showDevicePopup(device.type, device.count, percentage);
+                            }
+                        }
+                    }
+                });
+                
+                // Setup popup close handler
+                this.setupDevicePopup();
+            }
+
+            updateVisitorFlow() {
+                const flowContainer = document.getElementById('visitorFlow');
+                const flows = this.currentData.visitorFlow.slice(0, 8);
+                
+                if (flows.length === 0) {
+                    flowContainer.innerHTML = '<p class="text-gray-500 text-center py-4">No visitor flow data available</p>';
+                    return;
+                }
+                
+                flowContainer.innerHTML = flows.map((flow, index) => `
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg min-w-0 cursor-pointer hover:bg-gray-100 transition-colors" 
+                         onclick="window.analyticsInstance.showPathPopup('${flow.path.replace(/'/g, "\\'")}', ${flow.count}, ${index + 1})"
+                         title="Click for full path details">
+                        <span class="text-gray-700 font-medium truncate pr-3 flex-1 min-w-0" title="${flow.path}">${flow.path}</span>
+                        <span class="text-black font-bold flex-shrink-0">${flow.count}</span>
+                    </div>
+                `).join('');
+                
+                // Setup popup close handler
+                this.setupPathPopup();
+            }
+
+            updateChatbotAnalytics() {
+                if (!this.currentData.chatbot) {
+                    // Hide chatbot section if no data
+                    const chatbotSection = document.querySelector('.border-2.border-black.mb-6');
+                    if (chatbotSection && chatbotSection.textContent.includes('Chatbot Analytics')) {
+                        chatbotSection.style.display = 'none';
+                    }
+                    return;
+                }
+
+                const chatbot = this.currentData.chatbot;
+
+                // Update chatbot statistics
+                document.getElementById('totalChatSessions').textContent = chatbot.totalChatSessions.toLocaleString();
+                document.getElementById('chatUsagePercentage').textContent = chatbot.chatUsagePercentage + '%';
+                document.getElementById('totalChatMessages').textContent = chatbot.totalMessages.toLocaleString();
+                document.getElementById('avgChatDuration').textContent = this.formatDuration(chatbot.avgSessionDuration);
+                document.getElementById('uniqueChatUsers').textContent = chatbot.uniqueChatUsers.toLocaleString();
+                
+                // Update error statistics
+                if (chatbot.errorStatistics) {
+                    document.getElementById('totalChatErrors').textContent = chatbot.errorStatistics.totalErrors.toLocaleString();
+                    document.getElementById('chatErrorRate').textContent = chatbot.errorStatistics.errorRate + '%';
+                } else {
+                    document.getElementById('totalChatErrors').textContent = '0';
+                    document.getElementById('chatErrorRate').textContent = '0%';
+                }
+
+                // Create chatbot charts
+                this.createChatSessionsChart();
+                this.createMessageTypesChart();
+                this.updateChatTopics();
+                this.updateChatErrorTypes();
+                this.setupTopicPopup();
+                this.setupErrorTypePopup();
+            }
+
+            formatDuration(seconds) {
+                if (seconds < 60) return `${seconds}s`;
+                const minutes = Math.floor(seconds / 60);
+                const remainingSeconds = seconds % 60;
+                if (remainingSeconds === 0) return `${minutes}m`;
+                return `${minutes}m ${remainingSeconds}s`;
+            }
+
+            createChatSessionsChart() {
+                const ctx = document.getElementById('chatSessionsChart').getContext('2d');
+                
+                if (this.charts.chatSessions) {
+                    this.charts.chatSessions.destroy();
+                }
+
+                const data = this.currentData.chatbot.chatSessionsOverTime;
+                
+                this.charts.chatSessions = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.map(d => new Date(d.date).toLocaleDateString()),
+                        datasets: [{
+                            label: 'Chat Sessions',
+                            data: data.map(d => d.sessions),
+                            borderColor: '#000',
+                            backgroundColor: 'rgba(0, 0, 0, 0.1)',
+                            tension: 0.1,
+                            fill: true,
+                            pointBackgroundColor: '#000',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointRadius: 4,
+                            pointHoverRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        },
+                        onClick: (event, elements) => {
+                            if (elements.length > 0) {
+                                const elementIndex = elements[0].index;
+                                const chatData = data[elementIndex];
+                                const date = new Date(chatData.date);
+                                const dayOfWeek = date.toLocaleDateString('en-US', { weekday: 'long' });
+                                const formattedDate = date.toLocaleDateString('en-US', { 
+                                    year: 'numeric', 
+                                    month: 'long', 
+                                    day: 'numeric' 
+                                });
+                                this.showChatSessionPopup(formattedDate, chatData.sessions, dayOfWeek);
+                            }
+                        }
+                    }
+                });
+                
+                this.setupChatSessionPopup();
+            }
+
+            createMessageTypesChart() {
+                const ctx = document.getElementById('messageTypesChart').getContext('2d');
+                
+                if (this.charts.messageTypes) {
+                    this.charts.messageTypes.destroy();
+                }
+
+                const chatbot = this.currentData.chatbot;
+                const totalMessages = chatbot.userMessages + chatbot.botMessages;
+                
+                this.charts.messageTypes = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['User Messages', 'Bot Responses'],
+                        datasets: [{
+                            data: [chatbot.userMessages, chatbot.botMessages],
+                            backgroundColor: ['#000000', '#6B7280']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    font: {
+                                        size: window.innerWidth < 640 ? 10 : 12
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const value = context.parsed;
+                                        const percentage = ((value / totalMessages) * 100).toFixed(1);
+                                        return `${context.label}: ${value.toLocaleString()} (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        },
+                        onClick: (event, elements) => {
+                            if (elements.length > 0) {
+                                const elementIndex = elements[0].index;
+                                const messageType = elementIndex === 0 ? 'User Messages' : 'Bot Responses';
+                                const count = elementIndex === 0 ? chatbot.userMessages : chatbot.botMessages;
+                                const percentage = ((count / totalMessages) * 100).toFixed(1);
+                                this.showMessageTypePopup(messageType, count, percentage);
+                            }
+                        }
+                    }
+                });
+                
+                this.setupMessageTypePopup();
+            }
+
+            updateChatTopics() {
+                const topicsContainer = document.getElementById('chatTopics');
+                const topics = this.currentData.chatbot.topConversationStarters;
+                
+                if (topics.length === 0) {
+                    topicsContainer.innerHTML = '<p class="text-gray-500 text-center py-4">No conversation topics data available</p>';
+                    return;
+                }
+                
+                topicsContainer.innerHTML = topics.map((topic, index) => `
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors" 
+                         onclick="window.analyticsInstance.showTopicPopup('${topic.topic}', ${topic.count}, ${index + 1})"
+                         title="Click for topic details">
+                        <span class="text-gray-700 font-medium">${topic.topic}</span>
+                        <span class="text-black font-bold">${topic.count}</span>
+                    </div>
+                `).join('');
+            }
+
+            updateChatErrorTypes() {
+                const errorContainer = document.getElementById('chatErrorTypes');
+                const errorStats = this.currentData.chatbot.errorStatistics;
+                
+                if (!errorStats || !errorStats.topErrorTypes || errorStats.topErrorTypes.length === 0) {
+                    errorContainer.innerHTML = `
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <span class="text-gray-700 font-medium">Total Errors</span>
+                            <span class="text-black font-bold">0</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <span class="text-gray-700 font-medium">Error Rate</span>
+                            <span class="text-black font-bold">0.0%</span>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                const errorTypeNames = {
+                    'api_error': 'API Error',
+                    'network_error': 'Network Error',
+                    'auth_error': 'Authentication Error',
+                    'quota_error': 'Quota/Rate Limit Error',
+                    'timeout_error': 'Timeout Error',
+                    'http_error': 'HTTP Error',
+                    'unknown': 'Unknown Error'
+                };
+                
+                errorContainer.innerHTML = errorStats.topErrorTypes.map((error, index) => `
+                    <div class="flex items-center justify-between p-3 bg-red-50 rounded-lg border border-red-200 cursor-pointer hover:bg-red-100 transition-colors" 
+                         onclick="window.analyticsInstance.showErrorTypePopup('${error.type}', ${error.count}, ${index + 1})"
+                         title="Click for error details">
+                        <span class="text-red-700 font-medium">${errorTypeNames[error.type] || error.type}</span>
+                        <span class="text-red-600 font-bold">${error.count}</span>
+                    </div>
+                `).join('');
+            }
+
+            // Chatbot popup handlers (similar to existing popup system)
+            showChatSessionPopup(date, sessions, dayOfWeek) {
+                // Create popup content for chat session details
+                // Implementation similar to existing popups
+                alert(`Chat Sessions on ${date} (${dayOfWeek}): ${sessions} sessions`);
+            }
+
+            showMessageTypePopup(messageType, count, percentage) {
+                alert(`${messageType}: ${count.toLocaleString()} messages (${percentage}% of total)`);
+            }
+
+            showTopicPopup(topic, count, rank) {
+                document.getElementById('topicName').textContent = topic;
+                document.getElementById('topicCount').textContent = count.toLocaleString();
+                document.getElementById('topicRank').textContent = `#${rank} most popular topic`;
+                document.getElementById('topicPopup').classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+
+            hideTopicPopup() {
+                document.getElementById('topicPopup').classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+
+            showErrorTypePopup(errorType, count, rank) {
+                const errorTypeNames = {
+                    'api_error': 'API Error',
+                    'network_error': 'Network Error',
+                    'auth_error': 'Authentication Error', 
+                    'quota_error': 'Quota/Rate Limit Error',
+                    'timeout_error': 'Timeout Error',
+                    'http_error': 'HTTP Error',
+                    'unknown': 'Unknown Error'
+                };
+                const friendlyName = errorTypeNames[errorType] || errorType;
+                
+                document.getElementById('errorTypeName').textContent = friendlyName;
+                document.getElementById('errorTypeCount').textContent = count.toLocaleString();
+                document.getElementById('errorTypeRank').textContent = `#${rank} most common error`;
+                document.getElementById('errorTypePopup').classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+
+            hideErrorTypePopup() {
+                document.getElementById('errorTypePopup').classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+
+            setupTopicPopup() {
+                const closeBtn = document.getElementById('closeTopicPopup');
+                const popup = document.getElementById('topicPopup');
+                
+                // Close button click
+                closeBtn.addEventListener('click', () => this.hideTopicPopup());
+                
+                // Click outside popup to close
+                popup.addEventListener('click', (e) => {
+                    if (e.target === popup) {
+                        this.hideTopicPopup();
+                    }
+                });
+                
+                // Escape key to close
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && !popup.classList.contains('hidden')) {
+                        this.hideTopicPopup();
+                    }
+                });
+            }
+
+            setupErrorTypePopup() {
+                const closeBtn = document.getElementById('closeErrorTypePopup');
+                const popup = document.getElementById('errorTypePopup');
+                
+                // Close button click
+                closeBtn.addEventListener('click', () => this.hideErrorTypePopup());
+                
+                // Click outside popup to close
+                popup.addEventListener('click', (e) => {
+                    if (e.target === popup) {
+                        this.hideErrorTypePopup();
+                    }
+                });
+                
+                // Escape key to close
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && !popup.classList.contains('hidden')) {
+                        this.hideErrorTypePopup();
+                    }
+                });
+            }
+
+            setupChatSessionPopup() {
+                // Setup popup handlers - implementation similar to existing popups
+            }
+
+            setupMessageTypePopup() {
+                // Setup popup handlers - implementation similar to existing popups
+            }
+
+            updateSystemStatus() {
+                document.getElementById('systemStatus').textContent = '●';
+                document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+                document.getElementById('dataPoints').textContent = this.currentData.stats.totalViews.toLocaleString();
+            }
+
+            showError(message) {
+                document.getElementById('loadingState').innerHTML = `
+                    <div class="text-center">
+                        <div class="text-red-500 text-6xl mb-4">⚠</div>
+                        <p class="text-gray-600">${message}</p>
+                        <button onclick="location.reload()" class="mt-4 bg-black text-white px-4 py-2">
+                            Retry
+                        </button>
+                    </div>
+                `;
+            }
+
+            showProxyModeError() {
+                document.getElementById('loadingState').innerHTML = `
+                    <div class="text-center max-w-2xl mx-auto">
+                        <div class="text-yellow-500 text-6xl mb-4">🔒</div>
+                        <h2 class="text-2xl font-light text-black mb-4">Analytics Unavailable in Secure Mode</h2>
+                        <div class="text-gray-600 space-y-3 text-left bg-gray-50 p-6 rounded border">
+                            <p><strong>Why is this happening?</strong></p>
+                            <p>The analytics dashboard requires direct database access to perform complex queries and aggregations. Your site is currently configured to use secure proxy mode, which protects sensitive database credentials but limits advanced features.</p>
+                            
+                            <p class="mt-4"><strong>Available options:</strong></p>
+                            <ul class="list-disc ml-6 space-y-1">
+                                <li>Use the <a href="admin-dashboard.html" class="text-blue-600 hover:underline">Feedback Dashboard</a> to view individual submissions</li>
+                                <li>Use the <a href="customers.html" class="text-blue-600 hover:underline">Customer Management</a> system</li>
+                                <li>For full analytics access, configure direct database credentials (not recommended for production)</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="mt-6 flex justify-center space-x-4">
+                            <a href="admin-dashboard.html" class="bg-black text-white px-6 py-2 hover:bg-gray-800 transition-colors">
+                                Feedback Dashboard
+                            </a>
+                            <a href="customers.html" class="border border-gray-400 text-black px-6 py-2 hover:bg-gray-100 transition-colors">
+                                Customer Management
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Custom date range methods
+            handleDateRangeChange() {
+                const dateRangeSelect = document.getElementById('dateRange');
+                const customDateRange = document.getElementById('customDateRange');
+                
+                if (dateRangeSelect.value === 'custom') {
+                    customDateRange.classList.remove('hidden');
+                } else {
+                    customDateRange.classList.add('hidden');
+                    this.clearDateInputs();
+                    this.loadAnalytics();
+                }
+            }
+
+            applyCustomDateRange() {
+                const fromDate = document.getElementById('fromDate').value;
+                const toDate = document.getElementById('toDate').value;
+                
+                if (!fromDate && !toDate) {
+                    alert('Please select at least one date');
+                    return;
+                }
+                
+                if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
+                    alert('From date must be before To date');
+                    return;
+                }
+                
+                this.loadAnalytics();
+            }
+
+            clearCustomDateRange() {
+                this.clearDateInputs();
+                document.getElementById('dateRange').value = '30';
+                document.getElementById('customDateRange').classList.add('hidden');
+                this.loadAnalytics();
+            }
+
+            clearDateInputs() {
+                document.getElementById('fromDate').value = '';
+                document.getElementById('toDate').value = '';
+                this.clearDateValidationErrors();
+            }
+
+            validateDateRange() {
+                const fromDate = document.getElementById('fromDate').value;
+                const toDate = document.getElementById('toDate').value;
+                const toDateInput = document.getElementById('toDate');
+                
+                if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
+                    toDateInput.style.borderColor = '#ef4444';
+                    toDateInput.style.borderWidth = '2px';
+                } else {
+                    this.clearDateValidationErrors();
+                }
+            }
+
+            clearDateValidationErrors() {
+                const toDateInput = document.getElementById('toDate');
+                toDateInput.style.borderColor = '';
+                toDateInput.style.borderWidth = '';
+            }
+
+            // Additional statistics calculations
+            calculateTodayViews() {
+                if (!this.currentData || !this.currentData.viewsOverTime) return 0;
+                
+                const today = new Date().toISOString().slice(0, 10);
+                const todayData = this.currentData.viewsOverTime.find(item => 
+                    item.date.slice(0, 10) === today
+                );
+                
+                return todayData ? todayData.views : 0;
+            }
+
+            calculateThisWeekViews() {
+                if (!this.currentData || !this.currentData.viewsOverTime) return 0;
+                
+                const now = new Date();
+                const weekStart = new Date(now);
+                weekStart.setDate(now.getDate() - now.getDay());
+                weekStart.setHours(0, 0, 0, 0);
+                
+                return this.currentData.viewsOverTime
+                    .filter(item => new Date(item.date) >= weekStart)
+                    .reduce((sum, item) => sum + item.views, 0);
+            }
+        }
+
+        // Initialize dashboard when page loads
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('🚀 Analytics dashboard initializing...');
+            
+            try {
+                // Initialize AdminAuth
+                if (window.AdminAuth) {
+                    console.log('✅ AdminAuth found');
+                    await window.AdminAuth.initialize();
+                    
+                    // Check authentication - redirect to login if not authenticated
+                    if (!window.AdminAuth.requireAuth()) {
+                        return; // Redirect will happen in requireAuth()
+                    }
+                    
+                    console.log('✅ User authenticated, showing dashboard');
+                    showDashboard();
+                } else {
+                    console.error('❌ AdminAuth not found! Check if admin-auth.js is loaded.');
+                    window.location.href = 'login.html';
+                }
+            } catch (error) {
+                console.error('❌ Initialization error:', error);
+                window.location.href = 'login.html';
+            }
+        });
+    </script>
+</body>
+</html>

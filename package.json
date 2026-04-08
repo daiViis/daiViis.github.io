@@ -1,0 +1,13 @@
+{
+  "name": "daiviis-website",
+  "version": "1.0.0",
+  "description": "Portfolio website with admin functions",
+  "scripts": {
+    "security:scan": "node scripts/check-secrets.js"
+  },
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "jsonwebtoken": "^9.0.2",
+    "@netlify/functions": "^2.0.0"
+  }
+}

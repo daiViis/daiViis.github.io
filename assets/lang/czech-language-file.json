@@ -1,0 +1,441 @@
+{
+  "meta": {
+    "title": "Webový vývojář a digitální tvůrce | David Cit | Portfolio",
+    "description": "Kreativní webový vývojář a digitální tvůrce vytváříme interaktivní zážitky. Specialista na moderní frontend, UX design a digitální řešení. Prohlédněte si portfolio a spojte se s námi.",
+    "keywords": "webový vývojář, digitální tvůrce, frontend vývojář, interaktivní designér, kreativní vývojář, portfolio, moderní web design, uživatelský zážitek, kreativní technologie"
+  },
+  "navigation": {
+    "work": "Práce",
+    "tools": "Nástroje",
+    "results": "Výsledky",
+    "pricing": "Ceník",
+    "connect": "Kontakt",
+    "faq": "FAQ",
+    "home": "Domů"
+  },
+  "hero": {
+    "title": {
+      "line1": "Vytváříme.",
+      "line2": "Spouštíme.",
+      "line3": "Rozvíjíme."
+    },
+    "subtitle": "Digitální řešení, která fungují",
+    "connectBtn": "Spojit se",
+    "growthMessage": {
+      "title": "Rychlá realizace. Chytrá řešení. Výjimečné výsledky.",
+      "description": "Vytváříme profesionální webové stránky pro každého — rychlé, moderní, SEO-optimalizované a navržené k úspěchu. Ať už potřebujete ostrou landing page nebo škálovatelný vícestránkový web, vytváříme zážitky, které skvěle vypadají a ještě lépe fungují."
+    }
+  },
+  "about": {
+    "title": {
+      "line1": "Navrhujeme.",
+      "line2": "Programujeme.",
+      "line3": "Vytváříme."
+    },
+    "subtitle": "Strategická řešení pro digitální transformaci.\nDokonalost v realizaci.",
+    "services": {
+      "companyProfile": {
+        "title": "Firemní profil a O nás stránky",
+        "description": "Profesionální vyprávění značky se strategickým poselstvím."
+      },
+      "productsServices": {
+        "title": "Prezentace produktů a služeb",
+        "description": "Přesvědčivé prezentace, které vedou k úspěchu."
+      },
+      "blogPlatforms": {
+        "title": "Blog a myšlenkové platformy",
+        "description": "Obsahové systémy, které budují odvětvovou autoritu."
+      },
+      "newsPress": {
+        "title": "Tiskové a mediální centra",
+        "description": "Dynamické správa obsahu pro mediální vztahy."
+      },
+      "resourceLibraries": {
+        "title": "Knihovny zdrojů",
+        "description": "Organizované znalostní báze s chytrým vyhledáváním."
+      },
+      "crmSystems": {
+        "title": "CRM systémy",
+        "description": "Řízení vztahů se zákazníky s automatizovanými procesy."
+      },
+      "careerPortals": {
+        "title": "Kariérní portály",
+        "description": "Platformy pro získávání talentů s aplikačními procesy."
+      },
+      "eventManagement": {
+        "title": "Systémy správy událostí",
+        "description": "Registrace, plánování a správa účastníků."
+      },
+      "multiLanguage": {
+        "title": "Vícejazyčné a lokalizační frameworky",
+        "description": "Globální dosah s kulturními adaptačními systémy."
+      }
+    },
+    "modernDevelopment": {
+      "description": "Moderní vývojové ekosystémy transformují způsob, jakým budujeme digitální řešení. Pokročilá vývojová prostředí s podporou AI, inteligentní systémy správy verzí a kolaborativní vývojové platformy vytvářejí synergii, která urychluje inovace nad rámec tradičních metod.",
+      "advantage": "Tato technologická výhoda poskytuje řešení, která nejsou jen funkční—jsou to konkurenční výhody. Vaše vize se stává realitou s přesností, rychlostí a inovacemi, které vás udržují před konkurencí.",
+      "tagline": "Dokonalost prostřednictvím inovací a odbornosti."
+    }
+  },
+  "skills": {
+    "title": {
+      "line1": "Realizujeme.",
+      "line2": "Dodáváme.",
+      "line3": "Škálujeme."
+    },
+    "subtitle": "Pokročilý technologický stack.\nOvěřené metodologie.",
+    "categories": {
+      "frontend": {
+        "title": "Frontend",
+        "technologies": "HTML5 • React • TypeScript • Tailwind"
+      },
+      "backend": {
+        "title": "Backend",
+        "technologies": "Node.js • Python • PHP"
+      },
+      "database": {
+        "title": "Databáze",
+        "technologies": "MySQL • MongoDB • PostgreSQL"
+      },
+      "aiMl": {
+        "title": "AI & ML",
+        "technologies": "Prompt Engineering • AI APIs"
+      },
+      "devops": {
+        "title": "DevOps",
+        "technologies": "Git • Docker • AWS"
+      }
+    },
+    "description": {
+      "paragraph1": "Každý projekt začíná pochopením vaší přesné vize. Pomocí špičkových vývojových nástrojů a frameworků vytvářím webové stránky, které dokonale odpovídají vašim požadavkům a překračují vaše očekávání.",
+      "paragraph2": "Od počátečních wireframů po nasazení využívám moderní CI/CD pipeline, cloudovou infrastrukturu a nástroje pro optimalizaci výkonu, abych zajistil, že vaše webová stránka nejen vypadá přesně tak, jak jste si představovali, ale také bezchybně funguje na všech zařízeních a platformách.",
+      "paragraph3": "Spolupráce s klientem je jádrem mého procesu. Prostřednictvím pravidelných zpětných vazeb, živých náhledů a iterativního vývoje se vaše webová stránka vyvíjí přesně podle vašich specifikací pomocí nejnovějších webových technologií a osvědčených postupů."
+    }
+  },
+  "seoDemo": {
+    "title": {
+      "line1": "Optimalizujeme.",
+      "line2": "Rankujeme.",
+      "line3": "Konvertujeme."
+    },
+    "subtitle": "Nejen základní SEO, ale růstový motor na podnikové úrovni navržený pro měřitelný dopad. Od důkladných technických auditů a pokročilého schématu po škálovatelné obsahové systémy a optimalizaci konverze se integrujeme s vaším týmem, abychom odemkli složené zisky v kvalifikovaném provozu, pipeline a výnosech—podpořeno experimentováním, správou a jasnými SLA pro předvídatelné výsledky.",
+    "trafficGrowth": {
+      "title": "Růst organického provozu",
+      "description": "Výsledky podložené výzkumem z komplexní odvětvové analýzy, skutečných případových studií klientů a kontrolovaných experimentů. Kombinujeme poznatky založené na datech s praktickou realizací pro poskytnutí konzistentního, obhajitelného růstu v provozu, rankinzích a konverzích."
+    },
+    "caseStudies": {
+      "localServices": "Místní služby",
+      "ecommerce": "E-commerce",
+      "b2bSaas": "B2B SaaS"
+    },
+    "metrics": {
+      "totalGrowth": "+172%",
+      "totalGrowthLabel": "Celkový růst",
+      "monthlyVisitors": "4 350",
+      "monthlyVisitorsLabel": "Měsíční návštěvníci",
+      "optimizationPeriod": "6",
+      "optimizationPeriodLabel": "Optimalizační období"
+    },
+    "tooltips": {
+      "growthTooltip": {
+        "title": "Kumulativní růst provozu",
+        "line1": "Zvýšení CTR + zlepšení hodnocení",
+        "line2": "+ zvýšená viditelnost během 6 měsíců"
+      },
+      "visitorsTooltip": {
+        "title": "Vrcholový měsíční provoz",
+        "line1": "Udržovaný objem návštěvníků po",
+        "line2": "implementaci optimalizace"
+      },
+      "timeframeTooltip": {
+        "title": "Časová osa implementace",
+        "line1": "Období aktivní optimalizační práce",
+        "line2": "Výsledky pokračují i po tomto období"
+      }
+    },
+    "conversionOptimization": {
+      "title": "Dopad optimalizace konverze",
+      "subtitle": "Před a po zobrazení výsledků vyhledávání"
+    },
+    "snippets": {
+      "localBusiness": "Místní podnik",
+      "faqSnippets": "FAQ výňatky",
+      "businessSchema": "Firemní schéma"
+    },
+    "examples": {
+      "plumber": {
+        "title": "Místní podnik - Před a po",
+        "before": "PŘED - Základní výsledek webu",
+        "after": "PO - Optimalizováno s naší optimalizací konverze",
+        "improvement": "+67% více kliknutí z místních vyhledávání"
+      },
+      "cleaning": {
+        "title": "FAQ bohaté výňatky",
+        "before": "PŘED - Standardní výsledek",
+        "after": "PO - S naší optimalizací konverze",
+        "improvement": "+85% více místa na stránce, odpovídá na otázky zákazníků"
+      },
+      "webdesign": {
+        "title": "Schéma služebního podniku",
+        "before": "PŘED - Obyčejný výsledek podniku",
+        "after": "PO - S naší optimalizací konverze",
+        "improvement": "+52% vyšší míra kliknutí, jasné zobrazení cen"
+      }
+    },
+    "cta": {
+      "title": "Chcete podobné výsledky pro svůj podnik?",
+      "description": "Profesionální implementace SEO, která poskytuje měřitelný růst během 6-12 měsíců. Pojďme diskutovat o tom, jak může váš podnik dosáhnout podobného úspěchu.",
+      "button": "Pojďme mluvit o výsledcích"
+    },
+    "researchLink": "Zobrazit kompletní výzkumná data"
+  },
+  "pricing": {
+    "title": {
+      "line1": "Plánujeme.",
+      "line2": "Oceňujeme.",
+      "line3": "Pokračujeme."
+    },
+    "subtitle": "Transparentní ceny pro profesionální webová řešení.\nVšechny balíčky zahrnují design, vývoj, nastavení hostingu, SEO optimalizaci a 60denní záruku.",
+    "currencySwitcher": {
+      "label": "Zobrazit ceny ve vaší měně:",
+      "disclaimer": "* Převedené ceny jsou odhady založené na aktuálních směnných kurzech. Konečná cena je vždy v USD.",
+      "attribution": "Směnné kurzy z Fixer API • Aktualizovány denně • Uloženo v mezipaměti po 24 hodin"
+    },
+    "packages": {
+      "landingPage": {
+        "title": "Landing Page",
+        "description": "Jednostránková prezentace",
+        "price": 585,
+        "delivery": "Dodání za 5 dní",
+        "features": [
+          "Profesionální jednostránkový design",
+          "Responzivní pro všechna zařízení",
+          "Integrace kontaktního formuláře",
+          "Základní SEO optimalizace",
+          "60denní záruka na chyby"
+        ]
+      },
+      "presentationWebsite": {
+        "title": "Prezentační web",
+        "description": "2-4 stránková prezentace",
+        "priceFrom": 1170,
+        "priceTo": 1755,
+        "delivery": "Maximálně 20 dní dodání",
+        "badge": "Nejoblíbenější",
+        "features": [
+          "Více sekcí a stránek",
+          "Navigační menu",
+          "Obrazová galerie",
+          "Pokročilá SEO optimalizace",
+          "Kontaktní formuláře a informace"
+        ]
+      },
+      "corporateWebsite": {
+        "title": "Firemní web",
+        "description": "5-10 stránek enterprise",
+        "priceFrom": 1950,
+        "priceTo": 3510,
+        "delivery": "Individuální časový plán",
+        "features": [
+          "Kompletní firemní prezentace",
+          "O nás, služby, produkty",
+          "Reference a portfolio",
+          "Blog/novinky (volitelně)",
+          "Pokročilá SEO a sociální média"
+        ]
+      },
+      "blogPackage": {
+        "title": "Blog balíček",
+        "description": "Landing page + CMS systém",
+        "price": 685,
+        "delivery": "Dodání za 7 dní",
+        "features": [
+          "Správa článků",
+          "Kategorie a štítky",
+          "RSS kanál",
+          "SEO pro články"
+        ]
+      },
+      "portfolioPackage": {
+        "title": "Portfolio balíček",
+        "description": "Landing page + CMS systém",
+        "price": 655,
+        "delivery": "Dodání za 7 dní",
+        "features": [
+          "Správa projektů",
+          "Galerie s kategoriemi",
+          "Lightbox prohlížení",
+          "Responzivní zobrazení"
+        ]
+      }
+    },
+    "learnMore": "Dozvědět se více",
+    "referenceNote": {
+      "title": "Referenční příklad",
+      "description": "Tyto webové stránky, které právě prohlížíte, jsou příkladem Prezentačního webu — vícestránková prezentace, která zahrnuje:",
+      "pages": [
+        "Hlavní stránka (domů, práce, nástroje, výsledky, ceny, kontakt)",
+        "Výsledky výzkumu konverze",
+        "Zásady ochrany osobních údajů",
+        "Obchodní podmínky"
+      ]
+    },
+    "whatsIncluded": {
+      "title": "Co je zahrnuto v každém balíčku",
+      "items": [
+        {
+          "title": "Počáteční konzultace",
+          "description": "Pochopení vašich potřeb a cílů"
+        },
+        {
+          "title": "Profesionální design",
+          "description": "Jedinečný vzhled přizpůsobený vaší značce"
+        },
+        {
+          "title": "Responzivní vývoj",
+          "description": "Dokonalé zobrazení na všech zařízeních"
+        },
+        {
+          "title": "Nastavení hostingu",
+          "description": "Kompletní konfigurace zahrnuta"
+        },
+        {
+          "title": "SEO optimalizace",
+          "description": "Kód přátelský vyhledávačům"
+        },
+        {
+          "title": "60denní záruka",
+          "description": "Opravy chyb po dobu 2 měsíců po dodání"
+        }
+      ],
+      "cta": {
+        "text": "Jste připraveni začít svůj projekt?",
+        "button": "Diskutovat o vašem projektu"
+      }
+    }
+  },
+  "contact": {
+    "title": {
+      "line1": "Začínáme.",
+      "line2": "Spouštíme.",
+      "line3": "Úspěch."
+    },
+    "subtitle": "Transformujeme vaši vizi do reality.",
+    "status": "Dostupný pro strategická partnerství",
+    "formHeading": "Pojďme diskutovat o vašem projektu",
+    "location": "Ostrava, Česká republika",
+    "availability": {
+      "note1": "Sdílejte svou projektovou vizi prostřednictvím formuláře vpravo. To mi pomůže pochopit vaše cíle a požadavky před tím, než si naplánujeme podrobnou konzultaci.",
+      "note2": "Poznámka: Obvykle odpovídám do 24-48 hodin k diskuzi o dalších krocích a dohodě na hovoru k prozkoumání vašeho projektu do hloubky.",
+      "note3": "Není třeba žádný závazek. Toto je bezplatná konzultace k pochopení vašich potřeb. Nic se nebude účtovat a nejste pod žádným závazkem, i když prodiskutujeme detaily a nesplníme očekávání."
+    },
+    "form": {
+      "name": "Jméno",
+      "email": "E-mail",
+      "projectType": "Vyberte typ projektu",
+      "currentWebsite": "Současné webové stránky (pokud existují)",
+      "altContact": "Raději mě kontaktujte přes sociální média",
+      "selectPlatform": "Vyberte platformu",
+      "message": "Řekněte mi o svém projektu...",
+      "privacyConsent": "Souhlasím se zpracováním osobních údajů v souladu se zásadami jejich ochrany.",
+      "submitButton": "Spustit projekt",
+      "submitting": "Odesílání...",
+      "characterCount": "znaků",
+      "wordCount": "slov",
+      "projectTypes": [
+        "Landing Page",
+        "Prezentační web",
+        "Firemní web",
+        "Blog balíček",
+        "Portfolio balíček",
+        "Full Stack aplikace",
+        "Ostatní (Prosím specifikujte ve zprávě)"
+      ]
+    },
+    "rating": {
+      "clickToRate": "Klikněte pro hodnocení",
+      "reviews": "hodnocení",
+      "rateExperience": "Ohodnoťte svou zkušenost",
+      "quickComment": "Rychlý komentář (volitelně)",
+      "cancel": "Zrušit",
+      "submitRating": "Odeslat hodnocení",
+      "submittingRating": "Odesílání...",
+      "copied": "Zkopírováno!"
+    }
+  },
+  "faq": {
+    "title": {
+      "line1": "Otázky.",
+      "line2": "Odpovězené.",
+      "line3": "Jednoduše."
+    },
+    "subtitle": "Získejte okamžité odpovědi na všechny otázky ohledně služeb webového vývoje, cen, termínů a technických detailů. Náš AI asistent poskytuje jasné poznatky, které vám pomohou dělat informovaná rozhodnutí o vašem projektu.",
+    "chatbot": {
+      "title": "Zeptejte se na cokoliv",
+      "subtitle": "Získejte okamžité odpovědi o službách webového vývoje, cenách a dalších.",
+      "status": "AI asistent online",
+      "placeholder": "Zeptejte se na ceny, služby, termíny...",
+      "sendButton": "Odeslat",
+      "poweredBy": "Poháněno AI • Odpovědi založené na Davidových službách a odbornosti",
+      "welcomeMessage": "Ahoj! Jsem tu, abych pomohl odpovědět na otázky o Davidových službách webového designu a vývoje. Neváhejte se zeptat na ceny, služby, termíny projektů nebo cokoliv dalšího, co byste chtěli vědět!",
+      "errorMessage": "Omlouvám se, právě mám problémy s připojením. Zkuste to prosím později nebo kontaktujte Davida přímo na david.cit1999@gmail.com pro okamžitou pomoc.",
+      "typing": "Asistent píše..."
+    },
+    "questions": [
+      {
+        "question": "Jak zajišťujete úspěch projektu?",
+        "answer": "Strategické plánování se setkává s technickou dokonalostí. Každý projekt začíná pochopením vaší vize, následuje strukturované vývojové fáze, kontinuální testování a pravidelná komunikace. Úspěch je budován prostřednictvím pozornosti k detailům a ověřených metodologií."
+      },
+      {
+        "question": "Co dělá váš přístup k vývoji odlišný?",
+        "answer": "Moderní vývojové nástroje s podporou AI kombinované s ověřenými odbornými znalostmi. Tato technologická výhoda poskytuje rychlejší vývojové cykly, vyšší kvalitu kódu a řešení, která se přizpůsobují vašim vyvíjejícím se obchodním potřebám. Inovace se spolehlivostí."
+      },
+      {
+        "question": "Jak dlouho trvá typický projekt?",
+        "answer": "Časový plán závisí na rozsahu a složitosti. Jednoduché firemní weby: 1-2 týdny. Složité webové platformy: 4-8 týdnů. Podnikové řešení: 8-16 týdnů. Každý projekt dostává vyhrazené zaměření s jasnými milníky a pravidelnými aktualizacemi."
+      },
+      {
+        "question": "Poskytujete průběžnou podporu?",
+        "answer": "Zahrnuta komplexní podpora po spuštění. Technická údržba, bezpečnostní aktualizace, monitorování výkonu a vylepšení funkcí. Váš úspěch pokračuje i po nasazení se spolehlivou, responzivní podporou, když ji potřebujete."
+      },
+      {
+        "question": "Co je zahrnuto ve vaší službě vývoje webů?",
+        "answer": "Kompletní digitální řešení. Vlastní design, responzivní vývoj, optimalizace výkonu, implementace SEO, konfigurace zabezpečení, nastavení správy obsahu, testování, nasazení a dokumentace. Vše potřebné pro digitální úspěch."
+      }
+    ],
+    "moreQuestions": {
+      "title": "Máte další otázky?",
+      "description": "Neváhejte se obrátit přímo s dalšími otázkami nebo vyjasnění.",
+      "email": "david.cit1999@gmail.com",
+      "responseTime": "Obvykle odpovídám do 24-48 hodin na všech platformách."
+    }
+  },
+  "footer": {
+    "brandName": "David Cit",
+    "tagline": "Strategická digitální řešení.\nModerní technologické platformy.\nRealizace zaměřená na výsledky.",
+    "quickAccess": "Rychlý přístup",
+    "letsConnect": "Spojme se",
+    "copyEmail": "Nebo se obraťte přes sociální média",
+    "availability": {
+      "status": "Dostupný pro projekty",
+      "responseTime": "Obvykle odpovídá do 24 hodin"
+    },
+    "location": {
+      "title": "Globální dosah",
+      "subtitle": "Vzdálená spolupráce"
+    },
+    "startProject": "Začít projekt",
+    "copyright": "© 2025 David Cit. Všechna práva vyhrazena.",
+    "legalLinks": {
+      "privacyPolicy": "Zásady ochrany osobních údajů",
+      "termsOfService": "Obchodní podmínky",
+      "adminDashboard": "Admin dashboard"
+    }
+  },
+  "common": {
+    "backToTop": "Zpět nahoru",
+    "loading": "Načítání...",
+    "error": "Chyba",
+    "success": "Úspěch"
+  }
+}

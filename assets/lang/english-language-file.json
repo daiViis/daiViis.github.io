@@ -1,0 +1,441 @@
+{
+  "meta": {
+    "title": "Web Developer & Digital Creator | David Cit | Portfolio",
+    "description": "Creative web developer & digital creator crafting interactive experiences. Expert in modern frontend, UX design & digital solutions. View portfolio & connect.",
+    "keywords": "web developer, digital creator, frontend developer, interactive designer, creative developer, portfolio, modern web design, user experience, creative technology"
+  },
+  "navigation": {
+    "work": "Work",
+    "tools": "Tools",
+    "results": "Results",
+    "pricing": "Pricing",
+    "connect": "Connect",
+    "faq": "FAQ",
+    "home": "Home"
+  },
+  "hero": {
+    "title": {
+      "line1": "Create.",
+      "line2": "Launch.",
+      "line3": "Evolve."
+    },
+    "subtitle": "Digital Solutions That Deliver",
+    "connectBtn": "Connect",
+    "growthMessage": {
+      "title": "Fast execution. Smart solutions. Exceptional results.",
+      "description": "We create professional web pages for everyone — fast, modern, SEO-ready, and designed to convert. Whether you need a sharp landing page or a scalable multi-page site, we craft experiences that look great and perform even better."
+    }
+  },
+  "about": {
+    "title": {
+      "line1": "Craft.",
+      "line2": "Code.",
+      "line3": "Create."
+    },
+    "subtitle": "Strategic solutions for digital transformation.\nExcellence in execution.",
+    "services": {
+      "companyProfile": {
+        "title": "Company Profile & About Pages",
+        "description": "Professional brand storytelling with strategic messaging."
+      },
+      "productsServices": {
+        "title": "Products & Services Showcases",
+        "description": "Compelling presentations that drive conversions."
+      },
+      "blogPlatforms": {
+        "title": "Blog & Thought Leadership Platforms",
+        "description": "Content systems that establish industry authority."
+      },
+      "newsPress": {
+        "title": "News & Press Centers",
+        "description": "Dynamic content management for media relations."
+      },
+      "resourceLibraries": {
+        "title": "Resource Libraries",
+        "description": "Organized knowledge bases with smart search."
+      },
+      "crmSystems": {
+        "title": "CRM Systems",
+        "description": "Customer relationship management with automation workflows."
+      },
+      "careerPortals": {
+        "title": "Career Portals",
+        "description": "Talent acquisition platforms with application workflows."
+      },
+      "eventManagement": {
+        "title": "Event Management Systems",
+        "description": "Registration, scheduling, and attendee management."
+      },
+      "multiLanguage": {
+        "title": "Multi-language & Localization Frameworks",
+        "description": "Global reach with cultural adaptation systems."
+      }
+    },
+    "modernDevelopment": {
+      "description": "Modern development ecosystems transform how we build digital solutions. Advanced AI-powered coding environments, intelligent version control systems, and collaborative development platforms create a synergy that accelerates innovation beyond traditional methods.",
+      "advantage": "This technological advantage delivers solutions that aren't just functional—they're competitive differentiators. Your vision becomes reality with precision, speed, and innovation that keeps you ahead of the market.",
+      "tagline": "Excellence through innovation and expertise."
+    }
+  },
+  "skills": {
+    "title": {
+      "line1": "Execute.",
+      "line2": "Deliver.",
+      "line3": "Scale."
+    },
+    "subtitle": "Advanced technology stack.\nProven methodologies.",
+    "categories": {
+      "frontend": {
+        "title": "Frontend",
+        "technologies": "HTML5 • React • TypeScript • Tailwind"
+      },
+      "backend": {
+        "title": "Backend",
+        "technologies": "Node.js • Python • PHP"
+      },
+      "database": {
+        "title": "Database",
+        "technologies": "MySQL • MongoDB • PostgreSQL"
+      },
+      "aiMl": {
+        "title": "AI & ML",
+        "technologies": "Prompt Engineering • AI APIs"
+      },
+      "devops": {
+        "title": "DevOps",
+        "technologies": "Git • Docker • AWS"
+      }
+    },
+    "description": {
+      "paragraph1": "Every project begins with understanding your exact vision. Using cutting-edge development tools and frameworks, I craft websites that perfectly align with your requirements and exceed your expectations.",
+      "paragraph2": "From initial wireframes to deployment, I leverage modern CI/CD pipelines, cloud infrastructure, and performance optimization tools to ensure your website not only looks exactly as you envisioned but performs flawlessly across all devices and platforms.",
+      "paragraph3": "Client collaboration is at the core of my process. Through regular feedback loops, live previews, and iterative development, your website evolves precisely according to your specifications using the latest web technologies and best practices."
+    }
+  },
+  "seoDemo": {
+    "title": {
+      "line1": "Optimize.",
+      "line2": "Rank.",
+      "line3": "Convert."
+    },
+    "subtitle": "Not just basic SEO, but an enterprise-grade growth engine engineered for measurable impact. From rigorous technical audits and advanced schema to scalable content systems and conversion optimization, We embed with your team to unlock compounding gains in qualified traffic, pipeline, and revenue—backed by experimentation, governance, and clear SLAs for predictable outcomes.",
+    "trafficGrowth": {
+      "title": "Organic Traffic Growth",
+      "description": "Research-backed results from comprehensive industry analysis, real client case studies, and controlled experiments. We combine data-driven insights with hands-on execution to deliver consistent, defensible growth across traffic, rankings, and conversions."
+    },
+    "caseStudies": {
+      "localServices": "Local Services",
+      "ecommerce": "E-commerce",
+      "b2bSaas": "B2B SaaS"
+    },
+    "metrics": {
+      "totalGrowth": "+172%",
+      "totalGrowthLabel": "Total Growth",
+      "monthlyVisitors": "4,350",
+      "monthlyVisitorsLabel": "Monthly Visitors",
+      "optimizationPeriod": "6",
+      "optimizationPeriodLabel": "Optimization Period"
+    },
+    "tooltips": {
+      "growthTooltip": {
+        "title": "Cumulative Traffic Growth",
+        "line1": "CTR boost + ranking improvements",
+        "line2": "+ increased visibility over 6 months"
+      },
+      "visitorsTooltip": {
+        "title": "Peak Monthly Traffic",
+        "line1": "Sustained visitor volume after",
+        "line2": "optimization implementation"
+      },
+      "timeframeTooltip": {
+        "title": "Implementation Timeline",
+        "line1": "Active optimization work period",
+        "line2": "Results continue beyond this timeframe"
+      }
+    },
+    "conversionOptimization": {
+      "title": "Conversion Optimization Impact",
+      "subtitle": "Before vs. after search result appearance"
+    },
+    "snippets": {
+      "localBusiness": "Local Business",
+      "faqSnippets": "FAQ Snippets",
+      "businessSchema": "Business Schema"
+    },
+    "examples": {
+      "plumber": {
+        "title": "Local Business - Before & After",
+        "before": "BEFORE - Basic Website Result",
+        "after": "AFTER - Optimized with our Conversion Optimization",
+        "improvement": "+67% More Clicks from Local Searches"
+      },
+      "cleaning": {
+        "title": "FAQ Rich Snippets",
+        "before": "BEFORE - Standard Result",
+        "after": "AFTER - With our Conversion Optimization",
+        "improvement": "+85% More Page Space, Answers Customer Questions"
+      },
+      "webdesign": {
+        "title": "Service Business Schema",
+        "before": "BEFORE - Plain Business Result",
+        "after": "AFTER - With our Conversion Optimization",
+        "improvement": "+52% Higher Click Rate, Clear Pricing Shown"
+      }
+    },
+    "cta": {
+      "title": "Want Results Like These for Your Business?",
+      "description": "Professional SEO implementation that delivers measurable growth in 6-12 months. Let's discuss how your business can achieve similar success.",
+      "button": "Let's Talk Results"
+    },
+    "researchLink": "View Complete Research Data"
+  },
+  "pricing": {
+    "title": {
+      "line1": "Plan.",
+      "line2": "Price.",
+      "line3": "Progress."
+    },
+    "subtitle": "Transparent pricing for professional web solutions.\nAll packages include design, development, hosting setup, SEO optimization, and 60-day guarantee.",
+    "currencySwitcher": {
+      "label": "View prices in your currency:",
+      "disclaimer": "* Converted prices are estimates based on current exchange rates. Final pricing is always in USD.",
+      "attribution": "Exchange rates from Fixer API • Updated daily • Cached for 24h"
+    },
+    "packages": {
+      "landingPage": {
+        "title": "Landing Page",
+        "description": "Single page presentation",
+        "price": 585,
+        "delivery": "5 days delivery",
+        "features": [
+          "Professional single-page design",
+          "Responsive for all devices",
+          "Contact form integration",
+          "Basic SEO optimization",
+          "60-day bug guarantee"
+        ]
+      },
+      "presentationWebsite": {
+        "title": "Presentation Website",
+        "description": "2-4 pages presentation",
+        "priceFrom": 1170,
+        "priceTo": 1755,
+        "delivery": "Max 20 days delivery",
+        "badge": "Most Popular",
+        "features": [
+          "Multiple sections & pages",
+          "Navigation menu",
+          "Image gallery",
+          "Advanced SEO optimization",
+          "Contact forms & info"
+        ]
+      },
+      "corporateWebsite": {
+        "title": "Corporate Website",
+        "description": "5-10 pages enterprise",
+        "priceFrom": 1950,
+        "priceTo": 3510,
+        "delivery": "Custom timeline",
+        "features": [
+          "Complete business presentation",
+          "About, services, products",
+          "References & portfolio",
+          "Blog/news (optional)",
+          "Advanced SEO & social media"
+        ]
+      },
+      "blogPackage": {
+        "title": "Blog Package",
+        "description": "Landing page + CMS system",
+        "price": 685,
+        "delivery": "7 days delivery",
+        "features": [
+          "Article management",
+          "Categories & tags",
+          "RSS feed",
+          "SEO for articles"
+        ]
+      },
+      "portfolioPackage": {
+        "title": "Portfolio Package",
+        "description": "Landing page + CMS system",
+        "price": 655,
+        "delivery": "7 days delivery",
+        "features": [
+          "Project management",
+          "Gallery with categories",
+          "Lightbox viewing",
+          "Responsive display"
+        ]
+      }
+    },
+    "learnMore": "Learn More",
+    "referenceNote": {
+      "title": "Reference Example",
+      "description": "This website you're viewing is an example of a Presentation Website — a multi-page presentation that includes:",
+      "pages": [
+        "Main page (home, work, tools, results, pricing, contact)",
+        "Conversion Research Results",
+        "Privacy Policy",
+        "Terms of Service"
+      ]
+    },
+    "whatsIncluded": {
+      "title": "What's Included in Every Package",
+      "items": [
+        {
+          "title": "Initial Consultation",
+          "description": "Understanding your needs and goals"
+        },
+        {
+          "title": "Professional Design",
+          "description": "Unique look tailored to your brand"
+        },
+        {
+          "title": "Responsive Development",
+          "description": "Perfect display on all devices"
+        },
+        {
+          "title": "Hosting Setup",
+          "description": "Complete configuration included"
+        },
+        {
+          "title": "SEO Optimization",
+          "description": "Search engine friendly code"
+        },
+        {
+          "title": "60-Day Guarantee",
+          "description": "Bug fixes for 2 months after delivery"
+        }
+      ],
+      "cta": {
+        "text": "Ready to start your project?",
+        "button": "Discuss Your Project"
+      }
+    }
+  },
+  "contact": {
+    "title": {
+      "line1": "Start.",
+      "line2": "Ship.",
+      "line3": "Succeed."
+    },
+    "subtitle": "Transform your vision into reality.",
+    "status": "Available for strategic partnerships",
+    "formHeading": "Let's discuss your project",
+    "location": "Ostrava, Czech Republic",
+    "availability": {
+      "note1": "Share your project vision through the form to the right. This helps me understand your goals and requirements before we schedule a detailed consultation.",
+      "note2": "Please note: I typically respond within 24-48 hours to discuss next steps and arrange a call to explore your project in depth.",
+      "note3": "No commitment required. This is a free consultation to understand your needs. Nothing will be billed, and you're under no obligation even if we discuss details and don't meet expectations."
+    },
+    "form": {
+      "name": "Name",
+      "email": "Email",
+      "projectType": "Select Project Type",
+      "currentWebsite": "Current website (if any)",
+      "altContact": "Contact me rather on social media",
+      "selectPlatform": "Select Platform",
+      "message": "Tell me about your project...",
+      "privacyConsent": "I agree to the processing of personal data in accordance with the principles of their protection.",
+      "submitButton": "Launch Project",
+      "submitting": "Sending...",
+      "characterCount": "chars",
+      "wordCount": "words",
+      "projectTypes": [
+        "Landing Page",
+        "Presentation Website",
+        "Corporate Website",
+        "Blog Package",
+        "Portfolio Package",
+        "Full Stack Application",
+        "Other (Please specify in message)"
+      ]
+    },
+    "rating": {
+      "clickToRate": "Click to rate",
+      "reviews": "reviews",
+      "rateExperience": "Rate your experience",
+      "quickComment": "Quick comment (optional)",
+      "cancel": "Cancel",
+      "submitRating": "Submit Rating",
+      "submittingRating": "Submitting...",
+      "copied": "Copied!"
+    }
+  },
+  "faq": {
+    "title": {
+      "line1": "Questions.",
+      "line2": "Answered.",
+      "line3": "Simply."
+    },
+    "subtitle": "Get instant answers to all your questions about web development services, pricing, timelines, and technical details. Our AI assistant provides clear insights to help you make informed decisions about your project.",
+    "chatbot": {
+      "title": "Ask Me Anything",
+      "subtitle": "Get instant answers about web development services, pricing, and more.",
+      "status": "AI Assistant Online",
+      "placeholder": "Ask about pricing, services, timelines...",
+      "sendButton": "Send",
+      "poweredBy": "Powered by AI • Responses based on David's services and expertise",
+      "welcomeMessage": "Hi! I'm here to help answer questions about David's web design and development services. Feel free to ask about pricing, services, project timelines, or anything else you'd like to know!",
+      "errorMessage": "I'm sorry, I'm having trouble connecting right now. Please try again later or contact David directly at david.cit1999@gmail.com for immediate assistance.",
+      "typing": "Assistant is typing..."
+    },
+    "questions": [
+      {
+        "question": "How do you ensure project success?",
+        "answer": "Strategic planning meets technical excellence. Every project starts with understanding your vision, followed by structured development phases, continuous testing, and regular communication. Success is built through attention to detail and proven methodologies."
+      },
+      {
+        "question": "What makes your development approach different?",
+        "answer": "Modern AI-powered development tools combined with proven expertise. This technological advantage delivers faster development cycles, higher code quality, and solutions that adapt to your evolving business needs. Innovation with reliability."
+      },
+      {
+        "question": "How long does a typical project take?",
+        "answer": "Timeline depends on scope and complexity. Simple business websites: 1-2 weeks. Complex web platforms: 4-8 weeks. Enterprise solutions: 8-16 weeks. Every project receives dedicated focus with clear milestones and regular updates."
+      },
+      {
+        "question": "Do you provide ongoing support?",
+        "answer": "Comprehensive post-launch support included. Technical maintenance, security updates, performance monitoring, and feature enhancements. Your success continues beyond deployment with reliable, responsive support when you need it."
+      },
+      {
+        "question": "What's included in your web development service?",
+        "answer": "Complete digital solution. Custom design, responsive development, performance optimization, SEO implementation, security configuration, content management setup, testing, deployment, and documentation. Everything needed for digital success."
+      }
+    ],
+    "moreQuestions": {
+      "title": "Have More Questions?",
+      "description": "Feel free to reach out directly for any additional questions or clarifications.",
+      "email": "david.cit1999@gmail.com",
+      "responseTime": "I typically respond within 24-48 hours across all platforms."
+    }
+  },
+  "footer": {
+    "brandName": "David Cit",
+    "tagline": "Strategic digital solutions.\nModern technology platforms.\nResults-driven execution.",
+    "quickAccess": "Quick Access",
+    "letsConnect": "Let's Connect",
+    "copyEmail": "Or reach out via social media",
+    "availability": {
+      "status": "Available for Projects",
+      "responseTime": "Usually responds in 24 hours"
+    },
+    "location": {
+      "title": "Global Reach",
+      "subtitle": "Remote collaboration"
+    },
+    "startProject": "Start Project",
+    "copyright": "© 2025 David Cit. All rights reserved.",
+    "legalLinks": {
+      "privacyPolicy": "Privacy Policy",
+      "termsOfService": "Terms of Service",
+      "adminDashboard": "Admin Dashboard"
+    }
+  },
+  "common": {
+    "backToTop": "Back to top",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
+  }
+}
